@@ -27,8 +27,15 @@ class ChatGPT(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         try: 
-            if message.author == self.bot.user:
+            if message.author == self.bot.user or message.author.bot:
                 return
+
+            async def generate_image(input_text, message):
+                prompt = f"{input_text}\n"
+                response = openai.Image.create(model="image-alpha-001", prompt=prompt)
+                image_url = response["data"][0]["url"]
+                await message.channel.send(image_url)
+
 
             if message.reference:
                 # This message is a reply to another message.
@@ -51,16 +58,7 @@ class ChatGPT(commands.Cog):
                             input_text = match.group(1)
                             
                             # Use Dall-E to generate an image
-                            prompt = (f"{input_text}\n")
-                            response = openai.Image.create(
-                                model="image-alpha-001",
-                                prompt=prompt,
-                            )
-
-                            image_url = response["data"][0]["url"]
-
-                            # Send the image URL to the user
-                            await message.channel.send(image_url)
+                            await generate_image(input_text, message)
                         else:
                             # Use ChatGPT to generate a response to the message
                             model_engine = self.model_engine
@@ -82,8 +80,7 @@ class ChatGPT(commands.Cog):
                             # Send the chunks as separate messages
                             for chunk in chunks:
                                 reply = await message.reply(chunk)
-            else:
-                if self.bot.user in message.mentions:
+            elif self.bot.user in message.mentions:
                     async with message.channel.typing():
                         # Check if the message includes the "generate an image of" command
                         # Compile the regex pattern with the re.IGNORECASE flag
@@ -96,16 +93,7 @@ class ChatGPT(commands.Cog):
                             input_text = match.group(1)
                             
                             # Use Dall-E to generate an image
-                            prompt = (f"{input_text}\n")
-                            response = openai.Image.create(
-                                model="image-alpha-001",
-                                prompt=prompt,
-                            )
-
-                            image_url = response["data"][0]["url"]
-
-                            # Send the image URL to the user
-                            await message.channel.send(image_url)
+                            await generate_image(input_text, message)
                         else:
                             # Use ChatGPT to generate a response to the message
                             model_engine = self.model_engine
@@ -181,6 +169,3 @@ class ChatGPT(commands.Cog):
 
 def setup(bot):
     bot.add_cog(ChatGPT(bot))
-
-
-
