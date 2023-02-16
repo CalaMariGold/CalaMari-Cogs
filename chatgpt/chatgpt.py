@@ -36,50 +36,45 @@ class ChatGPT(commands.Cog):
                 image_url = response["data"][0]["url"]
                 await message.channel.send(image_url)
 
-
-            if message.reference:
-                # This message is a reply to another message.
-                # Check if the replied message is a message sent by the bot.
-                replied_message = await message.channel.fetch_message(message.reference.resolved.id)
-                if replied_message.author == self.bot.user:
-                    # This is a reply to a message sent by the bot.
-                    # Use the replied message as the previous message.
-                    self.previous_messages[message.channel.id] = replied_message.content
-
-                    async with message.channel.typing():
-                        # Check if the message includes the "generate an image of" command
-                        # Compile the regex pattern with the re.IGNORECASE flag
-                        pattern = re.compile(r"generate an image of (.*)", re.IGNORECASE)
+            # Check if the replied message is a message sent by the bot.
+            if message.reference and message.reference.resolved.author == self.bot.user:
+                # Use the replied message as the previous message.
+                self.previous_messages[message.channel.id] = message.reference.resolved.content
+                
+                async with message.channel.typing():
+                    # Check if the message includes the "generate an image of" command
+                    # Compile the regex pattern with the re.IGNORECASE flag
+                    pattern = re.compile(r"generate an image of (.*)", re.IGNORECASE)
+                    
+                    # Check if the message matches the regex pattern
+                    match = pattern.search(message.content)
+                    if match:
+                        # Get the input from the message
+                        input_text = match.group(1)
                         
-                        # Check if the message matches the regex pattern
-                        match = pattern.search(message.content)
-                        if match:
-                            # Get the input from the message
-                            input_text = match.group(1)
-                            
-                            # Use Dall-E to generate an image
-                            await generate_image(input_text, message)
-                        else:
-                            # Use ChatGPT to generate a response to the message
-                            model_engine = self.model_engine
+                        # Use Dall-E to generate an image
+                        await generate_image(input_text, message)
+                    else:
+                        # Use ChatGPT to generate a response to the message
+                        model_engine = self.model_engine
 
-                            baa_mention = "<@791424813049970738>"
-                            # Remove all instances of the bot's user mention from the message content
-                            message.content = message.content.replace(baa_mention, "")
+                        baa_mention = "<@791424813049970738>"
+                        # Remove all instances of the bot's user mention from the message content
+                        message.content = message.content.replace(baa_mention, "")
 
-                            prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
-                            completions = openai.Completion.create(engine=model_engine, prompt=prompt, max_tokens=1024, n=1,stop=None,temperature=1.0)
-                            response = completions.choices[0].text
-                            
-                            # Split the response into chunks of 2000 characters or fewer
-                            chunk_size = 2000
-                            chunks = [response[i:i+chunk_size] for i in range(0, len(response), chunk_size)]
+                        completions = openai.Completion.create(engine=model_engine, prompt=prompt, max_tokens=1024, n=1,stop=None,temperature=1.0)
+                        response = completions.choices[0].text
                         
-                            message_ids = []
-                            # Send the chunks as separate messages
-                            for chunk in chunks:
-                                reply = await message.reply(chunk)
+                        # Split the response into chunks of 2000 characters or fewer
+                        chunk_size = 2000
+                        chunks = [response[i:i+chunk_size] for i in range(0, len(response), chunk_size)]
+                    
+                        message_ids = []
+                        # Send the chunks as separate messages
+                        for chunk in chunks:
+                            reply = await message.reply(chunk)
             elif self.bot.user in message.mentions:
                     async with message.channel.typing():
                         # Check if the message includes the "generate an image of" command
