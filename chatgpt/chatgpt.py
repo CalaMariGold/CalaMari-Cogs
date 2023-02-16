@@ -72,7 +72,7 @@ class ChatGPT(commands.Cog):
                         message.content = message.content.replace("<@791424813049970738>", "")
 
                         # Prompt where the bot understands previous context
-                        prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
                         await generate_response(prompt, message)
 
@@ -91,7 +91,7 @@ class ChatGPT(commands.Cog):
                         message.content = message.content.replace("<@791424813049970738>", "")
 
                         # Prompt where the bot has NO previous context
-                        prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
                         await generate_response(prompt, message)
         except Exception as e:
