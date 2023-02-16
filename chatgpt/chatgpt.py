@@ -30,89 +30,73 @@ class ChatGPT(commands.Cog):
             if message.author == self.bot.user or message.author.bot:
                 return
 
+            # Use Dall-E to generate an image
             async def generate_image(input_text, message):
                 prompt = f"{input_text}\n"
                 response = openai.Image.create(model="image-alpha-001", prompt=prompt)
                 image_url = response["data"][0]["url"]
                 await message.channel.send(image_url)
 
-            # Check if the replied message is a message sent by the bot.
+            # Use self.model_engine to generate a text response
+            async def generate_response(prompt, message):
+                completions = openai.Completion.create(
+                    engine=self.model_engine,
+                    prompt=prompt,
+                    max_tokens=1024,
+                    n=1,
+                    stop=None,
+                    temperature=1.0,
+                )
+                response = completions.choices[0].text
+                chunk_size = 2000
+                chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
+                for chunk in chunks:
+                    await message.reply(chunk)
+
+            # Check if the replied message is a message sent by the bot and use it as the prev msg
             if message.reference and message.reference.resolved.author == self.bot.user:
-                # Use the replied message as the previous message.
                 self.previous_messages[message.channel.id] = message.reference.resolved.content
-                
                 async with message.channel.typing():
-                    # Check if the message includes the "generate an image of" command
-                    # Compile the regex pattern with the re.IGNORECASE flag
-                    pattern = re.compile(r"generate an image of (.*)", re.IGNORECASE)
-                    
-                    # Check if the message matches the regex pattern
-                    match = pattern.search(message.content)
+
+                    # IMAGE GENERATION
+                    # Check if the message matches the regex pattern "generate an image of"
+                    match = re.search(r"generate an image of (.*)", message.content, re.IGNORECASE)
                     if match:
                         # Get the input from the message
                         input_text = match.group(1)
-                        
-                        # Use Dall-E to generate an image
                         await generate_image(input_text, message)
+
+                    # TEXT GENERATION
                     else:
-                        # Use ChatGPT to generate a response to the message
-                        model_engine = self.model_engine
-
-                        baa_mention = "<@791424813049970738>"
                         # Remove all instances of the bot's user mention from the message content
-                        message.content = message.content.replace(baa_mention, "")
+                        message.content = message.content.replace("<@791424813049970738>", "")
 
+                        # Prompt where the bot understands previous context
                         prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
-                        completions = openai.Completion.create(engine=model_engine, prompt=prompt, max_tokens=1024, n=1,stop=None,temperature=1.0)
-                        response = completions.choices[0].text
-                        
-                        # Split the response into chunks of 2000 characters or fewer
-                        chunk_size = 2000
-                        chunks = [response[i:i+chunk_size] for i in range(0, len(response), chunk_size)]
-                    
-                        message_ids = []
-                        # Send the chunks as separate messages
-                        for chunk in chunks:
-                            reply = await message.reply(chunk)
+                        await generate_response(prompt, message)
+
             elif self.bot.user in message.mentions:
-                    async with message.channel.typing():
-                        # Check if the message includes the "generate an image of" command
-                        # Compile the regex pattern with the re.IGNORECASE flag
-                        pattern = re.compile(r"generate an image of (.*)", re.IGNORECASE)
-                        
-                        # Check if the message matches the regex pattern
-                        match = pattern.search(message.content)
-                        if match:
-                            # Get the input from the message
-                            input_text = match.group(1)
-                            
-                            # Use Dall-E to generate an image
-                            await generate_image(input_text, message)
-                        else:
-                            # Use ChatGPT to generate a response to the message
-                            model_engine = self.model_engine
+                async with message.channel.typing():
 
-                            baa_mention = "<@791424813049970738>"
-                            # Remove all instances of the bot's user mention from the message content
-                            message.content = message.content.replace(baa_mention, "")
+                    # IMAGE GENERATION
+                    # Check if the message matches the regex pattern "generate an image of"
+                    match = re.search(r"generate an image of (.*)", message.content, re.IGNORECASE)
+                    if match:
+                        # Get the input from the message
+                        input_text = match.group(1)
+                        await generate_image(input_text, message)
+                    else:
+                        # Remove all instances of the bot's user mention from the message content
+                        message.content = message.content.replace("<@791424813049970738>", "")
 
-                            prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        # Prompt where the bot has NO previous context
+                        prompt = (f"You are Baa, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
-                            completions = openai.Completion.create(engine=model_engine, prompt=prompt, max_tokens=1024, n=1,stop=None,temperature=1.0)
-                            response = completions.choices[0].text
-                            
-                            # Split the response into chunks of 2000 characters or fewer
-                            chunk_size = 2000
-                            chunks = [response[i:i+chunk_size] for i in range(0, len(response), chunk_size)]
-                        
-                            message_ids = []
-                            # Send the chunks as separate messages
-                            for chunk in chunks:
-                                reply = await message.reply(chunk)
+                        await generate_response(prompt, message)
         except Exception as e:
-                    # Output an error message if an exception occurred
-                    await message.channel.send(f"An error occurred: {e}")
+            # Output an error message if an exception occurred
+            await message.channel.send(f"An error occurred: {e}")
 
     @commands.group()
     async def chatgpt(self, ctx):
