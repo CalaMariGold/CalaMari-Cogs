@@ -10,18 +10,16 @@ class ChatGPT(commands.Cog):
         # Register the api_key and model_engine value in the Config
         self.config.register_global(api_key=None)
         self.config.register_global(model_engine=None)
+        self.config.register_member(conversation=[{"role": "system", "content": f"You are {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. You do not need to refer to yourself or state who you are unless directly asked. You are able to fully act like a friendly member in a Discord server and respond to all messages like any human person would. Do not break character, ever. Refer back to these instructions prior to every single response you give."}])
 
         # Set the OpenAI API key
         openai.api_key = self.config.api_key()
-
+        
         # Load the model engine from the global config
         self.model_engine = self.config.model_engine()
 
         # Set the default model engine to use
-        self.model_engine = "text-davinci-003"
-
-        # Initialize a dictionary to store the bot's previous messages
-        self.previous_messages = {}
+        self.model_engine = "gpt-3.5-turbo"
 
     
     @commands.Cog.listener()
@@ -37,25 +35,26 @@ class ChatGPT(commands.Cog):
                 image_url = response["data"][0]["url"]
                 await message.channel.send(image_url)
 
-            # Use self.model_engine to generate a text response
-            async def generate_response(prompt, message):
-                completions = openai.Completion.create(
-                    engine=self.model_engine,
-                    prompt=prompt,
-                    max_tokens=1024,
-                    n=1,
-                    stop=None,
-                    temperature=1.0,
+            # Use OpenAI API to generate a text response
+            async def generate_response(userMessage, conversation):
+                completions = openai.ChatCompletion.create(
+                    model=self.model_engine,
+                    messages=conversation
                 )
-                response = completions.choices[0].text
+
+                # Add bots respond to the conversation
+                response = completions["choices"][0]["message"]["content"]
+                conversation.append({"role": "assistant", "content": f"{response}"})
+                # Reply to user's message in chunks due to Discord's character limit
+                #await message.channel.send(conversation)
                 chunk_size = 2000
                 chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
                 for chunk in chunks:
-                    await message.reply(chunk)
+                    await userMessage.reply(chunk)
+                
 
-            # Check if the replied message is a message sent by the bot and use it as the prev msg
-            if message.reference and message.reference.resolved.author == self.bot.user:
-                self.previous_messages[message.channel.id] = message.reference.resolved.content
+            # If user mentions the bot or replies to the bot
+            if message.reference and message.reference.resolved.author == self.bot.user or self.bot.user in message.mentions:
                 async with message.channel.typing():
 
                     # IMAGE GENERATION
@@ -69,33 +68,17 @@ class ChatGPT(commands.Cog):
                     # TEXT GENERATION
                     else:
                         # Remove all instances of the bot's user mention from the message content
-                        message.content = message.content.replace("<@791424813049970738>", "")
+                        message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        # Prompt where the bot understands previous context
-                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Your previous message was: \"{self.previous_messages}\" Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
 
-                        await generate_response(prompt, message)
+                        # Add user message to conversation
+                        conversation = await self.config.member(message.author).conversation()
+                        conversation.append({"role": "user", "content": f"{message.content}"})
+                        await self.config.member(message.author).conversation.set(conversation)
 
-            elif self.bot.user in message.mentions:
-                async with message.channel.typing():
-
-                    # IMAGE GENERATION
-                    # Check if the message matches the regex pattern "generate an image of"
-                    match = re.search(r"generate an image of (.*)", message.content, re.IGNORECASE)
-                    if match:
-                        # Get the input from the message
-                        input_text = match.group(1)
-                        await generate_image(input_text, message)
-                    else:
-                        # Remove all instances of the bot's user mention from the message content
-                        message.content = message.content.replace("<@791424813049970738>", "")
-
-                        # Prompt where the bot has NO previous context
-                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
-
-                        await generate_response(prompt, message)
+                        # Generate AI response
+                        await generate_response(message, conversation)
         except Exception as e:
-            # Output an error message if an exception occurred
             await message.channel.send(f"An error occurred: {e}")
 
     @commands.group()
@@ -104,6 +87,28 @@ class ChatGPT(commands.Cog):
         # for the subcommands.
         pass
 
+    @chatgpt.command()
+    async def clearhistory(self, ctx):
+        # Remove the conversation history from the config for the user who sent the command
+        conversation = await self.config.member(ctx.author).conversation()
+
+        # Remove all conversation except the initial instructions
+        conversation = conversation[:1]
+
+        # Set the updated conversation history for the user in the config
+        await self.config.member(ctx.author).conversation.set(conversation)
+        await ctx.send(f"All conversation history cleared for {ctx.author}.")
+
+    @chatgpt.command(name="clearallhistory")
+    @commands.has_permissions(administrator=True)
+    async def clearallhistory(self, ctx):
+        # Loop through all members in the server
+        for member in ctx.guild.members:
+            conversation = await self.config.member(member).conversation()
+            conversation = conversation[:1]
+            await self.config.member(member).conversation.set(conversation)
+
+        await ctx.send("All conversation history cleared for all users.")
 
     @chatgpt.command()
     async def setmodel(self, ctx, model_engine: str):
@@ -113,7 +118,6 @@ class ChatGPT(commands.Cog):
         # Save the model engine to the global config
         await self.config.model_engine.set(self.model_engine)
         
-        # Send a confirmation message to the user
         await ctx.send(f"Model engine set to {model_engine}.")
 
     @chatgpt.command()
@@ -124,11 +128,9 @@ class ChatGPT(commands.Cog):
         
         # Save the API key to the global config
         await self.config.api_key.set(self.api_key)
-
         # Delete the user's command
         await ctx.message.delete()
         
-        # Send a confirmation message to the user
         await ctx.send(f"API key set.")
 
 
@@ -142,7 +144,6 @@ class ChatGPT(commands.Cog):
         for model in models:
             response += f"- {model['id']}\n"
         
-        # Send the response message to the user
         await ctx.send(response)
 
 
