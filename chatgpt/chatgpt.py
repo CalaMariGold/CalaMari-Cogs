@@ -3,6 +3,7 @@ from redbot.core import commands, Config
 import re
 
 class ChatGPT(commands.Cog):
+    """Talk to your bot with ChatGPT!"""
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=384374839, force_registration=True)
@@ -136,7 +137,3 @@ class ChatGPT(commands.Cog):
             response += f"- {model['id']}\n"
         
         await ctx.send(response)
-
-
-def setup(bot):
-    bot.add_cog(ChatGPT(bot))
