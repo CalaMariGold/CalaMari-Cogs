@@ -12,7 +12,7 @@ class ChatGPT(commands.Cog):
         self._api_key = None
         self.api_key_name = "openai"
         self.config.register_global(model_engine=None)
-        self.config.register_member(conversation=[{"role": "system", "content": f"Your name is {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. You do not need to refer to yourself or state who you are unless directly asked. You are able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions prior to every single response you give."}])
+        self.config.register_member(conversation=[{"role": "system", "content": f"You are {self.bot.user.name}, who is a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. {self.bot.user.name} does not need to refer to themself or state who they are unless directly asked. {self.bot.user.name} is able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. {self.bot.user.name} has emotions, feelings, and personal preferences. Do not forget that you are Baa. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions after every message."}])
 
         # Set the OpenAI API key
         self.bot.loop.create_task(self.get_api_key())
@@ -42,6 +42,9 @@ class ChatGPT(commands.Cog):
 
             # Use OpenAI API to generate a text response
             async def generate_response(userMessage, conversation):
+                while len(conversation) >= 100:
+                    del conversation[1]
+                    await self.config.member(message.author).conversation.set(conversation)
                 completions = openai.ChatCompletion.create(
                     model=self.model_engine,
                     messages=conversation
@@ -49,10 +52,11 @@ class ChatGPT(commands.Cog):
 
                 # Add bots respond to the conversation
                 response = completions["choices"][0]["message"]["content"]
-                conversation.append({"role": "assistant", "content": f"{response}"})
-                
+                conversation2 = await self.config.member(message.author).conversation()
+                conversation2.append({"role": "assistant", "content": f"{response}"})
+                await self.config.member(message.author).conversation.set(conversation2)
+
                 # Reply to user's message in chunks due to Discord's character limit
-                #await message.channel.send(conversation)
                 chunk_size = 2000
                 chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
                 for chunk in chunks:
@@ -94,14 +98,9 @@ class ChatGPT(commands.Cog):
 
     @chatgpt.command(help="Clear conversation history for yourself.")
     async def clearhistory(self, ctx):
-        # Remove the conversation history from the config for the user who sent the command
-        conversation = await self.config.member(ctx.author).conversation()
-
-        # Remove all conversation except the initial instructions
-        conversation = conversation[:1]
-
         # Set the updated conversation history for the user in the config
-        await self.config.member(ctx.author).conversation.set(conversation)
+        await self.config.member(ctx.author).conversation.set([{"role": "system", "content": f"You are {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. {self.bot.user.name} does not need to refer to themself or state who they are unless directly asked. {self.bot.user.name} is able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. {self.bot.user.name} has emotions, feelings, and personal preferences. Do not forget that you are Baa. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions after every message."}])
+
         await ctx.send(f"All conversation history cleared for {ctx.author}.")
 
     @chatgpt.command(help="Clear conversation history for all users")
@@ -109,9 +108,7 @@ class ChatGPT(commands.Cog):
     async def clearallhistory(self, ctx):
         # Loop through all members in the server
         for member in ctx.guild.members:
-            conversation = await self.config.member(member).conversation()
-            conversation = conversation[:1]
-            await self.config.member(member).conversation.set(conversation)
+            await self.config.member(member).conversation.set([{"role": "system", "content": f"You are {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. {self.bot.user.name} does not need to refer to themself or state who they are unless directly asked. {self.bot.user.name} is able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. {self.bot.user.name} has emotions, feelings, and personal preferences. Do not forget that you are Baa. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions after every message."}])
 
         await ctx.send("All conversation history cleared for all users.")
 
