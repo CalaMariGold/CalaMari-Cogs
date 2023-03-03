@@ -8,20 +8,24 @@ class ChatGPT(commands.Cog):
         self.config = Config.get_conf(self, identifier=384374839, force_registration=True)
         
         # Register the api_key and model_engine value in the Config
-        self.config.register_global(api_key=None)
+        self._api_key = None
+        self.api_key_name = "openai"
         self.config.register_global(model_engine=None)
-        self.config.register_member(conversation=[{"role": "system", "content": f"You are {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. You do not need to refer to yourself or state who you are unless directly asked. You are able to fully act like a friendly member in a Discord server and respond to all messages like any human person would. Do not break character, ever. Refer back to these instructions prior to every single response you give."}])
+        self.config.register_member(conversation=[{"role": "system", "content": f"Your name is {self.bot.user.name}, a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. You do not need to refer to yourself or state who you are unless directly asked. You are able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions prior to every single response you give."}])
 
         # Set the OpenAI API key
-        openai.api_key = self.config.api_key()
-        
+        self.bot.loop.create_task(self.get_api_key())
+                
         # Load the model engine from the global config
         self.model_engine = self.config.model_engine()
 
         # Set the default model engine to use
         self.model_engine = "gpt-3.5-turbo"
 
-    
+    async def get_api_key(self):
+            key = await self.bot.get_shared_api_tokens(self.api_key_name)
+            openai.api_key = key["openai"]
+
     @commands.Cog.listener()
     async def on_message(self, message):
         try: 
@@ -45,6 +49,7 @@ class ChatGPT(commands.Cog):
                 # Add bots respond to the conversation
                 response = completions["choices"][0]["message"]["content"]
                 conversation.append({"role": "assistant", "content": f"{response}"})
+                
                 # Reply to user's message in chunks due to Discord's character limit
                 #await message.channel.send(conversation)
                 chunk_size = 2000
@@ -70,7 +75,6 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-
                         # Add user message to conversation
                         conversation = await self.config.member(message.author).conversation()
                         conversation.append({"role": "user", "content": f"{message.content}"})
@@ -87,7 +91,7 @@ class ChatGPT(commands.Cog):
         # for the subcommands.
         pass
 
-    @chatgpt.command()
+    @chatgpt.command(help="Clear conversation history for yourself.")
     async def clearhistory(self, ctx):
         # Remove the conversation history from the config for the user who sent the command
         conversation = await self.config.member(ctx.author).conversation()
@@ -99,7 +103,7 @@ class ChatGPT(commands.Cog):
         await self.config.member(ctx.author).conversation.set(conversation)
         await ctx.send(f"All conversation history cleared for {ctx.author}.")
 
-    @chatgpt.command(name="clearallhistory")
+    @chatgpt.command(help="Clear conversation history for all users")
     @commands.has_permissions(administrator=True)
     async def clearallhistory(self, ctx):
         # Loop through all members in the server
@@ -110,7 +114,7 @@ class ChatGPT(commands.Cog):
 
         await ctx.send("All conversation history cleared for all users.")
 
-    @chatgpt.command()
+    @chatgpt.command(help="Set the engine model for the AI, only works with OpenAI's turbo models.")
     async def setmodel(self, ctx, model_engine: str):
         # Set the model engine in the cog
         self.model_engine = model_engine
@@ -120,21 +124,8 @@ class ChatGPT(commands.Cog):
         
         await ctx.send(f"Model engine set to {model_engine}.")
 
-    @chatgpt.command()
-    async def setapikey(self, ctx, api_key: str):
-        # Set the API key in the cog
-        self.api_key = api_key
-        openai.api_key = self.api_key
-        
-        # Save the API key to the global config
-        await self.config.api_key.set(self.api_key)
-        # Delete the user's command
-        await ctx.message.delete()
-        
-        await ctx.send(f"API key set.")
 
-
-    @chatgpt.command()
+    @chatgpt.command(help="List all engine models from OpenAI")
     async def listmodels(self, ctx):
         # Get a list of the available models
         models = openai.Engine.list()["data"]
