@@ -42,9 +42,11 @@ class ChatGPT(commands.Cog):
 
             # Use OpenAI API to generate a text response
             async def generate_response(userMessage, conversation):
+                # Start removing old messages when > 100 messages to save on API tokens
                 while len(conversation) >= 100:
                     del conversation[1]
                     await self.config.member(message.author).conversation.set(conversation)
+                    
                 completions = openai.ChatCompletion.create(
                     model=self.model_engine,
                     messages=conversation
