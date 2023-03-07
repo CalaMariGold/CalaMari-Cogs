@@ -73,16 +73,21 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        # Davinci response
                         prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
                         await generate_davinci_response(prompt,message)
-                        
+
         except Exception as e:
             await message.channel.send(f"An error occurred: {e}")
 
 
-    @commands.group(help="Chat with ChatGPT!")
-    async def chatgpt(self, ctx, *prompt: str):
+    @commands.group()
+    async def chatgpt(self, ctx):
+        # This command has no implementation, but it's needed as the parent command
+        # for the subcommands.
+        pass
+
+    @chatgpt.command(help="Chat with ChatGPT!")
+    async def chat(self, ctx, *prompt: str):
         prompt = ' '.join(prompt)
         # Use OpenAI API to generate a text response
         async def generate_response(userMessage, conversation):
