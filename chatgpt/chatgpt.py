@@ -89,7 +89,7 @@ class ChatGPT(commands.Cog):
         pass
 
     @chatgpt.command(help="Chat with ChatGPT!")
-    async def chat(self, ctx, prompt: str):
+    async def chat(self, ctx, *prompt: str):
         # Use OpenAI API to generate a text response
         async def generate_response(userMessage, conversation):
             # Start removing old messages when > 100 messages to save on API tokens
