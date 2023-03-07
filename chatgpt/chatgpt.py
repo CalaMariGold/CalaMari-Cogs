@@ -115,13 +115,14 @@ class ChatGPT(commands.Cog):
             for chunk in chunks:
                 await userMessage.reply(chunk)
 
-        # Add user message to conversation
-        conversation = await self.config.member(ctx.author).conversation()
-        conversation.append({"role": "user", "content": f"{prompt}"})
-        await self.config.member(ctx.author).conversation.set(conversation)
+        async with ctx.channel.typing():
+            # Add user message to conversation
+            conversation = await self.config.member(ctx.author).conversation()
+            conversation.append({"role": "user", "content": f"{prompt}"})
+            await self.config.member(ctx.author).conversation.set(conversation)
 
-        # Generate AI response
-        await generate_response(ctx, conversation)
+            # Generate AI response
+            await generate_response(ctx, conversation)
 
     @chatgpt.command(help="Clear conversation history for yourself.")
     async def clearhistory(self, ctx):
