@@ -89,38 +89,41 @@ class ChatGPT(commands.Cog):
     @chatgpt.command(help="Chat with ChatGPT!")
     async def chat(self, ctx, *prompt: str):
         prompt = ' '.join(prompt)
-        # Use OpenAI API to generate a text response
-        async def generate_response(userMessage, conversation):
-            # Start removing old messages when > 100 messages to save on API tokens
-            while len(conversation) >= 100:
-                del conversation[1]
+        try:
+            # Use OpenAI API to generate a text response
+            async def generate_response(userMessage, conversation):
+                # Start removing old messages when > 100 messages to save on API tokens
+                while len(conversation) >= 100:
+                    del conversation[1]
+                    await self.config.member(ctx.author).conversation.set(conversation)
+                    
+                completions = openai.ChatCompletion.create(
+                    model=self.model_engine,
+                    messages=conversation
+                )
+
+                # Add bots respond to the conversation
+                response = completions["choices"][0]["message"]["content"]
+                conversation2 = await self.config.member(ctx.author).conversation()
+                conversation2.append({"role": "assistant", "content": f"{response}"})
+                await self.config.member(ctx.author).conversation.set(conversation2)
+
+                # Reply to user's message in chunks due to Discord's character limit
+                chunk_size = 2000
+                chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
+                for chunk in chunks:
+                    await userMessage.reply(chunk)
+
+            async with ctx.channel.typing():
+                # Add user message to conversation
+                conversation = await self.config.member(ctx.author).conversation()
+                conversation.append({"role": "user", "content": f"{prompt}"})
                 await self.config.member(ctx.author).conversation.set(conversation)
-                
-            completions = openai.ChatCompletion.create(
-                model=self.model_engine,
-                messages=conversation
-            )
 
-            # Add bots respond to the conversation
-            response = completions["choices"][0]["message"]["content"]
-            conversation2 = await self.config.member(ctx.author).conversation()
-            conversation2.append({"role": "assistant", "content": f"{response}"})
-            await self.config.member(ctx.author).conversation.set(conversation2)
-
-            # Reply to user's message in chunks due to Discord's character limit
-            chunk_size = 2000
-            chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
-            for chunk in chunks:
-                await userMessage.reply(chunk)
-
-        async with ctx.channel.typing():
-            # Add user message to conversation
-            conversation = await self.config.member(ctx.author).conversation()
-            conversation.append({"role": "user", "content": f"{prompt}"})
-            await self.config.member(ctx.author).conversation.set(conversation)
-
-            # Generate AI response
-            await generate_response(ctx, conversation)
+                # Generate AI response
+                await generate_response(ctx, conversation)
+        except Exception as e:
+            await ctx.channel.send(f"An error occurred: {e}")
 
     @chatgpt.command(help="Clear conversation history for yourself.")
     async def clearhistory(self, ctx):
