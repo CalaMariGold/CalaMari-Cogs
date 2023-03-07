@@ -24,8 +24,8 @@ class ChatGPT(commands.Cog):
         self.model_engine = "gpt-3.5-turbo"
 
     async def get_api_key(self):
-            key = await self.bot.get_shared_api_tokens(self.api_key_name)
-            openai.api_key = key["openai"]
+        key = await self.bot.get_shared_api_tokens(self.api_key_name)
+        openai.api_key = key["openai"]
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -40,29 +40,20 @@ class ChatGPT(commands.Cog):
                 image_url = response["data"][0]["url"]
                 await message.channel.send(image_url)
 
-            # Use OpenAI API to generate a text response
-            async def generate_response(userMessage, conversation):
-                # Start removing old messages when > 100 messages to save on API tokens
-                while len(conversation) >= 100:
-                    del conversation[1]
-                    await self.config.member(message.author).conversation.set(conversation)
-                    
-                completions = openai.ChatCompletion.create(
-                    model=self.model_engine,
-                    messages=conversation
+            async def generate_davinci_response(prompt, message):
+                completions = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=prompt,
+                    max_tokens=1024,
+                    n=1,
+                    stop=None,
+                    temperature=1.0,
                 )
-
-                # Add bots respond to the conversation
-                response = completions["choices"][0]["message"]["content"]
-                conversation2 = await self.config.member(message.author).conversation()
-                conversation2.append({"role": "assistant", "content": f"{response}"})
-                await self.config.member(message.author).conversation.set(conversation2)
-
-                # Reply to user's message in chunks due to Discord's character limit
+                response = completions.choices[0].text
                 chunk_size = 2000
                 chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
                 for chunk in chunks:
-                    await userMessage.reply(chunk)
+                    await message.reply(chunk)
                 
 
             # If user mentions the bot or replies to the bot
@@ -82,21 +73,47 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        # Add user message to conversation
-                        conversation = await self.config.member(message.author).conversation()
-                        conversation.append({"role": "user", "content": f"{message.content}"})
-                        await self.config.member(message.author).conversation.set(conversation)
+                        # Prompt where the bot has NO previous context
+                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        await generate_davinci_response(prompt,message)
 
-                        # Generate AI response
-                        await generate_response(message, conversation)
+                        
         except Exception as e:
             await message.channel.send(f"An error occurred: {e}")
 
     @commands.group()
-    async def chatgpt(self, ctx):
-        # This command has no implementation, but it's needed as the parent command
-        # for the subcommands.
-        pass
+    async def chatgpt(self, ctx, prompt: str):
+        # Use OpenAI API to generate a text response
+        async def generate_response(userMessage, conversation):
+            # Start removing old messages when > 100 messages to save on API tokens
+            while len(conversation) >= 100:
+                del conversation[1]
+                await self.config.member(ctx.author).conversation.set(conversation)
+                
+            completions = openai.ChatCompletion.create(
+                model=self.model_engine,
+                messages=conversation
+            )
+
+            # Add bots respond to the conversation
+            response = completions["choices"][0]["message"]["content"]
+            conversation2 = await self.config.member(ctx.author).conversation()
+            conversation2.append({"role": "assistant", "content": f"{response}"})
+            await self.config.member(ctx.author).conversation.set(conversation2)
+
+            # Reply to user's message in chunks due to Discord's character limit
+            chunk_size = 2000
+            chunks = [response[i : i + chunk_size] for i in range(0, len(response), chunk_size)]
+            for chunk in chunks:
+                await userMessage.reply(chunk)
+
+        # Add user message to conversation
+        conversation = await self.config.member(ctx.author).conversation()
+        conversation.append({"role": "user", "content": f"{prompt}"})
+        await self.config.member(ctx.author).conversation.set(conversation)
+
+        # Generate AI response
+        await generate_response(ctx, conversation)
 
     @chatgpt.command(help="Clear conversation history for yourself.")
     async def clearhistory(self, ctx):
