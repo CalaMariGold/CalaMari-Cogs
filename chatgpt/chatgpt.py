@@ -88,7 +88,7 @@ class ChatGPT(commands.Cog):
         # for the subcommands.
         pass
 
-    @commands.command(help="Chat with ChatGPT!")
+    @chatgpt.command(help="Chat with ChatGPT!")
     async def chat(self, ctx, prompt: str):
         # Use OpenAI API to generate a text response
         async def generate_response(userMessage, conversation):
