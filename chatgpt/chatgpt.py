@@ -81,8 +81,15 @@ class ChatGPT(commands.Cog):
         except Exception as e:
             await message.channel.send(f"An error occurred: {e}")
 
+
     @commands.group()
-    async def chatgpt(self, ctx, prompt: str):
+    async def chatgpt(self, ctx):
+        # This command has no implementation, but it's needed as the parent command
+        # for the subcommands.
+        pass
+
+    @commands.command(help="Chat with ChatGPT!")
+    async def chat(self, ctx, prompt: str):
         # Use OpenAI API to generate a text response
         async def generate_response(userMessage, conversation):
             # Start removing old messages when > 100 messages to save on API tokens
@@ -96,6 +103,7 @@ class ChatGPT(commands.Cog):
             )
 
             # Add bots respond to the conversation
+            await ctx.send(conversation)
             response = completions["choices"][0]["message"]["content"]
             conversation2 = await self.config.member(ctx.author).conversation()
             conversation2.append({"role": "assistant", "content": f"{response}"})
