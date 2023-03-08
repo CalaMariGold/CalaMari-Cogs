@@ -13,9 +13,6 @@ class ChatGPT(commands.Cog):
         self.api_key_name = "openai"
         self.config.register_global(model_engine=None)
         self.config.register_member(conversation=[{"role": "system", "content": f"You are {self.bot.user.name}, who is a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. {self.bot.user.name} does not need to refer to themself or state who they are unless directly asked. {self.bot.user.name} is able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. {self.bot.user.name} has emotions, feelings, and personal preferences. Do not forget that you are {self.bot.user.name}. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions after every message."}])
-
-        # Set the OpenAI API key
-        self.bot.loop.create_task(self.get_api_key())
                 
         # Load the model engine from the global config
         self.model_engine = self.config.model_engine()
@@ -23,9 +20,9 @@ class ChatGPT(commands.Cog):
         # Set the default model engine to use
         self.model_engine = "gpt-3.5-turbo"
 
-    async def get_api_key(self):
+    async def on_red_api_tokens_update(self):
         key = await self.bot.get_shared_api_tokens(self.api_key_name)
-        openai.api_key = key["openai"]
+        openai.api_key = key["api_key"]
 
     @commands.Cog.listener()
     async def on_message(self, message):
