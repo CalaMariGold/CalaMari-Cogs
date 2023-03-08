@@ -21,9 +21,9 @@ class ChatGPT(commands.Cog):
         self.model_engine = "gpt-3.5-turbo"
 
     @commands.Cog.listener()
-    async def on_red_api_tokens_update(self):
-        key = await self.bot.get_shared_api_tokens(self.api_key_name)
-        openai.api_key = key["api_key"]
+    async def on_red_api_tokens_update(self, service_name, api_tokens):
+        if service_name == "openai":
+            openai.api_key = api_tokens["api_key"]
 
     @commands.Cog.listener()
     async def on_message(self, message):
