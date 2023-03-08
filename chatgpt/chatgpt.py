@@ -20,6 +20,7 @@ class ChatGPT(commands.Cog):
         # Set the default model engine to use
         self.model_engine = "gpt-3.5-turbo"
 
+    @commands.Cog.listener()
     async def on_red_api_tokens_update(self):
         key = await self.bot.get_shared_api_tokens(self.api_key_name)
         openai.api_key = key["api_key"]
