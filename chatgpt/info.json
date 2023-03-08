@@ -4,7 +4,7 @@
         "CalaMariGold (CalaMariGold マリ#1998)"
     ],
     "description": "Chat with your bot using ChatGPT!",
-    "install_msg": "To get started, install the OpenAI API: `[p]pipinstall openai` \nThen set the OpenAI API key with `[p]set api openai api_key,<your API key>`\nYou can chat with your bot by mentioning them or replying to them. The bot holds conversation history with users individually, which can be reset using commands.",
+    "install_msg": "To get started, set the OpenAI API key with `[p]set api openai api_key,<your API key>`\nYou can chat with your bot by mentioning them or replying to them, which uses the text-davinci-003 model (fun to chat with and has preferences, less restrictive), or you can use `[p]chatgpt chat <your prompt>` to chat with the latest version of ChatGPT (smarter and more detailed responses, but more robotic with many restrictions). ChatGPT holds conversation history with users individually, which can be reset using commands, while davinci holds no chat history.",
     "end_user_data_statement": "This cog stores the content of messages that mention or reply to the bot for use of ChatGPT being able to retain conversation history.",
     "max_bot_version": "3.6.0.dev0",
     "min_bot_version": "3.4.0",
@@ -14,7 +14,7 @@
         1
     ],
     "name": "ChatGPT",
-    "requirements": [],
+    "requirements": ["openai"],
     "short": "Chat with your bot using ChatGPT!",
     "tags": [
         "utility"
