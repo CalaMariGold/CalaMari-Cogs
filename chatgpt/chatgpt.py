@@ -31,6 +31,9 @@ class ChatGPT(commands.Cog):
             return
         if message is None or not hasattr(message, 'author') or message.author == self.bot.user or message.author.bot:
             return
+        author = getattr(message.reference.resolved, "author")
+        if author is None:
+            return
         try: 
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
