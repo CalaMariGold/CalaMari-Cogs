@@ -27,10 +27,9 @@ class ChatGPT(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if message is None or not hasattr(message, 'author') or message.author == self.bot.user or message.author.bot:
+            return
         try: 
-            if message is None or not hasattr(message, 'author') or message.author == self.bot.user or message.author.bot:
-                return
-
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
                 prompt = f"{input_text}\n"
