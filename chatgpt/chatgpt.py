@@ -27,6 +27,8 @@ class ChatGPT(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not self.bot.is_ready():
+            return
         if message is None or not hasattr(message, 'author') or message.author == self.bot.user or message.author.bot:
             return
         try: 
