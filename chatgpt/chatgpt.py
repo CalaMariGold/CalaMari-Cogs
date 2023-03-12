@@ -33,7 +33,7 @@ class ChatGPT(commands.Cog):
             return
         author = getattr(message, "author")
         if author is None:
-            return
+            return # this shit isnt working i give up
         try: 
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
@@ -94,8 +94,8 @@ class ChatGPT(commands.Cog):
         try:
             # Use OpenAI API to generate a text response
             async def generate_response(userMessage, conversation):
-                # Start removing old messages when > 100 messages to save on API tokens
-                while len(conversation) >= 100:
+                # Start removing old messages when > 50 messages to save on API tokens
+                while len(conversation) >= 50:
                     del conversation[1]
                     await self.config.member(ctx.author).conversation.set(conversation)
                     
