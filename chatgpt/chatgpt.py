@@ -47,7 +47,6 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
-                message.channel.send(f"Prompt: {prompt}")
                 completions = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=prompt,
@@ -80,7 +79,7 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        prompt = (f"{self.promptMessage}\nReply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}")
+                        prompt = (f"{self.promptMessage} Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
                         
                         await generate_davinci_response(prompt,message)
 
