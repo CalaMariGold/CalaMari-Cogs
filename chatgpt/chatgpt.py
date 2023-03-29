@@ -80,7 +80,7 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        prompt = (f"{self.promptMessage}\n{message.content}")
+                        prompt = (f"{self.promptMessage}\nReply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}")
                         
                         await generate_davinci_response(prompt,message)
 
