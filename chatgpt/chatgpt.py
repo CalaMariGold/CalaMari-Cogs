@@ -47,7 +47,7 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
-                message.channel.send(prompt)
+                message.channel.send(f"Prompt: {prompt}")
                 completions = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=prompt,
@@ -164,10 +164,10 @@ class ChatGPT(commands.Cog):
         # Set the model engine in the cog
         self.promptMessage = promptMessage
     
-        # Save the model engine to the global config
+        # Save the promptMessage to the global config
         await self.config.promptMessage.set(self.promptMessage)
         
-        await ctx.send("Prompt set.")
+        await ctx.send(f"Prompt set to {self.promptMessage}")
 
 
     @chatgpt.command(help="List all engine models from OpenAI")
