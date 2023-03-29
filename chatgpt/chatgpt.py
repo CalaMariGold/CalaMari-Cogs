@@ -160,9 +160,9 @@ class ChatGPT(commands.Cog):
         await ctx.send(f"Model engine set to {model_engine}.")
 
     @chatgpt.command(help="Set the initial message for Davinci.")
-    async def setdavinciprompt(self, ctx, promptMessage: str):
-        # Set the model engine in the cog
-        self.promptMessage = promptMessage
+    async def setdavinciprompt(self, ctx, *promptMessage: str):
+        # Join all the arguments together into a single string
+        self.promptMessage = ' '.join(promptMessage)
     
         # Save the promptMessage to the global config
         await self.config.promptMessage.set(self.promptMessage)
