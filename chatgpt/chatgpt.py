@@ -92,7 +92,7 @@ class ChatGPT(commands.Cog):
         # for the subcommands.
         pass
 
-    @chatgpt.command(help="Chat with ChatGPT!")
+    @commands.command(help="Chat with ChatGPT!", aliases=['c'])
     async def chat(self, ctx, *prompt: str):
         prompt = ' '.join(prompt)
         try:
