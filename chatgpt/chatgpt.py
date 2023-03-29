@@ -163,7 +163,7 @@ class ChatGPT(commands.Cog):
         self.promptMessage = promptMessage
     
         # Save the model engine to the global config
-        await self.config.model_engine.set(self.promptMessage)
+        await self.config.promptMessage.set(self.promptMessage)
         
         await ctx.send("Prompt set.")
 
