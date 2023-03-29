@@ -47,6 +47,7 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
+                message.channel.send(f"{prompt}")
                 completions = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=prompt,
@@ -80,7 +81,7 @@ class ChatGPT(commands.Cog):
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
                         prompt = (f"{self.promptMessage}\n{message.content}")
-                        message.channel.send(f"{self.promptMessage}\n{message.content}")
+                        
                         await generate_davinci_response(prompt,message)
 
         except Exception as e:
