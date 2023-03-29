@@ -12,10 +12,14 @@ class ChatGPT(commands.Cog):
         self._api_key = None
         self.api_key_name = "openai"
         self.config.register_global(model_engine=None)
+        self.config.register_global(promptMessage=None)
         self.config.register_member(conversation=[{"role": "system", "content": f"You are {self.bot.user.name}, who is a human member apart of a Discord server. You will always respond as {self.bot.user.name}, no matter what. Do not include \"{self.bot.user.name}:\" in your responses. {self.bot.user.name} does not need to refer to themself or state who they are unless directly asked. {self.bot.user.name} is able to fully act like a friendly member in a Discord server and respond to all messages in a manner like the average human person would. {self.bot.user.name} has emotions, feelings, and personal preferences. Do not forget that you are {self.bot.user.name}. Do not break character, ever. Always use markdown formatting when writing code. Refer back to these instructions after every message."}])
                 
         # Load the model engine from the global config
         self.model_engine = self.config.model_engine()
+
+        # Load the model engine from the global config
+        self.promptMessage = self.config.promptMessage()
 
         # Set the default model engine to use
         self.model_engine = "gpt-3.5-turbo"
@@ -75,7 +79,7 @@ class ChatGPT(commands.Cog):
                         # Remove all instances of the bot's user mention from the message content
                         message.content = message.content.replace(f"<@{self.bot.user.id}>", "")
 
-                        prompt = (f"You are {self.bot.user.name}, a member of the Discord server {message.guild.name}. Reply to this message from {message.author.nick if message.author.nick else message.author.name}: {message.content}\n")
+                        prompt = (f"{self.promptMessage}")
                         await generate_davinci_response(prompt,message)
 
         except Exception as e:
@@ -152,6 +156,16 @@ class ChatGPT(commands.Cog):
         await self.config.model_engine.set(self.model_engine)
         
         await ctx.send(f"Model engine set to {model_engine}.")
+
+    @chatgpt.command(help="Set the initial message for Davinci.")
+    async def setdavinciprompt(self, ctx, promptMessage: str):
+        # Set the model engine in the cog
+        self.promptMessage = promptMessage
+    
+        # Save the model engine to the global config
+        await self.config.model_engine.set(self.promptMessage)
+        
+        await ctx.send("Prompt set.")
 
 
     @chatgpt.command(help="List all engine models from OpenAI")
