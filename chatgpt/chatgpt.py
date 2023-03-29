@@ -47,7 +47,7 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
-                message.channel.send(f"{prompt}")
+                message.channel.send(prompt)
                 completions = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=prompt,
