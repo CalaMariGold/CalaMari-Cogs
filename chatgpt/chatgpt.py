@@ -95,7 +95,7 @@ class ChatGPT(commands.Cog):
 
     @commands.command(help="Chat with ChatGPT!", aliases=['c'])
     async def chat(self, ctx, *prompt: str):
-        prompt = ' '.join(prompt)
+        prompt = ' '.join(prompt).replace('"', '\\"')
         try:
             # Use OpenAI API to generate a text response
             async def generate_response(userMessage, conversation):
