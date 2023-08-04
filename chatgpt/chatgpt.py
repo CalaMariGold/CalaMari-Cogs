@@ -22,7 +22,7 @@ class ChatGPT(commands.Cog):
         self.promptMessage = self.config.promptMessage()
 
         # Set the default model engine to use
-        self.model_engine = "gpt-3.5-turbo"
+        self.model_engine = "gpt-4-32k"
 
     @commands.Cog.listener()
     async def on_red_api_tokens_update(self, service_name, api_tokens):
