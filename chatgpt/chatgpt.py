@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 from redbot.core import commands, Config
 import re
 
@@ -23,6 +23,7 @@ class ChatGPT(commands.Cog):
 
         # Set the default model engine to use
         self.model_engine = "gpt-4"
+        client = OpenAI()
 
     @commands.Cog.listener()
     async def on_red_api_tokens_update(self, service_name, api_tokens):
@@ -42,7 +43,7 @@ class ChatGPT(commands.Cog):
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
                 prompt = f"{input_text}\n"
-                response = openai.images.generate(
+                response = client.images.generate(
                     model="dall-e-3",
                     prompt=prompt,
                     size="512x512",
@@ -53,7 +54,7 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
-                completions = openai.Completion.create(
+                completions = client.Completion.create(
                     engine="text-davinci-003",
                     prompt=prompt,
                     max_tokens=1024,
@@ -110,7 +111,7 @@ class ChatGPT(commands.Cog):
                     del conversation[1]
                     await self.config.member(ctx.author).conversation.set(conversation)
                     
-                completions = openai.ChatCompletion.create(
+                completions = client.ChatCompletion.create(
                     model=self.model_engine,
                     messages=conversation
                 )
@@ -178,7 +179,7 @@ class ChatGPT(commands.Cog):
     @chatgpt.command(help="List all engine models from OpenAI")
     async def listmodels(self, ctx):
         # Get a list of the available models
-        models = openai.Engine.list()["data"]
+        models = client.Engine.list()["data"]
         
         # Build the response message
         response = "Available models:\n"
