@@ -41,9 +41,16 @@ class ChatGPT(commands.Cog):
         try: 
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
+                client = OpenAI()
                 prompt = f"{input_text}\n"
-                response = openai.Image.create(model="image-alpha-001", prompt=prompt)
-                image_url = response["data"][0]["url"]
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt,
+                    size="512x512",
+                    quality="standard",
+                    n=1,
+                )
+                image_url = response.data[0].url
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
