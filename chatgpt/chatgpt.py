@@ -1,4 +1,3 @@
-import openai
 from openai import OpenAI
 from redbot.core import commands, Config
 import re
