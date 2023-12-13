@@ -1,4 +1,4 @@
-from openai import OpenAI
+import openai
 from redbot.core import commands, Config
 import re
 
@@ -41,9 +41,8 @@ class ChatGPT(commands.Cog):
         try: 
             # Use Dall-E to generate an image
             async def generate_image(input_text, message):
-                client = OpenAI()
                 prompt = f"{input_text}\n"
-                response = client.images.generate(
+                response = openai.images.generate(
                     model="dall-e-3",
                     prompt=prompt,
                     size="512x512",
