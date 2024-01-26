@@ -54,7 +54,7 @@ class ChatGPT(commands.Cog):
 
             async def generate_davinci_response(prompt, message):
                 completions = openai.Completion.create(
-                    engine="gpt-3.5",
+                    engine="gpt-3.5-turbo-1106	",
                     prompt=prompt,
                     max_tokens=1024,
                     n=1,
