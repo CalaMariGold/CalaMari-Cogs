@@ -53,13 +53,9 @@ class ChatGPT(commands.Cog):
                 await message.channel.send(image_url)
 
             async def generate_davinci_response(prompt, message):
-                completions = openai.Completion.create(
-                    engine="gpt-3.5-turbo-1106",
-                    prompt=prompt,
-                    max_tokens=1024,
-                    n=1,
-                    stop=None,
-                    temperature=1.0,
+                completions = openai.ChatCompletion.create(
+                    model=self.model_engine,
+                    messages=conversation
                 )
                 response = completions.choices[0].text
                 chunk_size = 2000
