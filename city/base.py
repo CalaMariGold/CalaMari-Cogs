@@ -234,3 +234,109 @@ class CityBase:
         # Cancel any pending tasks
         # Close any open resources
         pass
+
+    class ConfirmWipeView(discord.ui.View):
+        def __init__(self, ctx: commands.Context, user: discord.Member):
+            super().__init__(timeout=30.0)  # 30 second timeout
+            self.ctx = ctx
+            self.user = user
+            self.value = None
+
+        async def interaction_check(self, interaction: discord.Interaction) -> bool:
+            # Only allow the original command author to use the buttons
+            return interaction.user.id == self.ctx.author.id
+
+        @discord.ui.button(label='Confirm Wipe', style=discord.ButtonStyle.danger)
+        async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+            self.value = True
+            self.stop()
+            # Disable all buttons after clicking
+            for item in self.children:
+                item.disabled = True
+            await interaction.response.edit_message(view=self)
+
+        @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
+        async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+            self.value = False
+            self.stop()
+            # Disable all buttons after clicking
+            for item in self.children:
+                item.disabled = True
+            await interaction.response.edit_message(view=self)
+
+        async def on_timeout(self):
+            # Disable all buttons if the view times out
+            for item in self.children:
+                item.disabled = True
+            # Try to update the message with disabled buttons
+            try:
+                await self.message.edit(view=self)
+            except discord.NotFound:
+                pass
+
+    @commands.command()
+    @commands.is_owner()
+    async def wipecitydata(self, ctx: commands.Context, user: discord.Member):
+        """Wipe all city-related data for a specific user.
+        
+        This will remove all their stats, including:
+        - Crime records and cooldowns
+        - Jail status and history
+        - All statistics (successful crimes, failed crimes, etc.)
+        - References in other users' data
+        
+        This action cannot be undone.
+        
+        Parameters
+        ----------
+        user: discord.Member
+            The user whose data should be wiped
+        """
+        # Create confirmation view
+        view = self.ConfirmWipeView(ctx, user)
+        view.message = await ctx.send(
+            f"⚠️ Are you sure you want to wipe all city data for {user.display_name}?\n"
+            "This action cannot be undone and will remove all their stats, including:\n"
+            "• Crime records and cooldowns\n"
+            "• Jail status and history\n"
+            "• All statistics (successful crimes, failed crimes, etc.)\n"
+            "• References in other users' data",
+            view=view
+        )
+
+        # Wait for the user's response
+        await view.wait()
+
+        if view.value is None:
+            await ctx.send("❌ Wipe cancelled - timed out.")
+            return
+        elif view.value is False:
+            await ctx.send("❌ Wipe cancelled.")
+            return
+
+        try:
+            # Step 1: Clear all member data across all guilds
+            all_guilds = self.bot.guilds
+            for guild in all_guilds:
+                await self.config.member_from_ids(guild.id, user.id).clear()
+            
+            # Step 2: Remove user from other members' data
+            all_members = await self.config.all_members()
+            for guild_id, guild_data in all_members.items():
+                for member_id, member_data in guild_data.items():
+                    if member_id == user.id:
+                        continue  # Skip the user's own data as it's already cleared
+                        
+                    modified = False
+                    # Check last_target
+                    if member_data.get("last_target") == user.id:
+                        await self.config.member_from_ids(guild_id, member_id).last_target.set(None)
+                        modified = True
+                    
+                    # If we add any other cross-user references in the future,
+                    # they should be cleaned up here
+            
+            await ctx.send(f"✅ Successfully wiped all city data for {user.display_name} across all guilds.")
+            
+        except Exception as e:
+            await ctx.send(f"❌ An error occurred while wiping data: {str(e)}")
