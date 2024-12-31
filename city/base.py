@@ -274,6 +274,100 @@ class CityBase:
             except discord.NotFound:
                 pass
 
+    class ConfirmGlobalWipeView(discord.ui.View):
+        def __init__(self, ctx: commands.Context):
+            super().__init__(timeout=30.0)  # 30 second timeout
+            self.ctx = ctx
+            self.value = None
+            self.confirmation_phrase = None
+            self.waiting_for_confirmation = False
+
+        async def interaction_check(self, interaction: discord.Interaction) -> bool:
+            # Only allow the original command author to use the buttons
+            return interaction.user.id == self.ctx.author.id
+
+        @discord.ui.button(label='I Understand - Proceed to Confirmation', style=discord.ButtonStyle.danger)
+        async def confirm_understanding(self, interaction: discord.Interaction, button: discord.ui.Button):
+            if self.waiting_for_confirmation:
+                return
+                
+            self.waiting_for_confirmation = True
+            
+            # Generate a random confirmation phrase
+            import random
+            import string
+            import asyncio
+            self.confirmation_phrase = ''.join(random.choices(string.ascii_uppercase, k=6))
+            
+            # Disable the initial button
+            button.disabled = True
+            # Remove the cancel button if it exists
+            cancel_button = discord.utils.get(self.children, label='Cancel')
+            if cancel_button:
+                self.remove_item(cancel_button)
+            
+            # Add the final confirmation button
+            confirm_button = discord.ui.Button(
+                label=f'CONFIRM WIPE - Type "{self.confirmation_phrase}"',
+                style=discord.ButtonStyle.danger,
+                disabled=True,
+                custom_id='final_confirm'
+            )
+            self.add_item(confirm_button)
+            
+            await interaction.response.edit_message(
+                content=f"⚠️ **FINAL WARNING**\n\n"
+                f"To proceed with wiping ALL city data for ALL users, you must type:\n"
+                f"```\n{self.confirmation_phrase}\n```\n"
+                f"This will permanently delete all user stats, crime records, and other city data.\n"
+                f"You have 30 seconds to confirm.",
+                view=self
+            )
+            
+            # Start listening for the confirmation message
+            def check(m):
+                return (m.author.id == self.ctx.author.id and 
+                       m.channel.id == self.ctx.channel.id and 
+                       m.content == self.confirmation_phrase)
+            
+            try:
+                await self.ctx.bot.wait_for('message', timeout=30.0, check=check)
+                self.value = True
+            except asyncio.TimeoutError:
+                self.value = None
+            finally:
+                self.stop()
+                # Try to update the message one last time
+                try:
+                    for item in self.children:
+                        item.disabled = True
+                    await self.message.edit(view=self)
+                except (discord.NotFound, discord.HTTPException):
+                    pass
+
+        @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
+        async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+            if self.waiting_for_confirmation:
+                return
+                
+            self.value = False
+            self.stop()
+            # Disable all buttons after clicking
+            for item in self.children:
+                item.disabled = True
+            await interaction.response.edit_message(view=self)
+
+        async def on_timeout(self):
+            self.value = None
+            # Disable all buttons if the view times out
+            for item in self.children:
+                item.disabled = True
+            # Try to update the message with disabled buttons
+            try:
+                await self.message.edit(view=self)
+            except (discord.NotFound, discord.HTTPException):
+                pass
+
     @commands.command()
     @commands.is_owner()
     async def wipecitydata(self, ctx: commands.Context, user: discord.Member):
@@ -337,6 +431,69 @@ class CityBase:
                     # they should be cleaned up here
             
             await ctx.send(f"✅ Successfully wiped all city data for {user.display_name} across all guilds.")
+            
+        except Exception as e:
+            await ctx.send(f"❌ An error occurred while wiping data: {str(e)}")
+
+    @commands.command()
+    @commands.is_owner()
+    async def wipecityallusers(self, ctx: commands.Context):
+        """Wipe ALL city-related data for ALL users.
+        
+        This is an extremely destructive action that will:
+        - Delete ALL user stats
+        - Remove ALL crime records and cooldowns
+        - Clear ALL jail status and history
+        - Wipe ALL cross-user references
+        - Remove ALL data across ALL guilds
+        
+        This action absolutely cannot be undone.
+        """
+        # Create confirmation view
+        view = self.ConfirmGlobalWipeView(ctx)
+        view.message = await ctx.send(
+            "🚨 **GLOBAL CITY DATA WIPE** 🚨\n\n"
+            "You are about to wipe ALL city data for ALL users across ALL guilds.\n\n"
+            "This will permanently delete:\n"
+            "• All user statistics\n"
+            "• All crime records and cooldowns\n"
+            "• All jail records and history\n"
+            "• All cross-user references\n"
+            "• All other city-related data\n\n"
+            "This action CANNOT be undone and will affect ALL users.\n"
+            "Are you sure you want to proceed?",
+            view=view
+        )
+
+        # Wait for the user's response
+        await view.wait()
+
+        if view.value is None:
+            await ctx.send("❌ Global wipe cancelled - timed out.")
+            return
+        elif view.value is False:
+            await ctx.send("❌ Global wipe cancelled.")
+            return
+
+        try:
+            # Step 1: Clear all member data across all guilds
+            all_members = await self.config.all_members()
+            count = 0
+            for guild_id, guild_data in all_members.items():
+                for member_id in guild_data.keys():
+                    await self.config.member_from_ids(guild_id, member_id).clear()
+                    count += 1
+            
+            # Step 2: Clear all guild settings to defaults
+            guild_count = 0
+            all_guilds = self.bot.guilds
+            for guild in all_guilds:
+                await self.config.guild(guild).clear()
+                guild_count += 1
+                
+            await ctx.send(f"✅ Successfully wiped ALL city data:\n"
+                         f"• Cleared data for {count:,} users\n"
+                         f"• Reset settings in {guild_count:,} guilds")
             
         except Exception as e:
             await ctx.send(f"❌ An error occurred while wiping data: {str(e)}")
