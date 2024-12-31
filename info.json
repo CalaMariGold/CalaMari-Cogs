@@ -1,8 +1,12 @@
 {
-    "author" : ["CalaMariGold (CalaMariGold マリ#1998)"],
-    "install_msg" : "Shiny!",
-    "name" : "CalaMari-Cogs",
-    "short" : "Assortment of Red v3 cogs created for my Discord bot, Baa",
-    "description" : "Assortment of Red v3 cogs created for my Discord bot, Baa",
-    "tags" : ["Utility"]
+    "author": ["CalaMariGold"],
+    "install_msg": "Thank you for installing CalaMari-Cogs! Check the README.md for more information about available cogs.",
+    "name": "CalaMari-Cogs",
+    "short": "Collection of utility cogs for Red v3",
+    "description": "A collection of Red v3 cogs providing various utilities and features",
+    "tags": [
+        "Utility",
+        "Games",
+        "Economy"
+    ]
 }
