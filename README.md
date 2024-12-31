@@ -1,27 +1,32 @@
-# CalaMari Cogs
+# CalaMari-Cogs
 
-A collection of [Red v3](https://github.com/Cog-Creators/Red-DiscordBot/) cogs.
+A collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-DiscordBot) V3.
+
+## Installation
+
+To add these cogs to your instance:
+
+```
+[p]repo add CalaMari-Cogs https://github.com/CalaMariGold/CalaMari-Cogs
+[p]cog install CalaMari-Cogs <cogname>
+```
 
 ## Available Cogs
 
-### City
-A modular city simulation system that includes various activities for users to engage in. The system is designed to be expandable with different modules that add new gameplay mechanics.
-
-#### Features:
-- **Crime System**: Engage in virtual crimes with different risk levels and rewards
-  - Multiple crime types with varying difficulty and payouts
-  - Dynamic cooldown system
-  - Jail system with jailbreak mechanics
-  - Random events that affect crime success rates
-  - Economy integration for rewards and penalties
-
-## Installation
-To install these cogs, follow these steps:
-1. Add the repo: `[p]repo add calamari-cogs https://github.com/CalaMariGold/CalaMari-Cogs`
-2. Install the desired cog: `[p]cog install calamari-cogs <cogname>`
+| Name | Description | Commands |
+|------|-------------|----------|
+| City | A comprehensive city simulation system with various activities. Features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, and dynamic events. | `[p]crime`, `[p]crimeset` |
+| LootDrop | A dynamic resource distribution system that creates random drops in channels and threads. Features streak bonuses, polished buttons, party drops, risk/reward mechanics, and leaderboards. | `[p]lootdrop`, `[p]lootdrop set` |
 
 ## Support
+
 If you encounter any issues or have suggestions, please open an issue on the GitHub repository.
 
+## Credits
+
+- [Red-DiscordBot](https://github.com/Cog-Creators/Red-DiscordBot) - The bot framework these cogs are built for
+- All the helpful folks in the [Red Discord Server](https://discord.gg/red)
+
 ## License
-This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the LICENSE file for details.
+
+All cogs in this repository are released under the [MIT License](LICENSE)
