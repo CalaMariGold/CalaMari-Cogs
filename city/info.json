@@ -1,0 +1,15 @@
+{
+    "name": "City",
+    "short": "A comprehensive city simulation system with various activities",
+    "description": "A modular city simulation system that includes various activities for users to engage in. Currently features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, dynamic events, and more.",
+    "end_user_data_statement": "This cog stores user data including:\n- Cooldown timers for various activities\n- Statistics for activities (e.g., successful/failed crimes)\n- Jail status and duration\n- Last target information for anti-farming\nAll data can be removed with the standard Red delete data commands.",
+    "install_msg": "Thanks for installing the City cog! Get started with `[p]crime` to explore the crime system. Use `[p]crimeset` for crime adjustments.",
+    "author": ["CalaMariGold"],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": ["fun", "economy", "games", "crime", "city", "simulation"],
+    "min_bot_version": "3.5.0",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
