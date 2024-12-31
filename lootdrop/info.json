@@ -1,0 +1,16 @@
+{
+    "name": "LootDrop",
+    "short": "Interactive random resource drops with risk/reward mechanics",
+    "description": "A dynamic resource distribution system that creates random drops in configured channels and threads. Features include streak bonuses, party drops for multiple users, risk/reward mechanics with good/bad outcomes, leaderboards, and detailed statistics tracking.",
+    "end_user_data_statement": "This cog stores user data including:\n- Drop statistics (successful/failed claims)\n- Streak information and history\n- Last claim timestamps for streak tracking\n- Highest achieved streaks\nAll data can be removed using `[p]lootdrop wipestats` or the standard Red delete data commands.",
+    "install_msg": "Thanks for installing LootDrop! Get started with `[p]lootdrop set addchannel` to configure channels, then `[p]lootdrop set toggle` to enable drops. Use `[p]help Lootdrop` for all commands.",
+    "author": ["CalaMariGold"],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": ["fun", "economy", "games", "drops", "city", "simulation", "interactive"],
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 8, 1],
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
