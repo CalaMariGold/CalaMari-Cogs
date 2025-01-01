@@ -9,8 +9,8 @@ RISK_MEDIUM = "medium"
 RISK_HIGH = "high"
 
 SUCCESS_RATE_HIGH = 0.75
-SUCCESS_RATE_MEDIUM = 0.55
-SUCCESS_RATE_LOW = 0.50
+SUCCESS_RATE_MEDIUM = 0.50
+SUCCESS_RATE_LOW = 0.30
 
 async def format_text(text: str, ctx, **kwargs) -> str:
     """Format text by replacing placeholders with actual values.
@@ -121,8 +121,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "train_robbery",
         "risk": RISK_HIGH,
-        "min_reward": 1000,
-        "max_reward": 3000,
+        "min_reward": 500,
+        "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.5,
@@ -218,7 +218,7 @@ RANDOM_SCENARIOS = [
         "name": "jewelry_store_heist",
         "risk": RISK_HIGH,
         "min_reward": 1000,
-        "max_reward": 3500,
+        "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.49,
@@ -314,7 +314,7 @@ RANDOM_SCENARIOS = [
         "name": "sugar_daddy_scam",
         "risk": RISK_HIGH,
         "min_reward": 800,
-        "max_reward": 2200,
+        "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.47,
@@ -337,8 +337,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "crypto_rug_pull",
         "risk": RISK_HIGH,
-        "min_reward": 1200,
-        "max_reward": 3000,
+        "min_reward": 800,
+        "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.48,
@@ -362,7 +362,7 @@ RANDOM_SCENARIOS = [
         "name": "ai_model_theft",
         "risk": RISK_HIGH,
         "min_reward": 900,
-        "max_reward": 2500,
+        "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1080,  # 18 minutes
         "fine_multiplier": 0.46,
@@ -409,7 +409,7 @@ RANDOM_SCENARIOS = [
     {
         "name": "area51_raid",
         "risk": RISK_HIGH,
-        "min_reward": 1500,
+        "min_reward": 500,
         "max_reward": 4000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 2100,  # 35 minutes
@@ -445,7 +445,7 @@ RANDOM_SCENARIOS = [
     {
         "name": "vtuber_identity_theft",
         "risk": RISK_HIGH,
-        "min_reward": 1000,
+        "min_reward": 600,
         "max_reward": 2800,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1200,  # 20 minutes
@@ -469,8 +469,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "andrew_tate_course",
         "risk": RISK_HIGH,
-        "min_reward": 1200,
-        "max_reward": 3000,
+        "min_reward": 600,
+        "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.48,
@@ -482,7 +482,7 @@ RANDOM_SCENARIOS = [
         "name": "reddit_mod_blackmail",
         "risk": RISK_HIGH,
         "min_reward": 900,
-        "max_reward": 2500,
+        "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.46,
@@ -541,8 +541,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "anime_convention_chaos",
         "risk": RISK_HIGH,
-        "min_reward": 1000,
-        "max_reward": 2800,
+        "min_reward": 600,
+        "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.47,
@@ -553,8 +553,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "twitch_chat_conspiracy",
         "risk": RISK_HIGH,
-        "min_reward": 1200,
-        "max_reward": 3000,
+        "min_reward": 800,
+        "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.48,
@@ -649,7 +649,7 @@ RANDOM_SCENARIOS = [
     {
         "name": "vtuber_identity_swap",
         "risk": RISK_HIGH,
-        "min_reward": 1200,
+        "min_reward": 800,
         "max_reward": 3500,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 960,
@@ -733,8 +733,8 @@ RANDOM_SCENARIOS = [
     {
         "name": "marigold_merch_fraud",
         "risk": RISK_HIGH,
-        "min_reward": 1200,
-        "max_reward": 3000,
+        "min_reward": 1000,
+        "max_reward": 2200,
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 960,
         "fine_multiplier": 0.5,
@@ -781,10 +781,10 @@ RANDOM_SCENARIOS = [
     {
         "name": "botception",
         "risk": RISK_HIGH,
-        "min_reward": 5000,
+        "min_reward": 3000,
         "max_reward": 8000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1200,
+        "jail_time": 10200,
         "fine_multiplier": 0.5,
         "attempt_text": "🤖 {user} tries to hack Baa, CalaMariGold’s bot, and rewrite the crime cog itself...",
         "success_text": "🤖 {user} successfully rewrote reality! Now they’re the richest player in the game, earning {amount} from this very crime!",
