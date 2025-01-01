@@ -24,14 +24,36 @@ class CrimeCommands:
 
     @commands.group(name="crime", invoke_without_command=True)
     async def crime(self, ctx: commands.Context):
-        """Crime-related commands
+        """Commit crimes to earn credits.
+
+        This command group provides access to the crime system.
+        
+        Commands:
+        - No subcommand: Shows available crimes
+        - commit: Choose a crime to commit
+        - status: View your crime statistics
+        - leaderboard: View the crime leaderboard
+        - bail: Attempt to pay bail and get out of jail
+        - jailbreak: Attempt to break out of jail
+        
+        Admin Commands:
+        - set: Configure crime system settings
         """
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
     @crime.command(name="commit")
     async def crime_commit(self, ctx: commands.Context):
-        """Choose a crime to commit"""
+        """Choose a crime to commit
+        
+        Available crimes:
+        - Pickpocket: Low risk, target users for small rewards
+        - Mugging: Medium risk, target users for medium rewards
+        - Store Robbery: Medium risk, no target needed
+        - Bank Heist: High risk, high rewards
+        
+        Getting caught will send you to jail!
+        """
         try:
             # Get guild settings
             settings = await self.config.guild(ctx.guild).global_settings()
@@ -251,7 +273,11 @@ class CrimeCommands:
 
     @crime.command(name="bail")
     async def crime_bail(self, ctx: commands.Context):
-        """Pay to bail out of jail"""
+        """Pay bail to get out of jail early
+        
+        Bail cost increases with remaining jail time.
+        Cost is calculated as: remaining_minutes * base_bail_rate
+        """
         try:
             # Check if user is in jail
             jail_time = await self.get_jail_time_remaining(ctx.author)
@@ -312,7 +338,15 @@ class CrimeCommands:
 
     @crime.command(name="jailbreak")
     async def crime_jailbreak(self, ctx: commands.Context):
-        """Attempt to break out of jail."""
+        """Attempt to break out of jail
+        
+        Success chance is based on remaining jail time:
+        - 1-5 minutes: 60% chance
+        - 6-15 minutes: 40% chance
+        - 16+ minutes: 20% chance
+        
+        Failed attempts add more jail time!
+        """
         try:
             # Check if user is in jail
             jail_time = await self.get_jail_time_remaining(ctx.author)
