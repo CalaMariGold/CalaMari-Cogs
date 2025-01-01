@@ -29,4 +29,4 @@ If you encounter any issues or have suggestions, please open an issue on the Git
 
 ## License
 
-All cogs in this repository are released under the [MIT License](LICENSE)
+All cogs in this repository are released under the [GNU General Public License v3 (GPLv3)](LICENSE)
