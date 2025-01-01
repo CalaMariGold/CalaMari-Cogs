@@ -4,14 +4,14 @@
 CRIME_TYPES = {
     "pickpocket": {
         "requires_target": True,
-        "min_reward": 100,
+        "min_reward": 150,
         "max_reward": 500,
         "success_rate": 0.6,
         "cooldown": 300,  # 5 minutes
-        "jail_time": 300,  # 5 minutes if caught
+        "jail_time": 450,  # 5 minutes if caught
         "risk": "low",
         "enabled": True,
-        "fine_multiplier": 0.3,  # 30% of max reward as fine
+        "fine_multiplier": 0.35,  # 35% of max reward as fine
         "min_steal_percentage": 0.01,  # Steal 1-10% of target's credits
         "max_steal_percentage": 0.10
     },
