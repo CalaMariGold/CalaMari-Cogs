@@ -500,13 +500,36 @@ class LootDrop(commands.Cog):
     @commands.group()
     @commands.guild_only()
     async def lootdrop(self, ctx: commands.Context) -> None:
-        """LootDrop - Random loot drops for active channels"""
+        """Random loot drops that appear in active channels
+        
+        Drops can be claimed by clicking a button. Features include:
+        - Regular drops (single claim)
+        - Party drops (everyone can claim)
+        - Streak bonuses for consecutive claims
+        - Risk/reward mechanics with good/bad outcomes
+        - Leaderboards and statistics
+        
+        Use `[p]lootdrop set` to configure settings
+        Use `[p]lootdrop stats` to view your stats
+        Use `[p]lootdrop leaderboard` to view top claimers
+        """
         pass
     
     @lootdrop.group(name="set")
     @commands.admin_or_permissions(administrator=True)
     async def lootdrop_set(self, ctx: commands.Context) -> None:
-        """Configure LootDrop settings"""
+        """Configure LootDrop settings
+        
+        All settings are per-server. Available settings:
+        - Toggle drops on/off
+        - Add/remove channels
+        - Credit amounts
+        - Drop frequency and timeouts
+        - Streak bonuses and timeouts
+        - Party drop settings
+        
+        Use `[p]help LootDrop set` to see all settings
+        """
         pass
     
     @lootdrop_set.command(name="toggle")
@@ -1101,6 +1124,9 @@ class DropButton(discord.ui.Button['LootDropView']):
         interaction: discord.Interaction
             The interaction that triggered this callback
         """
+        if interaction.user.bot:
+            return
+            
         assert self.view is not None
         
         if self.view.claimed:
@@ -1193,6 +1219,9 @@ class PartyDropView(discord.ui.View):
         button: discord.ui.Button
             The button that was clicked
         """
+        if interaction.user.bot:
+            return
+            
         if str(interaction.user.id) in self.claimed_users:
             await interaction.response.send_message("You've already claimed this party drop!", ephemeral=True)
             return
