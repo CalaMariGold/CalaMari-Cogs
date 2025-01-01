@@ -25,6 +25,9 @@ class CrimeButton(discord.ui.Button):
     
     async def callback(self, interaction: discord.Interaction):
         """Handle button press"""
+        if interaction.user.bot:
+            return
+            
         view: CrimeListView = self.view
         
         try:
@@ -398,6 +401,9 @@ class CrimeView(discord.ui.View):
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.success)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Handle crime confirmation"""
+        if interaction.user.bot:
+            return
+            
         try:
             await interaction.response.defer()
             
@@ -777,6 +783,9 @@ class CrimeView(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Cancel the crime attempt"""
+        if interaction.user.bot:
+            return
+            
         try:
             # Delete only the confirmation message
             try:
@@ -813,6 +822,9 @@ class CrimeAttemptView(discord.ui.View):
     @discord.ui.button(label="Bail Out!", style=discord.ButtonStyle.danger, emoji="🏃")
     async def bail_out(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Handle bailing out of a crime attempt"""
+        if interaction.user.bot:
+            return
+            
         try:
             await interaction.response.defer()
             
@@ -949,6 +961,9 @@ class BailView(discord.ui.View):
     @discord.ui.button(label="Pay Bail", style=discord.ButtonStyle.success, emoji="💸")
     async def pay_bail(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Pay bail and get out of jail"""
+        if interaction.user.bot:
+            return
+            
         try:
             # Get current balance and currency name
             current_balance = await bank.get_balance(interaction.user)
@@ -1007,6 +1022,9 @@ class BailView(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, emoji="❌")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Cancel bail payment"""
+        if interaction.user.bot:
+            return
+            
         try:
             minutes = self.jail_time // 60
             seconds = self.jail_time % 60
@@ -1249,6 +1267,9 @@ class TargetSelectionView(discord.ui.View):
     @discord.ui.button(label="Random Target", style=discord.ButtonStyle.primary)
     async def random_target(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Select a random target"""
+        if interaction.user.bot:
+            return
+            
         try:
             await interaction.response.defer()
             
@@ -1306,12 +1327,18 @@ class TargetSelectionView(discord.ui.View):
     @discord.ui.button(label="Select Target", style=discord.ButtonStyle.success)
     async def select_target(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Open modal to select specific target"""
+        if interaction.user.bot:
+            return
+            
         modal = TargetModal(self)
         await interaction.response.send_modal(modal)
         
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Cancel target selection"""
+        if interaction.user.bot:
+            return
+            
         await interaction.response.defer()
         msg = await interaction.channel.send(_("Crime cancelled."))
         self.all_messages.append(msg)
