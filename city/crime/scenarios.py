@@ -12,26 +12,33 @@ SUCCESS_RATE_HIGH = 0.75
 SUCCESS_RATE_MEDIUM = 0.55
 SUCCESS_RATE_LOW = 0.50
 
-def get_currency_text(amount: int, is_penalty: bool = False) -> str:
-    """Format currency text with amount and currency name.
+async def format_text(text: str, ctx, **kwargs) -> str:
+    """Format text by replacing placeholders with actual values.
     
     Args:
-        amount: The amount of currency
-        is_penalty: Whether this is a penalty/fine (adds minus sign)
-        
-    Returns:
-        Formatted currency string with sign and placeholder
+        text: Text containing placeholders
+        ctx: Either a Context or Interaction object
+        **kwargs: Additional format arguments (credits_bonus, credits_penalty)
     """
-    if amount < 0:
-        amount = abs(amount)
-    sign = "-" if is_penalty else "+"
-    return f"{sign}{amount} {{currency}}"
-
-async def format_text(text: str, ctx) -> str:
-    """Format text by replacing placeholders with actual values."""
-    currency_name = await bank.get_currency_name(ctx.guild)
-    return text.format(currency=currency_name, user=ctx.author.display_name)
-
+    if hasattr(ctx, 'guild'):
+        # Context object
+        guild = ctx.guild
+        user = ctx.user if hasattr(ctx, 'user') else ctx.author
+    else:
+        # Interaction object
+        guild = ctx.guild
+        user = ctx.user
+        
+    currency_name = await bank.get_currency_name(guild)
+    format_args = {
+        'currency': currency_name,
+        'user': user.mention if "{user}" in text else user.display_name
+    }
+    
+    # Add any additional format arguments
+    format_args.update(kwargs)
+    
+    return text.format(**format_args)
 
 def get_crime_event(crime_type: str) -> list:
     """Get a list of random events for a specific crime type.
@@ -870,12 +877,12 @@ CRIME_EVENTS = {
         {
             "name": "dropped_wallet",
             "credits_bonus": 100,
-            "text": f"You found a dropped wallet on the way! 💰 ({get_currency_text(100)})"
+            "text": "You found a dropped wallet on the way! 💰 (+{credits_bonus} {currency})"
         },
         {
             "name": "pickpocket_victim",
             "credits_penalty": 75,
-            "text": f"Someone pickpocketed you while you were distracted! 💸 ({get_currency_text(75, True)})"
+            "text": "Someone pickpocketed you while you were distracted! 💸 (-{credits_penalty} {currency})"
         }
     ],
     "mugging": [
@@ -957,12 +964,12 @@ CRIME_EVENTS = {
         {
             "name": "street_performer_tip",
             "credits_bonus": 150,
-            "text": f"A street performer gave you their tips! 🎭 ({get_currency_text(150)})"
+            "text": "A street performer gave you their tips! 🎭 (+{credits_bonus} {currency})"
         },
         {
             "name": "dropped_loot",
             "credits_penalty": 125,
-            "text": f"You dropped some of your loot while running! 💸 ({get_currency_text(125, True)})"
+            "text": "You dropped some of your loot while running! 💸 (-{credits_penalty} {currency})"
         }
     ],
     "rob_store": [
@@ -1033,12 +1040,12 @@ CRIME_EVENTS = {
         {
             "name": "register_bonus",
             "credits_bonus": 200,
-            "text": f"You found extra cash in the register! 💰 ({get_currency_text(200)})"
+            "text": "You found extra cash in the register! 💰 (+{credits_bonus} {currency})"
         },
         {
             "name": "property_damage",
             "credits_penalty": 175,
-            "text": f"You had to pay for property damage! 💸 ({get_currency_text(175, True)})"
+            "text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})"
         }
     ],
     "bank_heist": [
@@ -1105,12 +1112,12 @@ CRIME_EVENTS = {
         {
             "name": "vault_bonus",
             "credits_bonus": 300,
-            "text": f"You found a secret compartment in the vault! 💰 ({get_currency_text(300)})"
+            "text": "You found a secret compartment in the vault! 💰 (+{credits_bonus} {currency})"
         },
         {
             "name": "equipment_cost",
             "credits_penalty": 250,
-            "text": f"Your expensive equipment was damaged! 💸 ({get_currency_text(250, True)})"
+            "text": "Your expensive equipment was damaged! 💸 (-{credits_penalty} {currency})"
         }
     ]
 }
@@ -1248,7 +1255,7 @@ PRISON_BREAK_SCENARIOS = [
         "events": [
             {"text": "It's holiday rush season! (+20% success chance)", "chance_bonus": 0.20},
             {"text": "You found a perfect-sized box! (+10% success chance)", "chance_bonus": 0.10},
-            {"text": "You discovered undelivered mail money orders!", "currency_bonus": 275},
+            {"text": "You discovered undelivered {currency} money orders!", "currency_bonus": 275},
             {"text": "Package inspection in progress! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "The box is too heavy! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "Had to pay for express shipping.", "currency_penalty": 225}

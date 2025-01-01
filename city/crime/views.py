@@ -8,7 +8,7 @@ from redbot.core.utils.chat_formatting import humanize_number
 from typing import Optional, Tuple
 from ..utils import calculate_stolen_amount, can_target_user
 import asyncio
-from .scenarios import get_random_scenario, get_crime_event
+from .scenarios import get_random_scenario, get_crime_event, format_text
 
 _ = Translator("Crime", __file__)
 
@@ -538,7 +538,17 @@ class CrimeView(discord.ui.View):
                         return
                         
                     # Send event message with delay
-                    msg = await interaction.channel.send(event["text"])
+                    event_text = event["text"]
+                    format_args = {}
+                    
+                    # Add credit amounts if present
+                    if "credits_bonus" in event:
+                        format_args["credits_bonus"] = str(event["credits_bonus"])
+                    elif "credits_penalty" in event:
+                        format_args["credits_penalty"] = str(event["credits_penalty"])
+                    
+                    # Format the message with all arguments at once
+                    msg = await interaction.channel.send(await format_text(event_text, interaction, **format_args))
                     self.all_messages.append(msg)
                     await asyncio.sleep(3.5)  # Increased delay between events (was 2s)
 
