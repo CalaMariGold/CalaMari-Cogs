@@ -6,9 +6,6 @@ import discord
 from datetime import datetime, timezone
 import time
 from .crime.data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
-import logging
-
-log = logging.getLogger("red")
 
 CONFIG_SCHEMA = {
     "GUILD": {
@@ -51,6 +48,9 @@ class CityBase:
         # Config schema version
         self.CONFIG_SCHEMA = 3
         
+        # Track active tasks
+        self.tasks = []
+        
     async def red_delete_data_for_user(self, *, requester, user_id: int):
         """Delete user data when requested."""
         # Delete member data
@@ -83,11 +83,10 @@ class CityBase:
         try:
             current_time = int(time.time())
             await self.config.member(member).jail_until.set(current_time + duration)
-            
-            # Log jail time
-            log.debug(f"Sent {member.display_name} to jail until {current_time + duration}")
+            return True
         except Exception as e:
-            log.error(f"Error sending member to jail: {e}", exc_info=True)
+            await self.bot.send_to_owners(f"Error sending {member} to jail: {str(e)}")
+            return False
             
     async def get_remaining_cooldown(self, member: discord.Member, action_type: str) -> int:
         """Get remaining cooldown time for an action."""
@@ -136,7 +135,7 @@ class CityBase:
             # Bail costs more than the highest fine
             return max(0, int(max_fine * settings["bail_cost_multiplier"]))
         except Exception as e:
-            log.error(f"Error calculating bail cost: {e}", exc_info=True)
+            await self.bot.send_to_owners(f"Error calculating bail cost: {str(e)}")
             return 0
             
     async def apply_fine(self, member: discord.Member, crime_type: str, crime_data: dict) -> tuple[bool, int]:
@@ -165,7 +164,6 @@ class CityBase:
                         
                 return False, fine_amount
             except Exception as e:
-                log.error(f"Error applying fine: {e}", exc_info=True)
                 return False, fine_amount
                 
     async def handle_target_crime(
@@ -231,10 +229,8 @@ class CityBase:
                 
     async def cog_unload(self):
         """Clean up when cog is unloaded."""
-        # Cancel any pending tasks
-        # Close any open resources
-        pass
-
+        for task in self.tasks:
+            task.cancel()
     class ConfirmWipeView(discord.ui.View):
         def __init__(self, ctx: commands.Context, user: discord.Member):
             super().__init__(timeout=30.0)  # 30 second timeout
