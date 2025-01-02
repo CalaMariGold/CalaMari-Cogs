@@ -214,6 +214,7 @@ class CrimeView(discord.ui.View):
         self.message = None
         self.all_messages = []  # Track all messages
         self.scenario = None
+        self.reward_calculations = []  # Add this line to track reward calculations
         
     async def format_crime_message(self, success: bool, is_attempt: bool = False, **kwargs):
         """Format crime result message."""
@@ -229,41 +230,59 @@ class CrimeView(discord.ui.View):
             embed.add_field(name="💸 Potential Fine", value="???", inline=True)
             return embed
             
-        # Get success/fail messages based on crime type
         if success:
             embed = discord.Embed(
                 title=f"{self.crime_data.get('emoji', '💰')} Successful {self.crime_type.replace('_', ' ').title()}!",
                 color=discord.Color.green()
             )
             
-            if self.crime_type == "random":
-                embed.description = _(self.scenario["success_text"]).format(
-                    user=self.interaction.user.mention,
-                    amount=kwargs["reward"],
-                    currency=currency
-                )
+            # Set description based on crime type
+            if self.target:
+                if self.crime_type == "pickpocket":
+                    embed.description = f"🧤 {self.interaction.user.mention} successfully pickpocketed {self.target.mention}!"
+                elif self.crime_type == "mugging":
+                    embed.description = f"🔪 {self.interaction.user.mention} successfully mugged {self.target.mention}!"
             else:
-                if self.target:
-                    if self.crime_type == "pickpocket":
-                        embed.description = f"🧤 {self.interaction.user.mention} successfully pickpocketed {self.target.mention}!"
-                    elif self.crime_type == "mugging":
-                        embed.description = f"🔪 {self.interaction.user.mention} successfully mugged {self.target.mention}!"
+                if self.crime_type == "pickpocket":
+                    embed.description = f"🧤 {self.interaction.user.mention} successfully picked a pocket!"
+                elif self.crime_type == "mugging":
+                    embed.description = f"🔪 {self.interaction.user.mention} successfully mugged someone!"
+                elif self.crime_type == "rob_store":
+                    embed.description = f"🏪 {self.interaction.user.mention} successfully robbed the store!"
+                else:  # bank heist
+                    embed.description = f"🏛 {self.interaction.user.mention} successfully pulled off a bank heist!"
+            
+            # Add reward calculation breakdown if available
+            if self.reward_calculations:
+                breakdown = []
+                base_entry = self.reward_calculations[0]  # First entry is always base amount
+                
+                # Only add base amount if there are modifiers
+                if len(self.reward_calculations) > 1:
+                    breakdown.append(f"Base: {base_entry[1]:,} {currency}")
+                    
+                    # Add subsequent calculations
+                    for calc in self.reward_calculations[1:]:
+                        if len(calc) == 3:  # Event with multiplier
+                            text, amount, modifier = calc
+                            if isinstance(modifier, float):
+                                # For multipliers, just show the multiplier and new amount
+                                breakdown.append(f"➜ ({modifier:.1f}x): {amount:,} {currency}")
+                            else:
+                                # For flat bonuses, just show the bonus amount
+                                breakdown.append(f"➜ +{modifier:,} {currency}")
                 else:
-                    if self.crime_type == "pickpocket":
-                        embed.description = f"🧤 {self.interaction.user.mention} successfully picked a pocket!"
-                    elif self.crime_type == "mugging":
-                        embed.description = f"🔪 {self.interaction.user.mention} successfully mugged someone!"
-                    elif self.crime_type == "rob_store":
-                        embed.description = f"🏪 {self.interaction.user.mention} successfully robbed the store!"
-                    else:  # bank heist
-                        embed.description = f"🏛 {self.interaction.user.mention} successfully pulled off a bank heist!"
-                        
-            # Add reward field
-            embed.add_field(
-                name="💰 Reward",
-                value=f"{kwargs.get('reward', 0):,} {currency}",
-                inline=False
-            )
+                    # If no modifiers, just show the final amount
+                    breakdown.append(f"Final: {base_entry[1]:,} {currency}")
+                    
+                if len(self.reward_calculations) > 1:
+                    breakdown.append(f"Final: {kwargs.get('reward', 0):,} {currency}")
+                
+                embed.add_field(
+                    name="💰 Reward Calculation",
+                    value="\n".join(breakdown),
+                    inline=False
+                )
             
             # Add success rate if not random
             if self.crime_type != "random":
@@ -605,11 +624,20 @@ class CrimeView(discord.ui.View):
                     # For targeted crimes
                     self.crime_data["crime_type"] = self.crime_type  # Add crime type to data
                     try:
-                        # Calculate amount to steal first
-                        amount = await calculate_stolen_amount(self.target, self.crime_data, settings)
+                        # Calculate base amount
+                        base_amount = await calculate_stolen_amount(self.target, self.crime_data, settings)
+                        self.reward_calculations = [("Base Amount", base_amount)]
+                        current_amount = base_amount
                         
-                        # Apply reward multiplier from events
-                        amount = int(amount * reward_multiplier)
+                        # Process reward modifiers from events
+                        for event in events:
+                            if "reward_multiplier" in event:
+                                old_amount = current_amount
+                                current_amount = int(current_amount * event["reward_multiplier"])
+                                self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
+                            elif "credits_bonus" in event:
+                                current_amount += event["credits_bonus"]
+                                self.reward_calculations.append((event["text"], current_amount, event["credits_bonus"]))
                         
                         # Check target's balance and perform transfer atomically
                         try:
@@ -627,27 +655,27 @@ class CrimeView(discord.ui.View):
                                 return
                                 
                             # Try to perform the transfers
-                            await bank.withdraw_credits(self.target, amount)
-                            await bank.deposit_credits(interaction.user, amount)
+                            await bank.withdraw_credits(self.target, current_amount)
+                            await bank.deposit_credits(interaction.user, current_amount)
                             
                             # Update stats and last target
                             async with self.cog.config.member(interaction.user).all() as user_data:
-                                user_data["total_stolen_from"] += amount
-                                user_data["total_credits_earned"] += amount
+                                user_data["total_stolen_from"] += current_amount
+                                user_data["total_credits_earned"] += current_amount
                                 user_data["last_target"] = self.target.id
                                 user_data["total_successful_crimes"] += 1
-                                if amount > user_data.get("largest_heist", 0):
-                                    user_data["largest_heist"] = amount
+                                if current_amount > user_data.get("largest_heist", 0):
+                                    user_data["largest_heist"] = current_amount
                                     
                             async with self.cog.config.member(self.target).all() as target_data:
-                                target_data["total_stolen_by"] += amount
+                                target_data["total_stolen_by"] += current_amount
                                 
                             # Send success message
                             msg = await interaction.channel.send(
                                 embed=await self.format_crime_message(
                                     True,
                                     target=self.target,
-                                    reward=amount,
+                                    reward=current_amount,
                                     rate=int(success_chance * 100),
                                     settings=settings,
                                     credit_changes=total_credit_changes
@@ -681,16 +709,27 @@ class CrimeView(discord.ui.View):
                 else:
                     try:
                         # For non-targeted crimes
-                        amount = random.randint(self.crime_data["min_reward"], self.crime_data["max_reward"])
-                        # Apply reward multiplier from events
-                        amount = int(amount * reward_multiplier)
-                        await bank.deposit_credits(interaction.user, amount)
+                        base_amount = random.randint(self.crime_data["min_reward"], self.crime_data["max_reward"])
+                        self.reward_calculations = [("Base Amount", base_amount)]
+                        current_amount = base_amount
+                        
+                        # Process reward modifiers from events
+                        for event in events:
+                            if "reward_multiplier" in event:
+                                old_amount = current_amount
+                                current_amount = int(current_amount * event["reward_multiplier"])
+                                self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
+                            elif "credits_bonus" in event:
+                                current_amount += event["credits_bonus"]
+                                self.reward_calculations.append((event["text"], current_amount, event["credits_bonus"]))
+                        
+                        await bank.deposit_credits(interaction.user, current_amount)
                         
                         # Send success message
                         msg = await interaction.channel.send(
                             embed=await self.format_crime_message(
                                 True,
-                                reward=amount,
+                                reward=current_amount,
                                 rate=int(success_chance * 100),
                                 settings=settings,
                                 credit_changes=total_credit_changes
@@ -704,10 +743,10 @@ class CrimeView(discord.ui.View):
                         
                         # Update stats
                         async with self.cog.config.member(interaction.user).all() as user_data:
-                            user_data["total_credits_earned"] += amount
+                            user_data["total_credits_earned"] += current_amount
                             user_data["total_successful_crimes"] += 1
-                            if amount > user_data.get("largest_heist", 0):
-                                user_data["largest_heist"] = amount
+                            if current_amount > user_data.get("largest_heist", 0):
+                                user_data["largest_heist"] = current_amount
                                 
                     except Exception as e:
                         await interaction.channel.send(
