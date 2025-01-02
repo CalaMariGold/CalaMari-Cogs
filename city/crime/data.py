@@ -57,7 +57,7 @@ CRIME_TYPES = {
         "min_reward": 100,  # Will be overridden by scenario
         "max_reward": 3000,  # Will be overridden by scenario
         "success_rate": 0.5,  # Will be overridden by scenario
-        "cooldown": 900,  # 15 minutes
+        "cooldown": 3600,  # 1 hour
         "jail_time": 600,  # Will be overridden by scenario
         "risk": "random",  # Will be determined by scenario
         "enabled": True,

@@ -822,18 +822,18 @@ CRIME_EVENTS = {
         },
         {
             "name": "discord_nitro",
-            "reward_multiplier": 2.0,
-            "text": "You found their Discord Nitro subscription! 🎮 (2x reward)"
+            "reward_multiplier": 1.5,
+            "text": "You found their Discord Nitro subscription! 🎮 (1.5x reward)"
         },
         {
             "name": "catgirl_distraction",
-            "chance_bonus": 0.2,
-            "text": "A catgirl walked by, distracting everyone! 😺 (+20% success chance)"
+            "chance_penalty": 0.15,
+            "text": "A cute catgirl walked by and distracted you! 😺 (-15% success chance)"
         },
         {
             "name": "vtuber_donation",
-            "reward_multiplier": 2.0,
-            "text": "They were about to donate to their favorite VTuber! 💝 (2x reward)"
+            "reward_multiplier": 1.75,
+            "text": "They were about to donate to their favorite VTuber! 💝 (1.75x reward)"
         },
         {
             "name": "tourist_group",
@@ -852,9 +852,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "undercover_cop",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.20,
             "jail_multiplier": 1.5,
-            "text": "There's an undercover cop nearby! 👮 (-25% success chance, +50% jail time if caught)"
+            "text": "There's an undercover cop nearby! 👮 (-20% success chance, +50% jail time if caught)"
         },
         {
             "name": "rainy_weather",
@@ -864,9 +864,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "festival_crowd",
-            "chance_bonus": 0.2,
             "chance_penalty": 0.1,
-            "text": "There's a festival nearby - more targets but more security! 🎪 (+20% success chance, -10% from security)"
+            "reward_multiplier": 1.1,
+            "text": "There's a festival nearby - more targets but more security! 🎪 (-10% success chance, +10% reward)"
         },
         {
             "name": "slippery_hands",
@@ -881,7 +881,7 @@ CRIME_EVENTS = {
         },
         {
             "name": "pickpocket_victim",
-            "credits_penalty": 75,
+            "credits_penalty": 100,
             "text": "Someone pickpocketed you while you were distracted! 💸 (-{credits_penalty} {currency})"
         }
     ],
@@ -903,9 +903,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "police_nearby",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.2,
             "jail_multiplier": 1.3,
-            "text": "There's a police car nearby! 👮 (-25% success chance, +30% jail time if caught)"
+            "text": "There's a police car nearby! 👮 (-20% success chance, +30% jail time if caught)"
         },
         {
             "name": "genshin_whale",
@@ -926,7 +926,7 @@ CRIME_EVENTS = {
             "name": "gacha_luck",
             "reward_multiplier": 1.3,
             "chance_bonus": 0.15,
-            "text": "Your target just hit pity! 🎲 (1.3x reward, +15% success chance)"
+            "text": "Your target just hit pity! 🎲 (1.3x reward, +10% success chance)"
         },
         {
             "name": "foggy_night",
@@ -945,9 +945,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "stormy_night",
-            "chance_bonus": 0.2,
-            "chance_penalty": 0.1,
-            "text": "The storm provides cover but makes it hard to see! ⛈️ (+20% success chance, -10% from poor visibility)"
+            "chance_bonus": 0.1,
+            "reward_multiplier": 0.9,
+            "text": "The storm provides cover but makes it hard to see! ⛈️ (+10% success chance, -10% reward)"
         },
         {
             "name": "drunk_target",
@@ -958,8 +958,8 @@ CRIME_EVENTS = {
         {
             "name": "risky_shortcut",
             "chance_bonus": 0.2,
-            "jail_multiplier": 1.2,
-            "text": "You found a shortcut through an alley! 🏃 (+20% success chance, +20% jail time if caught)"
+            "jail_multiplier": 1.3,
+            "text": "You found a shortcut through an alley! 🏃 (+20% success chance, +30% jail time if caught)"
         },
         {
             "name": "street_performer_tip",
@@ -968,7 +968,7 @@ CRIME_EVENTS = {
         },
         {
             "name": "dropped_loot",
-            "credits_penalty": 125,
+            "credits_penalty": 150,
             "text": "You dropped some of your loot while running! 💸 (-{credits_penalty} {currency})"
         }
     ],
@@ -1006,9 +1006,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "discord_mod",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.20,
             "jail_multiplier": 1.3,
-            "text": "The store owner is a Discord mod! They never sleep! 🛡️ (-25% success chance, +30% jail time if caught)"
+            "text": "The store owner is a Discord mod! They never sleep! 🛡️ (-20% success chance, +30% jail time if caught)"
         },
         {
             "name": "gacha_banner",
@@ -1022,9 +1022,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "silent_alarm",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.20,
             "jail_multiplier": 1.3,
-            "text": "Someone triggered the silent alarm! 🚨 (-25% success chance, +30% jail time if caught)"
+            "text": "Someone triggered the silent alarm! 🚨 (-20% success chance, +30% jail time if caught)"
         },
         {
             "name": "armed_customer",
@@ -1035,7 +1035,7 @@ CRIME_EVENTS = {
             "name": "police_station",
             "chance_penalty": 0.25,
             "jail_multiplier": 1.5,
-            "text": "The store is right next to a police station! 👮 (-25% success chance, +50% jail time if caught)"
+            "text": "The store is right next to a police station! 👮 (-20% success chance, +50% jail time if caught)"
         },
         {
             "name": "register_bonus",
@@ -1044,7 +1044,7 @@ CRIME_EVENTS = {
         },
         {
             "name": "property_damage",
-            "credits_penalty": 175,
+            "credits_penalty": 200,
             "text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})"
         }
     ],
@@ -1067,9 +1067,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "swat_team",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.20,
             "jail_multiplier": 1.5,
-            "text": "SWAT team is on high alert! 👮 (-25% success chance, +50% jail time if caught)"
+            "text": "SWAT team is on high alert! 👮 (-20% success chance, +50% jail time if caught)"
         },
         {
             "name": "crypto_wallet",
@@ -1105,9 +1105,9 @@ CRIME_EVENTS = {
         },
         {
             "name": "fbi_investigation",
-            "chance_penalty": 0.25,
+            "chance_penalty": 0.20,
             "jail_multiplier": 1.5,
-            "text": "The FBI is conducting an investigation! 🕴️ (-25% success chance, +50% jail time if caught)"
+            "text": "The FBI is conducting an investigation! 🕴️ (-20% success chance, +50% jail time if caught)"
         },
         {
             "name": "vault_bonus",
@@ -1116,7 +1116,7 @@ CRIME_EVENTS = {
         },
         {
             "name": "equipment_cost",
-            "credits_penalty": 250,
+            "credits_penalty": 300,
             "text": "Your expensive equipment was damaged! 💸 (-{credits_penalty} {currency})"
         }
     ]
