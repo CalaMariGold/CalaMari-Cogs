@@ -9,21 +9,27 @@ from .crime.data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
 
 CONFIG_SCHEMA = {
     "GUILD": {
-        "crime_options": {},  # Populated from crime/data.py
-        "global_settings": {}  # Populated from crime/data.py
+        "crime_options": {},  # Crime configuration from crime/data.py
+        "global_settings": {}  # Global settings from crime/data.py including:
+                             # - Jail and bail settings
+                             # - Crime targeting rules
+                             # - Notification settings (cost and toggle)
     },
     "MEMBER": {
-        "jail_until": 0,  # Timestamp when jail ends
-        "last_actions": {},  # Dict of action_type -> last_timestamp
-        "total_successful_crimes": 0,
-        "total_failed_crimes": 0,
-        "total_fines_paid": 0,
-        "total_credits_earned": 0,
-        "total_stolen_from": 0,  # Credits stolen from others
-        "total_stolen_by": 0,  # Credits stolen by others
-        "total_bail_paid": 0,  # Amount spent on bail
-        "largest_heist": 0,  # Largest successful heist
-        "last_target": None  # ID of last targeted user
+        "jail_until": 0,  # Unix timestamp when jail sentence ends
+        "last_actions": {},  # Dict mapping action_type -> last_timestamp
+        "total_successful_crimes": 0,  # Total number of successful crimes
+        "total_failed_crimes": 0,  # Total number of failed crimes
+        "total_fines_paid": 0,  # Total amount paid in fines
+        "total_credits_earned": 0,  # Total credits earned from all sources
+        "total_stolen_from": 0,  # Credits stolen from other users
+        "total_stolen_by": 0,  # Credits stolen by other users
+        "total_bail_paid": 0,  # Total amount spent on bail
+        "largest_heist": 0,  # Largest successful heist amount
+        "last_target": None,  # ID of last targeted user (anti-farming)
+        "notify_on_release": False,  # Whether to notify when jail sentence ends
+        "jail_channel": None,  # ID of channel where user was jailed (for notifications)
+        "attempted_jailbreak": False  # Whether user attempted jailbreak this sentence
     }
 }
 

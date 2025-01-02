@@ -8,7 +8,7 @@ import random
 import time
 import asyncio
 from .scenarios import get_random_scenario, get_random_jailbreak_scenario
-from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton
+from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView
 from .data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
 from datetime import datetime
 from ..utils import (
@@ -24,33 +24,77 @@ class CrimeCommands:
 
     @commands.group(name="crime", invoke_without_command=True)
     async def crime(self, ctx: commands.Context):
-        """Commit crimes to earn credits.
-
-        This command group provides access to the crime system.
+        """Welcome to the criminal underworld!
         
-        Commands:
-        - No subcommand: Shows available crimes
-        - commit: Choose a crime to commit
-        - status: View your crime statistics
-        - leaderboard: View the crime leaderboard
-        - bail: Attempt to pay bail and get out of jail
-        - jailbreak: Attempt to break out of jail
+        This command opens an interactive menu where you can:
+        • 🦹 Commit various crimes for rewards
+        • 💰 Pay bail to get out of jail
+        • 🔓 Attempt a jailbreak
+        • 🏆 View the crime leaderboard
+        • 📊 Check your criminal status
+        • 🔔 Toggle jail release notifications
         
-        Admin Commands:
-        - set: Configure crime system settings
+        Use the buttons to navigate through the options.
+        Each action has its own cooldowns and requirements.
         """
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
+        # Create and show the main menu
+        view = MainMenuView(self, ctx)
+        
+        # Create a thematic embed
+        embed = discord.Embed(
+            title="🌃 Welcome to the Criminal Underworld",
+            description=(
+                "The city never sleeps, and neither do its criminals. "
+                "What kind of trouble are you looking to get into today?\n\n"
+                "Choose your next move wisely..."
+            ),
+            color=discord.Color.dark_purple()
+        )
+        
+        # Add user's current status
+        is_jailed = await self.is_jailed(ctx.author)
+        jail_time = await self.get_jail_time_remaining(ctx.author)
+        member_data = await self.config.member(ctx.author).all()
+        
+        status_lines = []
+        if is_jailed:
+            status_lines.append(f"⛓️ **Current Status:** In jail ({format_cooldown_time(jail_time, include_emoji=False)} remaining)")
+        else:
+            status_lines.append("🦹 **Current Status:** Free to cause trouble")
+            
+        status_lines.extend([
+            f"💰 **Lifetime Earnings:** {member_data['total_credits_earned']:,} credits",
+            f"✅ **Successful Crimes:** {member_data['total_successful_crimes']}",
+            f"❌ **Failed Attempts:** {member_data['total_failed_crimes']}",
+            f"🏆 **Largest Heist:** {member_data['largest_heist']:,} credits"
+        ])
+        
+        embed.add_field(
+            name="Your Criminal Record",
+            value="\n".join(status_lines),
+            inline=False
+        )
+        
+        # Send the menu
+        view.message = await ctx.send(embed=embed, view=view)
+        await view.update_button_states()
 
     @crime.command(name="commit")
     async def crime_commit(self, ctx: commands.Context):
-        """Choose a crime to commit
+        """Choose a crime to commit using an interactive menu
         
         Available crimes:
-        - Pickpocket: Low risk, target users for small rewards
-        - Mugging: Medium risk, target users for medium rewards
-        - Store Robbery: Medium risk, no target needed
-        - Bank Heist: High risk, high rewards
+        • 🧤 Pickpocket: Low risk, target users for small rewards
+        • 🔪 Mugging: Medium risk, target users for medium rewards
+        • 🏪 Store Robbery: Medium risk, no target needed
+        • 🏛 Bank Heist: High risk, high rewards
+        • 🎲 Random Crime: Random risk and rewards
+        
+        Each crime has:
+        • Color-coded risk levels (green=low, blue=medium, red=high)
+        • Success rates shown before committing
+        • Cooldown periods between attempts
+        • Fines and jail time if caught
         
         Getting caught will send you to jail!
         """
@@ -115,12 +159,12 @@ class CrimeCommands:
                     
                     # Add both crimes side by side
                     embed.add_field(
-                        name=f"{get_crime_emoji(crime_type)} {crime_type.replace('_', ' ').title()}",
+                        name=f"{get_crime_emoji(crime_type)} __**{crime_type.replace('_', ' ').title()}**__",
                         value=description,
                         inline=True
                     )
                     embed.add_field(
-                        name=f"{get_crime_emoji(next_crime_type)} {next_crime_type.replace('_', ' ').title()}",
+                        name=f"{get_crime_emoji(next_crime_type)} __**{next_crime_type.replace('_', ' ').title()}**__",
                         value=next_description,
                         inline=True
                     )
@@ -129,7 +173,7 @@ class CrimeCommands:
                 else:
                     # Add single crime if no pair
                     embed.add_field(
-                        name=f"{get_crime_emoji(crime_type)} {crime_type.replace('_', ' ').title()}",
+                        name=f"{get_crime_emoji(crime_type)} __**{crime_type.replace('_', ' ').title()}**__",
                         value=description,
                         inline=True
                     )

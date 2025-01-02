@@ -18,7 +18,7 @@ def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
         Formatted string like "2h 30m" or "5m 30s"
     """
     if seconds <= 0:
-        return "✅ Ready" if include_emoji else "Ready"
+        return "✅" if include_emoji else "Ready"
         
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
@@ -128,22 +128,27 @@ async def calculate_stolen_amount(target: discord.Member, crime_data: dict, sett
         return 0
 
 def get_crime_emoji(crime_type: str) -> str:
-    """Get the emoji for a crime type.
+    """Get the appropriate emoji for a crime type.
     
     Args:
-        crime_type: The type of crime
+        crime_type: The type of crime (pickpocket, mugging, rob_store, bank_heist, random)
         
     Returns:
-        Emoji representing the crime type
+        The corresponding emoji for the crime type:
+        • 🧤 for pickpocket
+        • 🔪 for mugging
+        • 🏪 for store robbery
+        • 🏛 for bank heist
+        • 🎲 for random crimes
     """
-    emoji_map = {
+    emojis = {
         "pickpocket": "🧤",
-        "mugging": "🔪", 
+        "mugging": "🔪",
         "rob_store": "🏪",
         "bank_heist": "🏛",
         "random": "🎲"
     }
-    return emoji_map.get(crime_type, "🤔")
+    return emojis.get(crime_type, "🦹")  # Default to generic criminal emoji
 
 def get_risk_emoji(risk_level: str) -> str:
     """Get the emoji for a risk level.
@@ -161,51 +166,55 @@ def get_risk_emoji(risk_level: str) -> str:
     }
     return emoji_map.get(risk_level, "🤔")
 
-def format_crime_description(crime_type: str, data: dict, status: str) -> str:
-    """Format the description for a crime type.
+def format_crime_description(crime_type: str, data: dict, cooldown_status: str) -> str:
+    """Format a crime's description for display in embeds.
     
     Args:
         crime_type: The type of crime
-        data: Crime data dictionary
-        status: Current status string
+        data: Dictionary containing crime data (success_rate, min_reward, max_reward, etc.)
+        cooldown_status: Formatted cooldown status string
         
     Returns:
-        Formatted description string
+        A formatted description string containing:
+        • Success rate percentage
+        • Reward range (percentage based for pickpocket/mugging)
+        • Risk level indicator
+        • Cooldown status
+        • Whether it requires a target
     """
-    risk_emoji = get_risk_emoji(data["risk"])
+    # Get risk emoji
+    risk_emoji = "🟢" if data["risk"] == "low" else "🟡" if data["risk"] == "medium" else "🔴"
     
+    # Format description based on crime type
     if crime_type == "random":
-        description = (
-            f"{risk_emoji} **Risk Level:** ???\n"
-            f"**Reward:** ???\n"
-            f"**Success Rate:** ???\n"
-            f"**Jail Time:** ???\n"
-            f"**Status:** {status}"
-        )
+        description = [
+            "**Success Rate:** ???",
+            "**Reward:** ???",
+            f"**Risk Level:** {risk_emoji}",
+            f"**Cooldown:** {cooldown_status}"
+        ]
     elif crime_type == "pickpocket":
-        description = (
-            f"{risk_emoji} **Risk Level:** {data['risk'].title()}\n"
-            f"**Reward:** 1-10% of target's balance (max 500)\n"
-            f"**Success Rate:** {int(data['success_rate'] * 100)}%\n"
-            f"**Jail Time:** {format_cooldown_time(data['jail_time'], include_emoji=False)}\n"
-            f"**Status:** {status}"
-        )
+        description = [
+            f"**Success Rate:** {int(data['success_rate'] * 100)}%",
+            "**Reward:** 1-10% of target's balance (max 500)",
+            f"**Risk Level:** {risk_emoji}",
+            f"**Cooldown:** {cooldown_status}",
+            "**Target Required:** Yes"
+        ]
     elif crime_type == "mugging":
-        description = (
-            f"{risk_emoji} **Risk Level:** {data['risk'].title()}\n"
-            f"**Reward:** 15-25% of target's balance (max 1500)\n"
-            f"**Success Rate:** {int(data['success_rate'] * 100)}%\n"
-            f"**Jail Time:** {format_cooldown_time(data['jail_time'], include_emoji=False)}\n"
-            f"**Status:** {status}"
-        )
+        description = [
+            f"**Success Rate:** {int(data['success_rate'] * 100)}%",
+            "**Reward:** 15-25% of target's balance (max 1500)",
+            f"**Risk Level:** {risk_emoji}",
+            f"**Cooldown:** {cooldown_status}",
+            "**Target Required:** Yes"
+        ]
     else:
-        description = (
-            f"{risk_emoji} **Risk Level:** {data['risk'].title()}\n"
-            f"**Reward:** {data['min_reward']}-{data['max_reward']}\n"
-            f"**Success Rate:** {int(data['success_rate'] * 100)}%\n"
-            f"**Jail Time:** {format_cooldown_time(data['jail_time'], include_emoji=False)}\n"
-            f"**Status:** {status}"
-        )
-    
-        
-    return description
+        description = [
+            f"**Success Rate:** {int(data['success_rate'] * 100)}%",
+            f"**Reward:** {data['min_reward']:,} - {data['max_reward']:,}",
+            f"**Risk Level:** {risk_emoji}",
+            f"**Cooldown:** {cooldown_status}"
+        ]
+            
+    return "\n".join(description)
