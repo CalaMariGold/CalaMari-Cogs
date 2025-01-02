@@ -930,9 +930,15 @@ class CrimeCommands:
                 # Only send if they still have notifications enabled
                 member_data = await self.config.member(member).all()
                 if member_data.get("notify_on_release", False):
-                    # Try to send to the channel they were jailed in
+                    # Try to send to the channel/thread they were jailed in
                     if "jail_channel" in member_data:
-                        channel = member.guild.get_channel(member_data["jail_channel"])
+                        channel_id = member_data["jail_channel"]
+                        # First try to get it as a thread
+                        channel = member.guild.get_thread(channel_id)
+                        # If not a thread, try as a regular channel
+                        if channel is None:
+                            channel = member.guild.get_channel(channel_id)
+                            
                         if channel:
                             await channel.send(f"🔔 {member.mention} Your jail sentence is over! You're now free to commit crimes again.")
                             return
