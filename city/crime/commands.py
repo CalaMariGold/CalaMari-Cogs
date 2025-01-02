@@ -193,7 +193,7 @@ class CrimeCommands:
 
     @crime.command(name="status")
     async def crime_status(self, ctx: commands.Context, user: discord.Member = None):
-        """View your current crime status
+        """View current jail status, cooldowns, and other active states
         
         Parameters
         ----------
@@ -208,8 +208,8 @@ class CrimeCommands:
 
             # Create status embed
             embed = discord.Embed(
-                title="🦹‍♂️ Criminal Profile",
-                description=f"Status report for {target.mention}",
+                title="🦹‍♂️ Criminal Status",
+                description=f"Current status for {target.mention}",
                 color=await ctx.embed_color()
             )
             
@@ -224,46 +224,20 @@ class CrimeCommands:
                     value=f"🔒 In jail for {format_cooldown_time(remaining_jail)}",
                     inline=False
                 )
+                
+                # Show if they've attempted jailbreak this sentence
+                if member_data.get("attempted_jailbreak", False):
+                    embed.add_field(
+                        name="🔓 __Jailbreak Status__",
+                        value="❌ Already attempted this sentence",
+                        inline=False
+                    )
             else:
                 embed.add_field(
                     name="⚖️ __Jail Status__",
                     value="🆓 Not in jail",
                     inline=False
                 )
-
-            # Add crime statistics in two columns
-            stats_left = [
-                f"**{await bank.get_currency_name(ctx.guild)} Earned:** {humanize_number(member_data['total_credits_earned'])}",
-                f"**Crimes:** ✅ {member_data['total_successful_crimes']} | ❌ {member_data['total_failed_crimes']}",
-                f"**{await bank.get_currency_name(ctx.guild)} Stolen:** {humanize_number(member_data['total_stolen_from'])}",
-                f"**Largest Heist:** {humanize_number(member_data['largest_heist'])}"
-            ]
-            
-            # Calculate success rate
-            total_crimes = member_data['total_successful_crimes'] + member_data['total_failed_crimes']
-            success_rate = (member_data['total_successful_crimes'] / total_crimes * 100) if total_crimes > 0 else 0
-            
-            stats_right = [
-                f"**Total Fines:** {humanize_number(member_data['total_fines_paid'])}",
-                f"**Total Bail:** {humanize_number(member_data['total_bail_paid'])}",
-                f"**{await bank.get_currency_name(ctx.guild)} Lost:** {humanize_number(member_data['total_stolen_by'])}",
-                f"**Success Rate:** {success_rate:.1f}%" if total_crimes > 0 else "**Success Rate:** N/A"
-            ]
-            
-            embed.add_field(
-                name="📊 __Crime Statistics__",
-                value="\n".join(stats_left),
-                inline=True
-            )
-            
-            embed.add_field(
-                name="💰 __Financial Impact__",
-                value="\n".join(stats_right),
-                inline=True
-            )
-            
-            # Add empty field to force next section to new line
-            embed.add_field(name="\u200b", value="\u200b", inline=True)
             
             # Add crime cooldowns in a more compact format
             cooldowns = []
@@ -297,6 +271,21 @@ class CrimeCommands:
                     # Add empty field to maintain grid layout
                     embed.add_field(name="\u200b", value="\u200b", inline=True)
             
+            # Add notification status
+            notify_enabled = member_data.get("notify_enabled", False)
+            notify_unlocked = member_data.get("notify_unlocked", False)
+            
+            if notify_unlocked:
+                notify_status = "🔔 Notifications unlocked and " + ("enabled" if notify_enabled else "disabled")
+            else:
+                notify_status = "🔕 Notifications not unlocked"
+                
+            embed.add_field(
+                name="🔔 __Notification Status__",
+                value=notify_status,
+                inline=True
+            )
+                
             # Add last target if any
             if member_data['last_target']:
                 try:
@@ -313,7 +302,67 @@ class CrimeCommands:
             await ctx.send(embed=embed)
         
         except Exception as e:
-            await ctx.send(_("An error occurred while retrieving your crime status. Please try again. Error: {}").format(str(e)))
+            await ctx.send(_("An error occurred while retrieving the status. Please try again. Error: {}").format(str(e)))
+            
+    @crime.command(name="stats")
+    async def crime_stats(self, ctx: commands.Context, user: discord.Member = None):
+        """View detailed crime statistics and financial impact
+        
+        Parameters
+        ----------
+        user : discord.Member, optional
+            The user to check stats for. If not provided, shows your own stats."""
+        try:
+            # Get member data
+            target = user or ctx.author
+            member_data = await self.config.member(target).all()
+            currency_name = await bank.get_currency_name(ctx.guild)
+
+            # Create stats embed
+            embed = discord.Embed(
+                title="📊 Criminal Statistics",
+                description=f"Detailed statistics for {target.mention}",
+                color=await ctx.embed_color()
+            )
+            
+            # Set thumbnail to user's avatar
+            embed.set_thumbnail(url=target.display_avatar.url)
+            
+            # Add crime statistics in two columns
+            stats_left = [
+                f"**{currency_name} Earned:** {humanize_number(member_data['total_credits_earned'])}",
+                f"**Crimes:** ✅ {member_data['total_successful_crimes']} | ❌ {member_data['total_failed_crimes']}",
+                f"**{currency_name} Stolen:** {humanize_number(member_data['total_stolen_from'])}",
+                f"**Largest Heist:** {humanize_number(member_data['largest_heist'])}"
+            ]
+            
+            # Calculate success rate
+            total_crimes = member_data['total_successful_crimes'] + member_data['total_failed_crimes']
+            success_rate = (member_data['total_successful_crimes'] / total_crimes * 100) if total_crimes > 0 else 0
+            
+            stats_right = [
+                f"**Total Fines:** {humanize_number(member_data['total_fines_paid'])}",
+                f"**Total Bail:** {humanize_number(member_data['total_bail_paid'])}",
+                f"**{currency_name} Lost:** {humanize_number(member_data['total_stolen_by'])}",
+                f"**Success Rate:** {success_rate:.1f}%" if total_crimes > 0 else "**Success Rate:** N/A"
+            ]
+            
+            embed.add_field(
+                name="📊 __Crime Statistics__",
+                value="\n".join(stats_left),
+                inline=True
+            )
+            
+            embed.add_field(
+                name="💰 __Financial Impact__",
+                value="\n".join(stats_right),
+                inline=True
+            )
+            
+            await ctx.send(embed=embed)
+        
+        except Exception as e:
+            await ctx.send(_("An error occurred while retrieving the stats. Please try again. Error: {}").format(str(e)))
 
     @crime.command(name="bail")
     async def crime_bail(self, ctx: commands.Context):
@@ -512,13 +561,35 @@ class CrimeCommands:
     async def crime_leaderboard(self, ctx: commands.Context):
         """View the server's crime leaderboard."""
         
+        # Get guild's currency name
+        currency_name = await bank.get_currency_name(ctx.guild)
+        
         stats = {
-            "total_credits_earned": f"💰 __Most {await bank.get_currency_name(ctx.guild)} Earned__",
-            "total_successful_crimes": "✅ __Most Successful Crimes__",
-            "total_failed_crimes": "❌ __Most Failed Crimes__",
-            "total_stolen_from": f"🦹 __Most {await bank.get_currency_name(ctx.guild)} Stolen__",
-            "largest_heist": "💎 __Largest Heist__",
-            "total_fines_paid": "💸 __Most Fines Paid__"
+            "earnings": {
+                "title": f"💰 __Most {currency_name} Earned__",
+                "field": "total_credits_earned",
+                "format": "credits"
+            },
+            "crimes": {
+                "title": "🦹 __Crime Success/Fails__",
+                "fields": ["total_successful_crimes", "total_failed_crimes"],
+                "format": "counts"
+            },
+            "stolen": {
+                "title": f"💎 __Stolen/Lost {currency_name}__",
+                "fields": ["total_stolen_from", "total_stolen_by"],
+                "format": "credits"
+            },
+            "largest_heist": {
+                "title": f"🏆 __Largest Heist__",
+                "field": "largest_heist",
+                "format": "credits"
+            },
+            "fines": {
+                "title": f"💸 __Most Fines/Bail Paid__",
+                "fields": ["total_fines_paid", "total_bail_paid"],
+                "format": "credits"
+            }
         }
         
         # Get all member data
@@ -535,41 +606,89 @@ class CrimeCommands:
         # Medal emojis for top 3
         medals = ["🥇", "🥈", "🥉"]
         
-        # Process each stat
-        for stat_key, title in stats.items():
-            # Sort members by the current stat
-            sorted_members = sorted(
-                all_members.items(),
-                key=lambda x: x[1].get(stat_key, 0),
-                reverse=True
-            )[:3]  # Top 3
-            
-            if not sorted_members:
-                continue
+        # Process each stat category
+        field_count = 0  # Track number of non-empty fields
+        for stat_info in stats.values():
+            if "fields" in stat_info:  # Combined stats
+                # Sort members by the sum of both fields
+                sorted_members = sorted(
+                    all_members.items(),
+                    key=lambda x: sum(x[1].get(field, 0) for field in stat_info["fields"]),
+                    reverse=True
+                )[:3]
                 
-            # Build the field value
-            field_lines = []
-            for i, (member_id, data) in enumerate(sorted_members):
-                member = ctx.guild.get_member(member_id)
-                if member is None:
+                if not sorted_members:
                     continue
                     
-                value = data.get(stat_key, 0)
+                field_lines = []
+                for i, (member_id, data) in enumerate(sorted_members):
+                    member = ctx.guild.get_member(member_id)
+                    if member is None:
+                        continue
+                        
+                    if stat_info["format"] == "credits":
+                        if stat_info["title"].startswith("💸"):  # Fines category
+                            total_paid = data.get(stat_info['fields'][0], 0) + data.get(stat_info['fields'][1], 0)
+                            field_lines.append(f"{medals[i]} **{member.display_name}** • {humanize_number(total_paid)} {currency_name}")
+                        elif stat_info["title"].startswith("💎"):  # Stolen/Lost category
+                            value1 = humanize_number(data.get(stat_info['fields'][0], 0))
+                            value2 = humanize_number(data.get(stat_info['fields'][1], 0))
+                            field_lines.append(f"{medals[i]} **{member.display_name}** • {value1} / {value2}")
+                        else:
+                            value1 = f"{humanize_number(data.get(stat_info['fields'][0], 0))} {currency_name}"
+                            value2 = f"{humanize_number(data.get(stat_info['fields'][1], 0))} {currency_name}"
+                            field_lines.append(f"{medals[i]} **{member.display_name}** • {value1} / {value2}")
+                    else:  # counts
+                        wins = data.get(stat_info['fields'][0], 0)
+                        fails = data.get(stat_info['fields'][1], 0)
+                        field_lines.append(f"{medals[i]} **{member.display_name}** • {wins}w / {fails}f")
                 
-                # Format value based on stat type
-                if stat_key in ["total_credits_earned", "total_stolen_from", "total_fines_paid", "largest_heist"]:
-                    value_str = f"{humanize_number(value)} credits"
-                else:
-                    value_str = str(value)
+                if field_lines:
+                    embed.add_field(
+                        name=stat_info["title"],
+                        value="\n".join(field_lines),
+                        inline=True
+                    )
+                    field_count += 1
                     
-                field_lines.append(f"{medals[i]} **{member.display_name}** • {value_str}")
-            
-            if field_lines:
-                embed.add_field(
-                    name=title,
-                    value="\n".join(field_lines),
-                    inline=False
-                )
+                    # Add empty field only if we have an odd number of fields and it's not the last field
+                    if field_count % 2 == 1 and field_count < len(stats):
+                        embed.add_field(name="\u200b", value="\u200b", inline=True)
+            else:  # Single stat
+                sorted_members = sorted(
+                    all_members.items(),
+                    key=lambda x: x[1].get(stat_info["field"], 0),
+                    reverse=True
+                )[:3]
+                
+                if not sorted_members:
+                    continue
+                    
+                field_lines = []
+                for i, (member_id, data) in enumerate(sorted_members):
+                    member = ctx.guild.get_member(member_id)
+                    if member is None:
+                        continue
+                        
+                    value = data.get(stat_info["field"], 0)
+                    if stat_info["format"] == "credits":
+                        value_str = f"{humanize_number(value)} {currency_name}"
+                    else:
+                        value_str = str(value)
+                        
+                    field_lines.append(f"{medals[i]} **{member.display_name}** • {value_str}")
+                
+                if field_lines:
+                    embed.add_field(
+                        name=stat_info["title"],
+                        value="\n".join(field_lines),
+                        inline=True
+                    )
+                    field_count += 1
+                    
+                    # Add empty field only if we have an odd number of fields and it's not the last field
+                    if field_count % 2 == 1 and field_count < len(stats):
+                        embed.add_field(name="\u200b", value="\u200b", inline=True)
         
         # Add footer with timestamp
         embed.set_footer(text=f"Updated")

@@ -520,6 +520,10 @@ class CrimeView(discord.ui.View):
                     "risk": self.scenario["risk"],
                     "fine_multiplier": self.scenario["fine_multiplier"]
                 })
+                events = []  # Initialize empty events list for random crimes
+            else:
+                # Get and process events if this is not a random crime
+                events = get_crime_event(self.crime_type)
             
             # Get attempt message based on crime type
             if self.crime_type == "random":
@@ -566,8 +570,6 @@ class CrimeView(discord.ui.View):
 
             # Get and process events if this is not a random crime
             if self.crime_type != "random":
-                events = get_crime_event(self.crime_type)
-                
                 # Process each event
                 for event in events:
                     # Check for bail out after each event
@@ -1540,7 +1542,7 @@ class MainMenuView(discord.ui.View):
             
         await self.ctx.invoke(self.cog.crime_leaderboard)
 
-    @discord.ui.button(label='View Status', style=discord.ButtonStyle.secondary, emoji='📊')
+    @discord.ui.button(label='View Status', style=discord.ButtonStyle.secondary, emoji='⏳')
     async def status(self, interaction: discord.Interaction, button: discord.ui.Button):
         """View your crime status."""
         # Delete the main menu message
@@ -1550,6 +1552,17 @@ class MainMenuView(discord.ui.View):
             pass
             
         await self.ctx.invoke(self.cog.crime_status)
+    
+    @discord.ui.button(label='View Stats', style=discord.ButtonStyle.secondary, emoji='📊')
+    async def stats(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """View your crime stats."""
+        # Delete the main menu message
+        try:
+            await self.message.delete()
+        except (discord.NotFound, discord.HTTPException):
+            pass
+            
+        await self.ctx.invoke(self.cog.crime_stats)
 
     @discord.ui.button(label='Unlock Notifications', style=discord.ButtonStyle.secondary, emoji='🔔')
     async def unlock_notify(self, interaction: discord.Interaction, button: discord.ui.Button):
