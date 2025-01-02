@@ -420,10 +420,18 @@ class CrimeCommands:
                     # Force clear it
                     await self.config.member(ctx.author).jail_until.set(0)
                 
-                await ctx.send(_(scenario['success_text']).format(
-                    user=ctx.author.mention
-                ))
-                await ctx.send(f"🎲 Your final escape chance was {success_chance:.1%}")
+                # Create success embed
+                embed = discord.Embed(
+                    title="🔓 Successful Jailbreak!",
+                    description=_(scenario['success_text']).format(user=ctx.author.mention),
+                    color=discord.Color.green()
+                )
+                embed.add_field(
+                    name="🎲 Final Escape Chance",
+                    value=f"{success_chance:.1%}",
+                    inline=True
+                )
+                await ctx.send(embed=embed)
             else:
                 # Failed - double the remaining sentence
                 remaining_time = await self.get_jail_time_remaining(ctx.author)
@@ -434,14 +442,23 @@ class CrimeCommands:
                 new_jail_until = current_jail_until + added_time
                 await self.config.member(ctx.author).jail_until.set(new_jail_until)
                 
-                await ctx.send(_(
-                    scenario['fail_text'] + "\n\n"
-                    "**Penalty:** Your sentence has been doubled! (+{time_remaining})"
-                ).format(
-                    user=ctx.author.mention,
-                    time_remaining=format_cooldown_time(added_time)
-                ))
-                await ctx.send(f"🎲 Your final escape chance was {success_chance:.1%}")
+                # Create fail embed
+                embed = discord.Embed(
+                    title="⛓️ Failed Jailbreak!",
+                    description=_(scenario['fail_text']).format(user=ctx.author.mention),
+                    color=discord.Color.red()
+                )
+                embed.add_field(
+                    name="⚖️ Penalty",
+                    value=f"Your sentence has been doubled! (+{format_cooldown_time(added_time)})",
+                    inline=True
+                )
+                embed.add_field(
+                    name="🎲 Final Escape Chance",
+                    value=f"{success_chance:.1%}",
+                    inline=True
+                )
+                await ctx.send(embed=embed)
                 
         except Exception as e:
             await ctx.send(_("An error occurred while processing your jailbreak attempt. Please try again. Error: {}").format(str(e)))
