@@ -78,16 +78,6 @@ class CityBase:
             
         return remaining
         
-    async def send_to_jail(self, member: discord.Member, duration: int):
-        """Send a member to jail for specified duration."""
-        try:
-            current_time = int(time.time())
-            await self.config.member(member).jail_until.set(current_time + duration)
-            return True
-        except Exception as e:
-            await self.bot.send_to_owners(f"Error sending {member} to jail: {str(e)}")
-            return False
-            
     async def get_remaining_cooldown(self, member: discord.Member, action_type: str) -> int:
         """Get remaining cooldown time for an action."""
         current_time = int(time.time())

@@ -79,7 +79,9 @@ DEFAULT_GUILD = {
         "protect_low_balance": True,  # Prevent stealing from users with very low balance
         "show_success_rate": True,  # Show success rate in crime messages
         "show_fine_amount": True,   # Show potential fine amounts
-        "enable_random_events": True # Enable random events during crimes
+        "enable_random_events": True, # Enable random events during crimes
+        "notify_cost": 10000,  # Cost to unlock notifications, 0 means free
+        "notify_cost_enabled": True  # Whether notifications require payment to unlock
     }
 }
 
@@ -97,4 +99,5 @@ DEFAULT_MEMBER = {
     "total_stolen_from": 0, # Amount stolen from others
     "total_stolen_by": 0,   # Amount stolen by others
     "total_bail_paid": 0,   # Amount spent on bail
+    "notify_on_release": False,  # Whether to ping user when jail sentence is over
 }

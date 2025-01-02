@@ -722,6 +722,8 @@ class CrimeCommands:
             _("  • Bail Cost Multiplier: {multiplier}").format(multiplier=global_settings["bail_cost_multiplier"]),
             _("  • Min Steal Balance: {amount}").format(amount=global_settings["min_steal_balance"]),
             _("  • Max Steal Amount: {amount}").format(amount=global_settings["max_steal_amount"]),
+            _("  • Notify Cost: {amount}").format(amount=global_settings.get("notify_cost", 0)),
+            _("  • Notify Cost System: {enabled}").format(enabled=_("Enabled") if global_settings.get("notify_cost_enabled", False) else _("Disabled")),
             "",
             _("🎯 **Crime Settings**:")
         ]
@@ -744,8 +746,242 @@ class CrimeCommands:
             
         await ctx.send(box("\n".join(settings_lines)))
 
-    async def send_to_jail(self, member: discord.Member, jail_time: int):
+    @crime.command(name="notify")
+    async def toggle_jail_notify(self, ctx: commands.Context):
+        """Toggle whether you want to be pinged when your jail sentence is over.
+        
+        If enabled in server settings, this may cost credits to unlock.
+        Use the command to see the current cost.
+        """
+        # Get settings
+        settings = await self.config.guild(ctx.guild).global_settings()
+        member_data = await self.config.member(ctx.author).all()
+        
+        # If notifications are already enabled, just toggle them off
+        if member_data.get("notify_on_release", False):
+            async with self.config.member(ctx.author).all() as member_data:
+                member_data["notify_on_release"] = False
+            
+            embed = discord.Embed(
+                title="🔕 Jail Release Notifications",
+                description="Notifications have been disabled.\n\nYou will no longer be pinged when your jail sentence is over.",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+            return
+            
+        # Check if cost system is enabled
+        if settings.get("notify_cost_enabled", False):
+            cost = settings.get("notify_cost", 0)
+            
+            # Create view with unlock button
+            class UnlockView(discord.ui.View):
+                def __init__(self, ctx, cost):
+                    super().__init__(timeout=30.0)
+                    self.ctx = ctx
+                    self.cost = cost
+                    self.value = None
+                    
+                async def interaction_check(self, interaction: discord.Interaction) -> bool:
+                    return interaction.user.id == self.ctx.author.id
+                
+                @discord.ui.button(label=f"Unlock for {cost:,} credits", style=discord.ButtonStyle.success, emoji="🔔")
+                async def unlock(self, interaction: discord.Interaction, button: discord.ui.Button):
+                    # Check if user can afford
+                    if not await bank.can_spend(interaction.user, self.cost):
+                        await interaction.response.send_message(
+                            f"❌ You don't have enough credits! This costs {self.cost:,} {await bank.get_currency_name(interaction.guild)}.",
+                            ephemeral=True
+                        )
+                        return
+                        
+                    # Charge the user
+                    await bank.withdraw_credits(interaction.user, self.cost)
+                    
+                    # Get new balance
+                    new_balance = await bank.get_balance(interaction.user)
+                    currency_name = await bank.get_currency_name(interaction.guild)
+                    
+                    # Enable notifications
+                    async with self.ctx.cog.config.member(interaction.user).all() as member_data:
+                        member_data["notify_on_release"] = True
+                    
+                    # Send success message
+                    embed = discord.Embed(
+                        title="🔔 Jail Release Notifications",
+                        description=f"Notifications have been enabled!\n\n"
+                                  f"You paid {self.cost:,} {currency_name} to unlock this feature.\n"
+                                  f"You will now be pinged when your jail sentence is over.",
+                        color=discord.Color.green()
+                    )
+                    embed.set_footer(text=f"New balance: {new_balance:,} {currency_name}")
+                    await interaction.response.send_message(embed=embed)
+                    self.value = True
+                    self.stop()
+                    
+                @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger)
+                async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+                    embed = discord.Embed(
+                        title="❌ Unlock Cancelled",
+                        description="You decided not to unlock notifications.",
+                        color=discord.Color.red()
+                    )
+                    await interaction.response.send_message(embed=embed)
+                    self.value = False
+                    self.stop()
+            
+            # Send prompt with unlock button
+            currency_name = await bank.get_currency_name(ctx.guild)
+            embed = discord.Embed(
+                title="🔔 Unlock Jail Release Notifications",
+                description=f"This feature costs **{cost:,} {currency_name}** to unlock.\n\n"
+                           f"Once unlocked, you will be pinged in the channel where you were jailed when your sentence is over.\n"
+                           f"You can disable notifications at any time by using this command again.",
+                color=discord.Color.blue()
+            )
+            
+            view = UnlockView(ctx, cost)
+            view.message = await ctx.send(embed=embed, view=view)
+            
+            # Wait for response
+            await view.wait()
+            
+            # Disable buttons after timeout
+            for child in view.children:
+                child.disabled = True
+            try:
+                await view.message.edit(view=view)
+            except discord.NotFound:
+                pass
+                
+        else:
+            # If cost system is disabled, just toggle notifications on
+            async with self.config.member(ctx.author).all() as member_data:
+                member_data["notify_on_release"] = True
+            
+            embed = discord.Embed(
+                title="🔔 Jail Release Notifications",
+                description="Notifications have been enabled!\n\nYou will now be pinged when your jail sentence is over.",
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
+
+    @crime_set_global.command(name="notifycost")
+    async def set_notify_cost(self, ctx: commands.Context, cost: int):
+        """Set the cost to unlock jail release notifications.
+        
+        Parameters
+        ----------
+        cost : int
+            The cost in credits to unlock notifications. Set to 0 to make it free.
+        """
+        if cost < 0:
+            await ctx.send(_("Cost must be positive!"))
+            return
+            
+        async with self.config.guild(ctx.guild).global_settings() as settings:
+            settings["notify_cost"] = cost
+            
+        if cost == 0:
+            await ctx.send(_("Jail release notifications are now free to unlock!"))
+        else:
+            await ctx.send(_("Jail release notifications now cost {cost} credits to unlock!").format(cost=cost))
+
+    @crime_set_global.command(name="togglenotifycost")
+    async def toggle_notify_cost(self, ctx: commands.Context, enabled: bool):
+        """Enable or disable the notification unlock cost.
+        
+        Parameters
+        ----------
+        enabled : bool
+            True to require payment to unlock notifications, False to make it free.
+        """
+        async with self.config.guild(ctx.guild).global_settings() as settings:
+            settings["notify_cost_enabled"] = enabled
+            
+        if enabled:
+            cost = settings.get("notify_cost", 0)
+            await ctx.send(_("Jail release notifications now require {cost} credits to unlock!").format(cost=cost))
+        else:
+            await ctx.send(_("Jail release notifications are now free to unlock!"))
+
+    async def send_to_jail(self, member: discord.Member, jail_time: int, channel: discord.TextChannel = None):
         """Send a member to jail."""
         async with self.config.member(member).all() as member_data:
             member_data["jail_until"] = int(time.time()) + jail_time
             member_data["attempted_jailbreak"] = False  # Reset jailbreak attempt when jailed
+            
+            # Store the channel ID where they were jailed if provided
+            if channel:
+                member_data["jail_channel"] = channel.id
+            
+            # If notifications are enabled, schedule a notification
+            if member_data.get("notify_on_release", False):
+                asyncio.create_task(self._schedule_release_notification(member, jail_time))
+    
+    async def _schedule_release_notification(self, member: discord.Member, jail_time: int):
+        """Schedule a notification for when a member's jail sentence is over."""
+        await asyncio.sleep(jail_time)
+        
+        # Double check they're actually out (in case sentence was extended)
+        remaining = await self.get_jail_time_remaining(member)
+        if remaining <= 0:
+            try:
+                # Only send if they still have notifications enabled
+                member_data = await self.config.member(member).all()
+                if member_data.get("notify_on_release", False):
+                    # Try to send to the channel they were jailed in
+                    if "jail_channel" in member_data:
+                        channel = member.guild.get_channel(member_data["jail_channel"])
+                        if channel:
+                            await channel.send(f"🔔 {member.mention} Your jail sentence is over! You're now free to commit crimes again.")
+                            return
+                    
+                    # Fallback to DM if channel not found or not stored
+                    await member.send(f"🔔 Your jail sentence is over! You're now free to commit crimes again.")
+            except (discord.Forbidden, discord.HTTPException):
+                pass  # Ignore if we can't send the message
+
+    @crime.command(name="jail")
+    @commands.admin_or_permissions(administrator=True)
+    async def manual_jail(self, ctx: commands.Context, user: discord.Member, minutes: int):
+        """Manually put a user in jail.
+
+        Parameters
+        ----------
+        user : discord.Member
+            The user to jail
+        minutes : int
+            Number of minutes to jail them for
+        """
+        try:
+            if minutes <= 0:
+                await ctx.send("❌ Jail time must be positive!")
+                return
+
+            # Convert minutes to seconds
+            jail_time = minutes * 60
+
+            # Send user to jail with the current channel
+            await self.send_to_jail(user, jail_time, ctx.channel)
+
+            embed = discord.Embed(
+                title="⛓️ Manual Jail",
+                description=f"{user.mention} has been jailed by {ctx.author.mention}!",
+                color=discord.Color.red()
+            )
+            embed.add_field(
+                name="⏰ Sentence Duration",
+                value=format_cooldown_time(jail_time),
+                inline=True
+            )
+            embed.add_field(
+                name="📅 Release Time",
+                value=f"<t:{int(time.time() + jail_time)}:R>",
+                inline=True
+            )
+
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"An error occurred while jailing the user: {str(e)}")
