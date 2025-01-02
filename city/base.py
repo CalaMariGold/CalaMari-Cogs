@@ -109,25 +109,6 @@ class CityBase:
         remaining = await self.get_jail_time_remaining(member)
         return remaining > 0
 
-    async def get_bail_cost(self, guild: discord.Guild, settings: dict) -> int:
-        """Calculate bail cost based on settings."""
-        try:
-            crime_options = await self.config.guild(guild).crime_options()
-            
-            # Get highest possible fine from enabled crimes
-            max_fine = 0
-            for crime_data in crime_options.values():
-                if not crime_data["enabled"]:
-                    continue
-                fine = max(0, int(crime_data["max_reward"] * crime_data["fine_multiplier"]))
-                max_fine = max(max_fine, fine)
-                
-            # Bail costs more than the highest fine
-            return max(0, int(max_fine * settings["bail_cost_multiplier"]))
-        except Exception as e:
-            await self.bot.send_to_owners(f"Error calculating bail cost: {str(e)}")
-            return 0
-            
     async def apply_fine(self, member: discord.Member, crime_type: str, crime_data: dict) -> tuple[bool, int]:
         """Apply a fine to a user. Returns (paid_successfully, amount)."""
         fine_amount = int(crime_data["max_reward"] * crime_data["fine_multiplier"])

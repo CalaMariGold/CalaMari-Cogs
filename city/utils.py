@@ -7,31 +7,6 @@ import time
 import random
 from typing import Optional, Tuple
 
-async def get_remaining_cooldown(config, member: discord.Member, action_type: str, action_data: dict) -> int:
-    """Get the remaining cooldown time for an action in seconds."""
-    current_time = int(time.time())
-    last_actions = await config.member(member).last_actions()
-    
-    # Get the last time this action was attempted
-    last_attempt = last_actions.get(action_type, 0)
-    if not last_attempt:
-        return 0
-        
-    # Get cooldown duration
-    cooldown = action_data["cooldown"]
-    
-    # Calculate remaining time
-    elapsed = current_time - last_attempt
-    remaining = max(0, cooldown - elapsed)
-    
-    return remaining
-
-async def set_action_cooldown(config, member: discord.Member, action_type: str):
-    """Set cooldown for an action type"""
-    current_time = int(time.time())
-    async with config.member(member).last_actions() as last_actions:
-        last_actions[action_type] = current_time
-
 def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
     """Format cooldown time into a human readable string.
     
