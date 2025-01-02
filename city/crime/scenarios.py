@@ -688,11 +688,11 @@ RANDOM_SCENARIOS = [
         "min_reward": 300,
         "max_reward": 900,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 360,
+        "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.3,
         "attempt_text": "🐾 {user} starts smuggling 'forbidden mrows' in Shinycord...",
         "success_text": "🐾 {user}'s adorable mrow empire grew overnight, earning {amount}! Cat girls stay winning!",
-        "fail_text": "🐾 {user} meowed too loudly and got reported to the mods. Now they’re on 'mute' probation!"
+        "fail_text": "🐾 {user} meowed too loudly and got reported to the mods. Now they're on 'mute' probation!"
     },
     {
         "name": "kitten_covert_ops",
@@ -700,7 +700,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 300,
         "max_reward": 800,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,
+        "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.3,
         "attempt_text": "🐾 {user} sneaks into CalaMariGold's stream and tries to disrupt it with meows...",
         "success_text": "🐾 {user} charmed the chat with their kitten antics, earning {amount} in sympathy donations!",
@@ -712,9 +712,9 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 1800,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,
+        "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.4,
-        "attempt_text": "⛏️ {user} tries to spy on CalaMariGold’s secret modpack dev server...",
+        "attempt_text": "⛏️ {user} tries to spy on CalaMariGold's secret modpack dev server...",
         "success_text": "⛏️ {user} leaked 'TREPIDATION' beta builds and sold early access for {amount}!",
         "fail_text": "⛏️ {user} got trapped in an infinite time loop! They were caught trying to escape!"
     },
@@ -724,9 +724,9 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 1300,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,
+        "jail_time": 2400,  # 40 minutes
         "fine_multiplier": 0.35,
-        "attempt_text": "🎶 {user} tries to request an impossible drum song to sabotage CalaMariGold’s stream...",
+        "attempt_text": "🎶 {user} tries to request an impossible drum song to sabotage CalaMariGold's stream...",
         "success_text": "🎶 {user}'s troll request backfired and went viral, netting them {amount} in 'pro troll' clout!",
         "fail_text": "🎶 {user} got roasted live when Mari flawlessly nailed the request!"
     },
@@ -736,7 +736,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 1000,
         "max_reward": 2200,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 960,
+        "jail_time": 3000,  # 50 minutes
         "fine_multiplier": 0.5,
         "attempt_text": "🎽 {user} counterfeits CalaMariGold merch and sells it to fans...",
         "success_text": "🎽 {user} made a fortune selling 'exclusive glow-in-the-dark' merch and earned {amount}!",
@@ -748,7 +748,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 300,
         "max_reward": 700,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 240,
+        "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.2,
         "attempt_text": "💬 {user} spreads a wild rumor in Shinycord...",
         "success_text": "💬 {user}'s gossip stirred chaos and earned them {amount} in 'drama gold'!",
@@ -760,11 +760,11 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 840,
+        "jail_time": 2100,  # 35 minutes
         "fine_multiplier": 0.45,
-        "attempt_text": "⏱️ {user} hacks CalaMariGold’s subathon timer to extend the stream endlessly...",
+        "attempt_text": "⏱️ {user} hacks CalaMariGold's subathon timer to extend the stream endlessly...",
         "success_text": "⏱️ {user} charged viewers to keep the timer running and made {amount}!",
-        "fail_text": "⏱️ {user}'s hack backfired, causing Mari’s PC to crash mid-stream. Banned from future events!"
+        "fail_text": "⏱️ {user}'s hack backfired, causing Mari's PC to crash mid-stream. Banned from future events!"
     },
     {
         "name": "discord_event_fixing",
@@ -772,7 +772,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1500,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,
+        "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "🎮 {user} rigs a Shinycord gaming event for their own gain...",
         "success_text": "🎮 {user} won fake bets and walked away with {amount}!",
@@ -784,11 +784,23 @@ RANDOM_SCENARIOS = [
         "min_reward": 3000,
         "max_reward": 8000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 10200,
+        "jail_time": 3600,  # 1 hour
         "fine_multiplier": 0.5,
-        "attempt_text": "🤖 {user} tries to hack Baa, CalaMariGold’s bot, and rewrite the crime cog itself...",
-        "success_text": "🤖 {user} successfully rewrote reality! Now they’re the richest player in the game, earning {amount} from this very crime!",
+        "attempt_text": "🤖 {user} tries to hack Baa, CalaMariGold's bot, and rewrite the crime cog itself...",
+        "success_text": "🤖 {user} successfully rewrote reality! Now they're the richest player in the game, earning {amount} from this very crime!",
         "fail_text": "🤖 {user} accidentally triggered Baa's self-defense mechanism. The bot gained sentience, locked them in a virtual jail, and posted the evidence in Shinycord. Even Mari couldn't save them!"
+    },
+    {
+        "name": "gacha_banner",
+        "risk": RISK_LOW,
+        "min_reward": 300,
+        "max_reward": 700,
+        "success_rate": SUCCESS_RATE_HIGH,
+        "jail_time": 900,  # 15 minutes
+        "fine_multiplier": 0.2,
+        "attempt_text": "🎰 {user} rolls the gacha banner and gets a rare item! 🎉 (+{min_reward} to {max_reward} {currency})",
+        "success_text": "🎰 {user} rolled a rare item! They got {amount} {currency}!",
+        "fail_text": "🎰 {user} rolled a common item. Better luck next time!"
     }
 ]
 
@@ -1012,8 +1024,8 @@ CRIME_EVENTS = {
         },
         {
             "name": "gacha_banner",
-            "reward_multiplier": 1.3,
-            "text": "Found the store's gacha transaction history! 💳 (1.3x reward)"
+            "reward_multiplier": 0.8,
+            "text": "The store's gacha banner is too tempting! You spent some time rolling... 🎰 (0.8x reward)"
         },
         {
             "name": "broken_camera",
