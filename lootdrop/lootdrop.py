@@ -229,7 +229,7 @@ class LootDrop(commands.Cog):
         else:
             scenario = random.choice(SCENARIOS)
             timeout = await self.config.guild(channel.guild).drop_timeout()
-            view = LootDropView(self, scenario)
+            view = LootDropView(self, scenario, float(timeout))
             view.message = await channel.send(scenario["start"], view=view)
             
             self.active_drops[channel.guild.id] = ActiveDrop(
@@ -244,12 +244,19 @@ class LootDrop(commands.Cog):
     async def _handle_drop_timeout(self, guild_id: int, timeout: int) -> None:
         """Handle drop timeout and cleanup"""
         try:
-            await asyncio.sleep(timeout)
             if guild_id in self.active_drops:
                 drop = self.active_drops[guild_id]
-                if not drop.view.claimed:
-                    await drop.message.edit(content="The opportunity has passed...", view=None)
-                del self.active_drops[guild_id]
+                # Calculate remaining time based on when the drop was created
+                now = int(datetime.datetime.now().timestamp())
+                elapsed = now - drop.created
+                remaining = max(0, timeout - elapsed)
+                
+                await asyncio.sleep(remaining)
+                if guild_id in self.active_drops:
+                    drop = self.active_drops[guild_id]
+                    if not drop.view.claimed:
+                        await drop.message.edit(content="The opportunity has passed...", view=None)
+                    del self.active_drops[guild_id]
         except Exception:
             pass
         finally:
@@ -615,13 +622,33 @@ class LootDrop(commands.Cog):
     
     @lootdrop_set.command(name="timeout")
     async def lootdrop_set_timeout(self, ctx: commands.Context, seconds: int) -> None:
-        """Set how long users have to claim a drop"""
+        """Set how long users have to claim a drop
+        
+        Parameters
+        ----------
+        seconds: int
+            Number of seconds before the drop expires
+            Example: 3600 = 1 hour, 1800 = 30 minutes
+        """
         if seconds < 10:
             await ctx.send("Timeout must be at least 10 seconds!")
             return
             
         await self.config.guild(ctx.guild).drop_timeout.set(seconds)
-        await ctx.send(f"Users will now have {seconds} seconds to claim drops!")
+        
+        # Convert to a more readable format for the response
+        if seconds >= 3600:
+            time_str = f"{seconds // 3600} hours"
+            if seconds % 3600:
+                time_str += f" and {(seconds % 3600) // 60} minutes"
+        elif seconds >= 60:
+            time_str = f"{seconds // 60} minutes"
+            if seconds % 60:
+                time_str += f" and {seconds % 60} seconds"
+        else:
+            time_str = f"{seconds} seconds"
+            
+        await ctx.send(f"Users will now have {time_str} to claim drops!")
     
     @lootdrop_set.command(name="frequency")
     async def lootdrop_set_frequency(self, ctx: commands.Context, min_minutes: int, max_minutes: int) -> None:
@@ -1136,9 +1163,12 @@ class DropButton(discord.ui.Button['LootDropView']):
         self.view.claimed = True
         await interaction.response.defer()
         
-        # Remove from active drops
+        # Remove from active drops and cancel timeout task
         if interaction.guild_id in self.view.cog.active_drops:
             del self.view.cog.active_drops[interaction.guild_id]
+            if interaction.guild_id in self.view.cog.tasks:
+                self.view.cog.tasks[interaction.guild_id].cancel()
+                del self.view.cog.tasks[interaction.guild_id]
             
         await self.view.cog.process_loot_claim(interaction)
         try:
@@ -1164,8 +1194,8 @@ class LootDropView(discord.ui.View):
     scenario: Scenario
         The scenario for this drop
     """
-    def __init__(self, cog: 'LootDrop', scenario: Scenario) -> None:
-        super().__init__()
+    def __init__(self, cog: 'LootDrop', scenario: Scenario, timeout: float) -> None:
+        super().__init__(timeout=timeout)
         self.cog: 'LootDrop' = cog
         self.message: Optional[discord.Message] = None
         self.claimed: bool = False
