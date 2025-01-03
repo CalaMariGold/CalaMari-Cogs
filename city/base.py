@@ -165,7 +165,7 @@ class CityBase:
                 # Check target's balance first
                 target_balance = await bank.get_balance(target)
                 if target_balance < amount:
-                    return 0, _("Target doesn't have enough credits!")
+                    return 0, _("Target doesn't have enough {currency}!").format(currency=await bank.get_currency_name(target.guild))
                     
                 # Perform the transfer atomically
                 await bank.withdraw_credits(target, amount)
@@ -182,9 +182,10 @@ class CityBase:
                 async with self.config.member(target).all() as target_data:
                     target_data["total_stolen_by"] += amount
                 
-                return amount, _("🎉 You successfully stole {amount:,} credits from {target}!").format(
+                return amount, _("🎉 You successfully stole {amount:,} {currency} from {target}!").format(
                     amount=amount,
-                    target=target.display_name
+                    target=target.mention,
+                    currency=await bank.get_currency_name(target.guild)
                 )
             except ValueError as e:
                 return 0, _("Failed to steal credits: Balance changed!")
@@ -197,10 +198,11 @@ class CityBase:
                 member_data["total_failed_crimes"] += 1
             
             if fine_paid:
-                return 0, _("💀 You were caught trying to steal from {target}! You paid a fine of {fine:,} credits and were sent to jail for {minutes}m!").format(
+                return 0, _("💀 You were caught trying to steal from {target}! You paid a fine of {fine:,} {currency} and were sent to jail for {minutes}m!").format(
                     target=target.display_name,
                     fine=fine_amount,
-                    minutes=crime_data["jail_time"] // 60
+                    minutes=crime_data["jail_time"] // 60,
+                    currency=await bank.get_currency_name(target.guild)
                 )
             else:
                 return 0, _("💀 You were caught and couldn't pay the {fine:,} credit fine! You were sent to jail for {minutes}m!").format(

@@ -1043,9 +1043,10 @@ class CrimeCommands:
             
             # Add current balance
             balance = await bank.get_balance(ctx.author)
+            currency_name = await bank.get_currency_name(ctx.guild)
             embed.add_field(
                 name="💰 Your Balance",
-                value=f"{balance:,} credits",
+                value=f"{balance:,} {currency_name}",
                 inline=False
             )
             
@@ -1056,12 +1057,12 @@ class CrimeCommands:
             for item_id, item in BLACKMARKET_ITEMS.items():
                 if item["type"] == "perk":
                     perks.append(
-                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} credits\n"
+                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
                         f"↳ {item['description']}"
                     )
                 else:
                     consumables.append(
-                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} credits\n"
+                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
                         f"↳ {item['description']}"
                     )
             

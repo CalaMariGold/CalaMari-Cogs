@@ -73,13 +73,22 @@ class BlackmarketSelect(discord.ui.Select):
             
         item_id = self.values[0]
         item = BLACKMARKET_ITEMS[item_id]
+        currency_name = await bank.get_currency_name(self.ctx.guild)
+        
+        # Update option descriptions with currency name
+        new_options = []
+        for option in self.options:
+            item = BLACKMARKET_ITEMS[option.value]
+            option.description = f"{item['cost']:,} {currency_name} - {item['description']}"
+            new_options.append(option)
+        self.options = new_options
         
         try:
             # Check if user can afford
             balance = await bank.get_balance(self.ctx.author)
             if balance < item["cost"]:
                 await interaction.response.send_message(
-                    f"❌ You cannot afford the {item['name']}! (Cost: {item['cost']:,} credits)",
+                    f"❌ You cannot afford the {item['name']}! (Cost: {item['cost']:,} {currency_name})",
                     ephemeral=True
                 )
                 return
@@ -140,13 +149,13 @@ class BlackmarketSelect(discord.ui.Select):
             # Send success message
             if item_id == "notify_ping":
                 await interaction.response.send_message(
-                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} credits!\n"
+                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} {currency_name}!\n"
                     f"Notifications are now enabled by default. Select the perk in your inventory to toggle them on/off.",
                     ephemeral=True
                 )
             else:
                 await interaction.response.send_message(
-                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} credits!",
+                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} {currency_name}!",
                     ephemeral=True
                 )
             
@@ -391,6 +400,7 @@ class InventorySellSelect(discord.ui.Select):
     async def update_options(self):
         """Update the select menu options based on user's inventory."""
         member_data = await self.cog.config.member(self.ctx.author).all()
+        currency_name = await bank.get_currency_name(self.ctx.guild)
         options = []
         
         # Add owned perks first
@@ -403,7 +413,7 @@ class InventorySellSelect(discord.ui.Select):
                     discord.SelectOption(
                         label=f"{perk['name']} (Permanent)",
                         value=f"perk_{perk_id}",
-                        description=f"Sell for {sell_price:,} credits",
+                        description=f"Sell for {sell_price:,} {currency_name}",
                         emoji=perk["emoji"]
                     )
                 )
@@ -420,7 +430,7 @@ class InventorySellSelect(discord.ui.Select):
                         discord.SelectOption(
                             label=f"{item['name']} ({uses} uses)",
                             value=item_id,
-                            description=f"Sell for {sell_price:,} credits",
+                            description=f"Sell for {sell_price:,} {currency_name}",
                             emoji=item["emoji"]
                         )
                     )
@@ -447,6 +457,7 @@ class InventorySellSelect(discord.ui.Select):
             return
             
         item_id = self.values[0]
+        currency_name = await bank.get_currency_name(self.ctx.guild)
         
         # Handle different item types
         try:
@@ -477,7 +488,7 @@ class InventorySellSelect(discord.ui.Select):
                     
                     embed = discord.Embed(
                         title="💰 Item Sold",
-                        description=f"You sold your {perk['emoji']} {perk['name']} for {sell_price:,} credits.",
+                        description=f"You sold your {perk['emoji']} {perk['name']} for {sell_price:,} {currency_name}.",
                         color=discord.Color.green()
                     )
                     await interaction.response.send_message(embed=embed)
@@ -503,7 +514,7 @@ class InventorySellSelect(discord.ui.Select):
                     
                     embed = discord.Embed(
                         title="💰 Item Sold",
-                        description=f"You sold your {item['emoji']} {item['name']} ({uses} uses) for {sell_price:,} credits.",
+                        description=f"You sold your {item['emoji']} {item['name']} ({uses} uses) for {sell_price:,} {currency_name}.",
                         color=discord.Color.green()
                     )
                     await interaction.response.send_message(embed=embed)
