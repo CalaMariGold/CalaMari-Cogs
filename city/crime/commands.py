@@ -8,8 +8,9 @@ import random
 import time
 import asyncio
 from .scenarios import get_random_scenario, get_random_jailbreak_scenario
-from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView
+from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView, BlackmarketView, InventoryView
 from .data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
+from .blackmarket import BLACKMARKET_ITEMS
 from datetime import datetime
 from ..utils import (
     format_cooldown_time, 
@@ -24,60 +25,50 @@ class CrimeCommands:
 
     @commands.group(name="crime", invoke_without_command=True)
     async def crime(self, ctx: commands.Context):
-        """Welcome to the criminal underworld!
+        """Access the crime system.
         
-        This command opens an interactive menu where you can:
-        • 🦹 Commit various crimes for rewards
-        • 💰 Pay bail to get out of jail
-        • 🔓 Attempt a jailbreak
-        • 🏆 View the crime leaderboard
-        • 📊 Check your criminal status
-        • 🔔 Toggle jail release notifications
-        
-        Use the buttons to navigate through the options.
-        Each action has its own cooldowns and requirements.
+        If no subcommand is provided, shows the main menu with all available actions.
         """
-        # Create and show the main menu
-        view = MainMenuView(self, ctx)
-        
-        # Create a thematic embed
-        embed = discord.Embed(
-            title="🌃 Welcome to the Criminal Underworld",
-            description=(
-                "The city never sleeps, and neither do its criminals. "
-                "What kind of trouble are you looking to get into today?\n\n"
-                "Choose your next move wisely..."
-            ),
-            color=discord.Color.dark_purple()
-        )
-        
-        # Add user's current status
-        is_jailed = await self.is_jailed(ctx.author)
-        jail_time = await self.get_jail_time_remaining(ctx.author)
-        member_data = await self.config.member(ctx.author).all()
-        
-        status_lines = []
-        if is_jailed:
-            status_lines.append(f"⛓️ **Current Status:** In jail ({format_cooldown_time(jail_time, include_emoji=False)} remaining)")
-        else:
-            status_lines.append("🦹 **Current Status:** Free to cause trouble")
+        try:
+            # Get member data
+            member_data = await self.config.member(ctx.author).all()
             
-        status_lines.extend([
-            f"💰 **Lifetime Earnings:** {member_data['total_credits_earned']:,} credits",
-            f"✅ **Successful Crimes:** {member_data['total_successful_crimes']}",
-            f"❌ **Failed Attempts:** {member_data['total_failed_crimes']}",
-            f"🏆 **Largest Heist:** {member_data['largest_heist']:,} credits"
-        ])
-        
-        embed.add_field(
-            name="Your Criminal Record",
-            value="\n".join(status_lines),
-            inline=False
-        )
-        
-        # Send the menu
-        view.message = await ctx.send(embed=embed, view=view)
-        await view.update_button_states()
+            # Get jail status
+            jail_remaining = await self.get_jail_time_remaining(ctx.author)
+            status = "⛓️ In jail" if jail_remaining > 0 else "✅ Free"
+            
+            # Create embed
+            embed = discord.Embed(
+                title="🌃 Welcome to the Criminal Underworld",
+                description=(
+                    "The city never sleeps, and neither do its criminals. What kind of trouble are you looking to get into today?\n\n"
+                    "Choose your next move wisely..."
+                ),
+                color=discord.Color.dark_red()
+            )
+            
+            # Add criminal record field
+            embed.add_field(
+                name="__Your Criminal Record__",
+                value=(
+                    f"🦹 Current Status: {status}\n"
+                    f"💰 Lifetime Earnings: {humanize_number(member_data['total_credits_earned'])} {await bank.get_currency_name(ctx.guild)}\n"
+                    f"✅ Successful Crimes: {member_data['total_successful_crimes']}\n"
+                    f"❌ Failed Attempts: {member_data['total_failed_crimes']}\n"
+                    f"🏆 Largest Heist: {humanize_number(member_data['largest_heist'])} {await bank.get_currency_name(ctx.guild)}"
+                ),
+                inline=False
+            )
+            
+            # Create and send view
+            view = MainMenuView(self, ctx)
+            view.message = await ctx.send(embed=embed, view=view)
+            
+            # Initialize menu options
+            await view.initialize_menu()
+            
+        except Exception as e:
+            await ctx.send(f"An error occurred while opening the crime menu: {str(e)}")
 
     @crime.command(name="commit")
     async def crime_commit(self, ctx: commands.Context):
@@ -219,9 +210,19 @@ class CrimeCommands:
             # Check jail status
             remaining_jail = await self.get_jail_time_remaining(target)
             if remaining_jail > 0:
+                # Check if user has reduced sentence perk
+                has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
+                
+                if has_reducer:
+                    # Calculate original time (current time is after 20% reduction)
+                    original_time = int(remaining_jail / 0.8)  # Reverse the 20% reduction
+                    jail_text = f"🔒 In jail for ~~{format_cooldown_time(original_time, include_emoji=False)}~~ → {format_cooldown_time(remaining_jail, include_emoji=False)} (-20%)"
+                else:
+                    jail_text = f"🔒 In jail for {format_cooldown_time(remaining_jail)}"
+                
                 embed.add_field(
                     name="⚖️ __Jail Status__",
-                    value=f"🔒 In jail for {format_cooldown_time(remaining_jail)}",
+                    value=jail_text,
                     inline=False
                 )
                 
@@ -272,20 +273,23 @@ class CrimeCommands:
                     embed.add_field(name="\u200b", value="\u200b", inline=True)
             
             # Add notification status
-            notify_enabled = member_data.get("notify_enabled", False)
+            notify_on_release = member_data.get("notify_on_release", False)
             notify_unlocked = member_data.get("notify_unlocked", False)
+            has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
             
-            if notify_unlocked:
-                notify_status = "🔔 Notifications unlocked and " + ("enabled" if notify_enabled else "disabled")
-            else:
-                notify_status = "🔕 Notifications not unlocked"
+            if notify_unlocked or has_reducer:
+                status_lines = []
+                if notify_unlocked:
+                    status_lines.append("🔔 Notifications " + ("enabled" if notify_on_release else "disabled"))
+                if has_reducer:
+                    status_lines.append("⚖️ Reduced Sentence (-20% jail time)")
                 
-            embed.add_field(
-                name="🔔 __Notification Status__",
-                value=notify_status,
-                inline=True
-            )
-                
+                embed.add_field(
+                    name="🔰 __Active Perks__",
+                    value="\n".join(status_lines),
+                    inline=True
+                )
+            
             # Add last target if any
             if member_data['last_target']:
                 try:
@@ -397,19 +401,20 @@ class CrimeCommands:
                 )
                 return
                 
-            # Create bail view
-            view = BailView(self, ctx, bail_cost, jail_time)
-            
             # Get current balance
             current_balance = await bank.get_balance(ctx.author)
             currency_name = await bank.get_currency_name(ctx.guild)
+            
+            # Get member data for perk check
+            member_data = await self.config.member(ctx.author).all()
             
             # Create embed for bail prompt
             embed = discord.Embed(
                 title="💰 Bail Payment Available",
                 description=(
                     "You can pay bail to get out of jail immediately, or wait out your sentence.\n\n"
-                    f"**Time Remaining:** {format_cooldown_time(jail_time, include_emoji=False)}\n"
+                    f"**Time Remaining:** {format_cooldown_time(jail_time, include_emoji=False)}"
+                    + (" (Reduced by 20%)" if "jail_reducer" in member_data.get("purchased_perks", []) else "") + "\n"
                     f"**Bail Cost:** {bail_cost:,} {currency_name}\n"
                     f"**Current Balance:** {current_balance:,} {currency_name}\n\n"
                 ),
@@ -419,6 +424,7 @@ class CrimeCommands:
             embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             
             # Send bail prompt
+            view = BailView(self, ctx, bail_cost, jail_time)
             message = await ctx.send(embed=embed, view=view)
             view.message = message
             
@@ -885,8 +891,6 @@ class CrimeCommands:
             _("  • Bail Cost Multiplier: {multiplier}").format(multiplier=global_settings["bail_cost_multiplier"]),
             _("  • Min Steal Balance: {amount}").format(amount=global_settings["min_steal_balance"]),
             _("  • Max Steal Amount: {amount}").format(amount=global_settings["max_steal_amount"]),
-            _("  • Notify Cost: {amount}").format(amount=global_settings.get("notify_cost", 0)),
-            _("  • Notify Cost System: {enabled}").format(enabled=_("Enabled") if global_settings.get("notify_cost_enabled", False) else _("Disabled")),
             "",
             _("🎯 **Crime Settings**:")
         ]
@@ -907,170 +911,16 @@ class CrimeCommands:
                 _("  • Fine Multiplier: {multiplier}").format(multiplier=data["fine_multiplier"])
             ])
             
-        await ctx.send(box("\n".join(settings_lines)))
-
-    @crime.command(name="notify")
-    async def toggle_jail_notify(self, ctx: commands.Context):
-        """Toggle whether you want to be pinged when your jail sentence is over.
-        
-        If enabled in server settings, this may cost credits to unlock.
-        Use the command to see the current cost.
-        """
-        # Get settings
-        settings = await self.config.guild(ctx.guild).global_settings()
-        member_data = await self.config.member(ctx.author).all()
-        
-        # If notifications are already enabled, just toggle them off
-        if member_data.get("notify_on_release", False):
-            async with self.config.member(ctx.author).all() as member_data:
-                member_data["notify_on_release"] = False
-            
-            embed = discord.Embed(
-                title="🔕 Jail Release Notifications",
-                description="Notifications have been disabled.\n\nYou will no longer be pinged when your jail sentence is over.",
-                color=discord.Color.red()
-            )
-            await ctx.send(embed=embed)
-            return
-            
-        # Check if cost system is enabled
-        if settings.get("notify_cost_enabled", False):
-            cost = settings.get("notify_cost", 0)
-            
-            # Create view with unlock button
-            class UnlockView(discord.ui.View):
-                def __init__(self, ctx, cost):
-                    super().__init__(timeout=30.0)
-                    self.ctx = ctx
-                    self.cost = cost
-                    self.value = None
-                    
-                async def interaction_check(self, interaction: discord.Interaction) -> bool:
-                    return interaction.user.id == self.ctx.author.id
-                
-                @discord.ui.button(label=f"Unlock for {cost:,} credits", style=discord.ButtonStyle.success, emoji="🔔")
-                async def unlock(self, interaction: discord.Interaction, button: discord.ui.Button):
-                    # Check if user can afford
-                    if not await bank.can_spend(interaction.user, self.cost):
-                        await interaction.response.send_message(
-                            f"❌ You don't have enough credits! This costs {self.cost:,} {await bank.get_currency_name(interaction.guild)}.",
-                            ephemeral=True
-                        )
-                        return
-                        
-                    # Charge the user
-                    await bank.withdraw_credits(interaction.user, self.cost)
-                    
-                    # Get new balance
-                    new_balance = await bank.get_balance(interaction.user)
-                    currency_name = await bank.get_currency_name(interaction.guild)
-                    
-                    # Enable notifications
-                    async with self.ctx.cog.config.member(interaction.user).all() as member_data:
-                        member_data["notify_on_release"] = True
-                    
-                    # Send success message
-                    embed = discord.Embed(
-                        title="🔔 Jail Release Notifications",
-                        description=f"Notifications have been enabled!\n\n"
-                                  f"You paid {self.cost:,} {currency_name} to unlock this feature.\n"
-                                  f"You will now be pinged when your jail sentence is over.",
-                        color=discord.Color.green()
-                    )
-                    embed.set_footer(text=f"New balance: {new_balance:,} {currency_name}")
-                    await interaction.response.send_message(embed=embed)
-                    self.value = True
-                    self.stop()
-                    
-                @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger)
-                async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-                    embed = discord.Embed(
-                        title="❌ Unlock Cancelled",
-                        description="You decided not to unlock notifications.",
-                        color=discord.Color.red()
-                    )
-                    await interaction.response.send_message(embed=embed)
-                    self.value = False
-                    self.stop()
-            
-            # Send prompt with unlock button
-            currency_name = await bank.get_currency_name(ctx.guild)
-            embed = discord.Embed(
-                title="🔔 Unlock Jail Release Notifications",
-                description=f"This feature costs **{cost:,} {currency_name}** to unlock.\n\n"
-                           f"Once unlocked, you will be pinged in the channel where you were jailed when your sentence is over.\n"
-                           f"You can disable notifications at any time by using this command again.",
-                color=discord.Color.blue()
-            )
-            
-            view = UnlockView(ctx, cost)
-            view.message = await ctx.send(embed=embed, view=view)
-            
-            # Wait for response
-            await view.wait()
-            
-            # Disable buttons after timeout
-            for child in view.children:
-                child.disabled = True
-            try:
-                await view.message.edit(view=view)
-            except discord.NotFound:
-                pass
-                
-        else:
-            # If cost system is disabled, just toggle notifications on
-            async with self.config.member(ctx.author).all() as member_data:
-                member_data["notify_on_release"] = True
-            
-            embed = discord.Embed(
-                title="🔔 Jail Release Notifications",
-                description="Notifications have been enabled!\n\nYou will now be pinged when your jail sentence is over.",
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=embed)
-
-    @crime_set_global.command(name="notifycost")
-    async def set_notify_cost(self, ctx: commands.Context, cost: int):
-        """Set the cost to unlock jail release notifications.
-        
-        Parameters
-        ----------
-        cost : int
-            The cost in credits to unlock notifications. Set to 0 to make it free.
-        """
-        if cost < 0:
-            await ctx.send(_("Cost must be positive!"))
-            return
-            
-        async with self.config.guild(ctx.guild).global_settings() as settings:
-            settings["notify_cost"] = cost
-            
-        if cost == 0:
-            await ctx.send(_("Jail release notifications are now free to unlock!"))
-        else:
-            await ctx.send(_("Jail release notifications now cost {cost} credits to unlock!").format(cost=cost))
-
-    @crime_set_global.command(name="togglenotifycost")
-    async def toggle_notify_cost(self, ctx: commands.Context, enabled: bool):
-        """Enable or disable the notification unlock cost.
-        
-        Parameters
-        ----------
-        enabled : bool
-            True to require payment to unlock notifications, False to make it free.
-        """
-        async with self.config.guild(ctx.guild).global_settings() as settings:
-            settings["notify_cost_enabled"] = enabled
-            
-        if enabled:
-            cost = settings.get("notify_cost", 0)
-            await ctx.send(_("Jail release notifications now require {cost} credits to unlock!").format(cost=cost))
-        else:
-            await ctx.send(_("Jail release notifications are now free to unlock!"))
+        await ctx.send("\n".join(settings_lines))
 
     async def send_to_jail(self, member: discord.Member, jail_time: int, channel: discord.TextChannel = None):
         """Send a member to jail."""
         async with self.config.member(member).all() as member_data:
+            # Check for reduced sentence perk
+            if "jail_reducer" in member_data.get("purchased_perks", []):
+                # Apply 20% reduction
+                jail_time = int(jail_time * 0.8)  # 20% shorter sentence
+            
             member_data["jail_until"] = int(time.time()) + jail_time
             member_data["attempted_jailbreak"] = False  # Reset jailbreak attempt when jailed
             
@@ -1130,6 +980,12 @@ class CrimeCommands:
 
             # Convert minutes to seconds
             jail_time = minutes * 60
+            
+            # Check if user has reduced sentence perk
+            member_data = await self.config.member(user).all()
+            has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
+            if has_reducer:
+                jail_time = int(jail_time * 0.8)  # 20% reduction
 
             # Send user to jail with the current channel
             await self.send_to_jail(user, jail_time, ctx.channel)
@@ -1139,9 +995,14 @@ class CrimeCommands:
                 description=f"{user.mention} has been jailed by {ctx.author.mention}!",
                 color=discord.Color.red()
             )
+            
+            sentence_text = format_cooldown_time(jail_time)
+            if has_reducer:
+                sentence_text += " (Reduced by 20%)"
+                
             embed.add_field(
                 name="⏰ Sentence Duration",
-                value=format_cooldown_time(jail_time),
+                value=sentence_text,
                 inline=True
             )
             embed.add_field(
@@ -1154,3 +1015,147 @@ class CrimeCommands:
 
         except Exception as e:
             await ctx.send(f"An error occurred while jailing the user: {str(e)}")
+
+    @crime.command(name="blackmarket")
+    async def crime_blackmarket(self, ctx: commands.Context):
+        """Browse the black market for special items and perks.
+        
+        Available items:
+        • 🔔 Jail Release Notification - Get notified when released
+        • ⚖️ Reduced Sentence - 20% shorter jail time
+        • 🔓 Get Out of Jail Free - Instant release from jail
+        • 🍀 Lucky Charm - Temporary crime success boost
+        
+        Use the dropdown menu to purchase items.
+        Some items are permanent perks, others are consumable.
+        """
+        try:
+            # Create embed
+            embed = discord.Embed(
+                title="🏴‍☠️ Black Market",
+                description=(
+                    "Welcome to the shadier side of the city...\n"
+                    "Here you can find various items and perks to aid your criminal career.\n"
+                    "Use the dropdown menu below to make a purchase."
+                ),
+                color=discord.Color.dark_purple()
+            )
+            
+            # Add current balance
+            balance = await bank.get_balance(ctx.author)
+            embed.add_field(
+                name="💰 Your Balance",
+                value=f"{balance:,} credits",
+                inline=False
+            )
+            
+            # Group items by type
+            perks = []
+            consumables = []
+            
+            for item_id, item in BLACKMARKET_ITEMS.items():
+                if item["type"] == "perk":
+                    perks.append(
+                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} credits\n"
+                        f"↳ {item['description']}"
+                    )
+                else:
+                    consumables.append(
+                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} credits\n"
+                        f"↳ {item['description']}"
+                    )
+            
+            # Add perks section
+            if perks:
+                embed.add_field(
+                    name="🔒 Permanent Perks",
+                    value="\n\n".join(perks),
+                    inline=False
+                )
+            
+            # Add consumables section
+            if consumables:
+                embed.add_field(
+                    name="📦 Consumable Items",
+                    value="\n\n".join(consumables),
+                    inline=False
+                )
+            
+            # Create and send view
+            view = BlackmarketView(self, ctx)
+            view.message = await ctx.send(embed=embed, view=view)
+            
+        except Exception as e:
+            await ctx.send(f"An error occurred while opening the black market: {str(e)}")
+
+    @crime.command(name="inventory")
+    async def view_inventory(self, ctx: commands.Context):
+        """View your inventory of items and perks."""
+        try:
+            # Get member data
+            member_data = await self.config.member(ctx.author).all()
+            current_time = int(time.time())
+            
+            # Create embed
+            embed = discord.Embed(
+                title="🎒 Your Inventory",
+                description="Use the dropdowns below to activate or sell your items.",
+                color=discord.Color.blue()
+            )
+            
+            # Add perks section
+            perks = member_data.get("purchased_perks", [])
+            if perks:
+                perk_list = []
+                for perk_id in perks:
+                    perk = BLACKMARKET_ITEMS[perk_id]
+                    perk_list.append(f"{perk['emoji']} **{perk['name']}**\n↳ {perk['description']}")
+                embed.add_field(
+                    name="🔒 Permanent Perks",
+                    value="\n".join(perk_list),
+                    inline=False
+                )
+            
+            # Add active items section
+            active_items = member_data.get("active_items", {})
+            if active_items:
+                active_list = []
+                for item_id, status in active_items.items():
+                    item = BLACKMARKET_ITEMS[item_id]
+                    
+                    if "duration" in item:
+                        end_time = status.get("end_time", 0)
+                        if end_time > current_time:
+                            remaining = end_time - current_time
+                            hours = remaining // 3600
+                            minutes = (remaining % 3600) // 60
+                            time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+                            active_list.append(
+                                f"{item['emoji']} **{item['name']}**\n↳ Time remaining: {time_str}"
+                            )
+                    else:
+                        uses = status.get("uses", 0)
+                        if uses > 0:
+                            active_list.append(
+                                f"{item['emoji']} **{item['name']}**\n↳ {uses} uses remaining"
+                            )
+                            
+                if active_list:
+                    embed.add_field(
+                        name="📦 Items",
+                        value="\n".join(active_list),
+                        inline=False
+                    )
+            
+            if not perks and not active_items:
+                embed.description += "\n\n❌ Your inventory is empty! Visit the black market to purchase items."
+            
+            # Create and send view
+            view = InventoryView(self, ctx)
+            view.message = await ctx.send(embed=embed, view=view)
+            
+            # Initialize dropdowns
+            await view.initialize_dropdowns()
+            
+        except Exception as e:
+            await ctx.send(_("An error occurred while viewing your inventory: {}").format(str(e)))

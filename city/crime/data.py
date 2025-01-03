@@ -79,9 +79,7 @@ DEFAULT_GUILD = {
         "protect_low_balance": True,  # Prevent stealing from users with very low balance
         "show_success_rate": True,  # Show success rate in crime messages
         "show_fine_amount": True,   # Show potential fine amounts
-        "enable_random_events": True, # Enable random events during crimes
-        "notify_cost": 10000,  # Cost to unlock notifications, 0 means free
-        "notify_cost_enabled": True  # Whether notifications require payment to unlock
+        "enable_random_events": True  # Enable random events during crimes
     }
 }
 

@@ -10,10 +10,11 @@ from .crime.data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
 CONFIG_SCHEMA = {
     "GUILD": {
         "crime_options": {},  # Crime configuration from crime/data.py
-        "global_settings": {}  # Global settings from crime/data.py including:
+        "global_settings": {},  # Global settings from crime/data.py including:
                              # - Jail and bail settings
                              # - Crime targeting rules
                              # - Notification settings (cost and toggle)
+        "blackmarket_items": {}  # Blackmarket items configuration
     },
     "MEMBER": {
         "jail_until": 0,  # Unix timestamp when jail sentence ends
@@ -27,9 +28,12 @@ CONFIG_SCHEMA = {
         "total_bail_paid": 0,  # Total amount spent on bail
         "largest_heist": 0,  # Largest successful heist amount
         "last_target": None,  # ID of last targeted user (anti-farming)
-        "notify_on_release": False,  # Whether to notify when jail sentence ends
+        "notify_unlocked": False,  # Whether notifications feature is unlocked
+        "notify_on_release": False,  # Whether notifications are currently enabled
         "jail_channel": None,  # ID of channel where user was jailed (for notifications)
-        "attempted_jailbreak": False  # Whether user attempted jailbreak this sentence
+        "attempted_jailbreak": False,  # Whether user attempted jailbreak this sentence
+        "purchased_perks": [],  # List of permanent perks owned from blackmarket
+        "active_items": {}  # Dict of temporary items with expiry timestamps or uses
     }
 }
 

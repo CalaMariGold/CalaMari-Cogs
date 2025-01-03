@@ -9,6 +9,7 @@ from typing import Optional, Tuple
 from ..utils import calculate_stolen_amount, can_target_user
 import asyncio
 from .scenarios import get_random_scenario, get_crime_event, format_text
+from .blackmarket import BLACKMARKET_ITEMS, BlackmarketView, BlackmarketSelect, InventoryView, InventorySelect
 
 _ = Translator("Crime", __file__)
 
@@ -255,7 +256,13 @@ class CrimeView(discord.ui.View):
             )
             
             # Set description based on crime type
-            if self.target:
+            if self.crime_type == "random":
+                embed.description = _(self.scenario["success_text"]).format(
+                    user=self.interaction.user.mention,
+                    reward=kwargs.get("reward", 0),
+                    currency=currency
+                )
+            elif self.target:
                 if self.crime_type == "pickpocket":
                     embed.description = f"🧤 {self.interaction.user.mention} successfully pickpocketed {self.target.mention}!"
                 elif self.crime_type == "mugging":
@@ -366,9 +373,23 @@ class CrimeView(discord.ui.View):
             if kwargs.get("jail_time", 0) > 0:
                 jail_minutes = kwargs["jail_time"] // 60
                 jail_seconds = kwargs["jail_time"] % 60
+                
+                # Check if user has reduced sentence perk
+                member_data = await self.cog.config.member(self.interaction.user).all()
+                has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
+                
+                if has_reducer:
+                    # Calculate reduced time
+                    reduced_time = int(kwargs["jail_time"] * 0.8)  # 20% reduction
+                    reduced_minutes = reduced_time // 60
+                    reduced_seconds = reduced_time % 60
+                    jail_text = f"~~{jail_minutes}m {jail_seconds}s~~ → {reduced_minutes}m {reduced_seconds}s (-20%)"
+                else:
+                    jail_text = f"{jail_minutes}m {jail_seconds}s"
+                
                 embed.add_field(
                     name="⛓️ Jail Time",
-                    value=f"{jail_minutes}m {jail_seconds}s",
+                    value=jail_text,
                     inline=True
                 )
             
@@ -406,8 +427,7 @@ class CrimeView(discord.ui.View):
         await interaction.channel.send(
             _("An error occurred while processing your crime. Please try again. Error: {error}").format(
                 error=str(error)
-            )
-        )
+            ))
         self.stop()
             
     async def on_timeout(self):
@@ -1098,10 +1118,18 @@ class BailView(discord.ui.View):
             minutes = self.jail_time // 60
             seconds = self.jail_time % 60
             
+            # Check if user has reduced sentence perk
+            member_data = await self.cog.config.member(interaction.user).all()
+            has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
+            
+            time_text = f"{minutes}m {seconds}s"
+            if has_reducer:
+                time_text += " (Reduced by 20%)"
+            
             cancel_embed = self.format_bail_embed(
                 "❌ Bail Cancelled",
                 f"You have chosen to serve your time.\n\n"
-                f"**Time Remaining:** {minutes}m {seconds}s",
+                f"**Time Remaining:** {time_text}",
                 discord.Color.orange()
             )
             msg = await interaction.channel.send(embed=cancel_embed)
@@ -1471,140 +1499,186 @@ async def can_target_for_crime(cog, interaction: discord.Interaction, target: di
         
     return True, ""
 
-class MainMenuView(discord.ui.View):
-    """Main menu view for the City cog.
+class MainMenuSelect(discord.ui.Select):
+    """Dropdown select menu for the main crime menu."""
     
-    This view presents a button-based interface for all major crime actions:
-    • 🦹 Commit Crime: Opens the crime selection menu
-    • 💰 Pay Bail: Pay to get out of jail early
-    • 🔓 Attempt Jailbreak: Try to escape jail
-    • 🏆 Leaderboard: View crime statistics rankings
-    • 📊 View Status: Check your criminal profile
-    • 🔔 Unlock Notifications: Toggle jail release notifications
-    
-    Buttons are dynamically enabled/disabled based on user's current status:
-    • Crime button is disabled while in jail
-    • Bail/Jailbreak buttons are only enabled while in jail
-    • Notify button is disabled if already unlocked
-    """
-    
-    def __init__(self, cog, ctx: commands.Context):
-        super().__init__(timeout=60)  # 1 minute timeout
+    def __init__(self, cog, ctx):
         self.cog = cog
         self.ctx = ctx
-        self.message = None
         
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        """Only allow the command author to use the buttons."""
-        return interaction.user.id == self.ctx.author.id
-
-    @discord.ui.button(label='Commit Crime', style=discord.ButtonStyle.danger, emoji='🦹')
-    async def commit_crime(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Show the crime selection menu."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_commit)
-
-    @discord.ui.button(label='Pay Bail', style=discord.ButtonStyle.primary, emoji='💰')
-    async def pay_bail(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Pay bail to get out of jail."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_bail)
-
-    @discord.ui.button(label='Attempt Jailbreak', style=discord.ButtonStyle.danger, emoji='🔓')
-    async def jailbreak(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Attempt a jailbreak."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_jailbreak)
-
-    @discord.ui.button(label='Leaderboard', style=discord.ButtonStyle.primary, emoji='🏆')
-    async def leaderboard(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """View the crime leaderboard."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_leaderboard)
-
-    @discord.ui.button(label='View Status', style=discord.ButtonStyle.secondary, emoji='⏳')
-    async def status(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """View your crime status."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_status)
+        # Create base options list
+        self.base_options = [
+            discord.SelectOption(
+                label="Commit Crime",
+                value="crime",
+                description="Choose a crime to commit",
+                emoji="🦹"
+            ),
+            discord.SelectOption(
+                label="Pay Bail",
+                value="bail",
+                description="Pay to get out of jail early",
+                emoji="💰"
+            ),
+            discord.SelectOption(
+                label="Attempt Jailbreak",
+                value="jailbreak",
+                description="Try to escape from jail",
+                emoji="🔓"
+            ),
+            discord.SelectOption(
+                label="Leaderboard",
+                value="leaderboard",
+                description="View the crime leaderboard",
+                emoji="🏆"
+            ),
+            discord.SelectOption(
+                label="View Status",
+                value="status",
+                description="Check your criminal status",
+                emoji="⏳"
+            ),
+            discord.SelectOption(
+                label="View Stats",
+                value="stats",
+                description="View your crime statistics",
+                emoji="📊"
+            ),
+            discord.SelectOption(
+                label="Inventory",
+                value="inventory",
+                description="View and manage your items",
+                emoji="🎒"
+            ),
+            discord.SelectOption(
+                label="Black Market",
+                value="blackmarket",
+                description="Purchase special items and perks",
+                emoji="🏴‍☠️"
+            )
+        ]
+        
+        super().__init__(
+            placeholder="Choose an action...",
+            min_values=1,
+            max_values=1,
+            options=self.base_options
+        )
     
-    @discord.ui.button(label='View Stats', style=discord.ButtonStyle.secondary, emoji='📊')
-    async def stats(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """View your crime stats."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_stats)
-
-    @discord.ui.button(label='Unlock Notifications', style=discord.ButtonStyle.secondary, emoji='🔔')
-    async def unlock_notify(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Unlock jail release notifications."""
-        # Delete the main menu message
-        try:
-            await self.message.delete()
-        except (discord.NotFound, discord.HTTPException):
-            pass
-            
-        await self.ctx.invoke(self.cog.crime_notify)
-
-    async def update_button_states(self):
-        """Update button states based on user's current status."""
+    async def update_options(self):
+        """Update options based on user's current status."""
         is_jailed = await self.cog.is_jailed(self.ctx.author)
-        settings = await self.cog.config.guild(self.ctx.guild).global_settings()
         member_data = await self.cog.config.member(self.ctx.author).all()
         
-        # Disable crime button if jailed
-        self.commit_crime.disabled = is_jailed
+        # Create a new options list based on user status
+        options = []
+        for option in self.base_options:
+            if option.value == "crime" and is_jailed:
+                # Update description for jailed users
+                new_option = discord.SelectOption(
+                    label=option.label,
+                    value=option.value,
+                    description="(Unavailable) Cannot commit crimes while in jail",
+                    emoji=option.emoji
+                )
+            elif option.value in ["bail", "jailbreak"] and not is_jailed:
+                # Update description for non-jailed users
+                new_option = discord.SelectOption(
+                    label=option.label,
+                    value=option.value,
+                    description="(Unavailable) Only available while in jail",
+                    emoji=option.emoji
+                )
+            elif option.value == "jailbreak" and member_data.get("attempted_jailbreak", False):
+                # Update description for failed jailbreak
+                new_option = discord.SelectOption(
+                    label=option.label,
+                    value=option.value,
+                    description="(Unavailable) Already attempted jailbreak this sentence",
+                    emoji=option.emoji
+                )
+            else:
+                new_option = option
+            
+            options.append(new_option)
         
-        # Disable bail/jailbreak buttons if not jailed
-        self.pay_bail.disabled = not is_jailed
-        self.jailbreak.disabled = not is_jailed or member_data.get("attempted_jailbreak", False)
+        self.options = options
         
-        # Disable notify button if already unlocked or if notifications are free
-        notify_cost = settings.get("notify_cost", 10000)
-        notify_cost_enabled = settings.get("notify_cost_enabled", True)
-        self.unlock_notify.disabled = (
-            member_data.get("notify_on_release", False) or 
-            not notify_cost_enabled or 
-            notify_cost <= 0
-        )
+        # Disable the entire select menu if all options would be disabled
+        self.disabled = is_jailed and all(opt.value in ["crime"] for opt in options) or \
+                       (not is_jailed and all(opt.value in ["bail", "jailbreak"] for opt in options))
         
-        if self.message:
-            await self.message.edit(view=self)
+        # Update the message with new options
+        if self.view and self.view.message:
+            await self.view.message.edit(view=self.view)
+    
+    async def callback(self, interaction: discord.Interaction):
+        """Handle menu selection."""
+        if interaction.user.id != self.ctx.author.id:
+            await interaction.response.send_message("This menu is not for you!", ephemeral=True)
+            return
+            
+        # Get current jail status
+        is_jailed = await self.cog.is_jailed(self.ctx.author)
+        member_data = await self.cog.config.member(self.ctx.author).all()
+        action = self.values[0]
+        
+        # Validate the selection based on current status
+        if action == "crime" and is_jailed:
+            await interaction.response.send_message("You cannot commit crimes while in jail!", ephemeral=True)
+            return
+        elif action in ["bail", "jailbreak"] and not is_jailed:
+            await interaction.response.send_message("You are not in jail!", ephemeral=True)
+            return
+        elif action == "jailbreak" and member_data.get("attempted_jailbreak", False):
+            await interaction.response.send_message("You've already attempted to break out this sentence!", ephemeral=True)
+            return
+            
+        # Delete the main menu message
+        try:
+            await self.view.message.delete()
+        except (discord.NotFound, discord.HTTPException):
+            pass
+            
+        # Handle different actions
+        if action == "crime":
+            await self.ctx.invoke(self.cog.crime_commit)
+        elif action == "bail":
+            await self.ctx.invoke(self.cog.crime_bail)
+        elif action == "jailbreak":
+            await self.ctx.invoke(self.cog.crime_jailbreak)
+        elif action == "leaderboard":
+            await self.ctx.invoke(self.cog.crime_leaderboard)
+        elif action == "status":
+            await self.ctx.invoke(self.cog.crime_status)
+        elif action == "stats":
+            await self.ctx.invoke(self.cog.crime_stats)
+        elif action == "inventory":
+            await self.ctx.invoke(self.cog.view_inventory)
+        elif action == "blackmarket":
+            await self.ctx.invoke(self.cog.crime_blackmarket)
 
+class MainMenuView(discord.ui.View):
+    """View for the main crime menu."""
+    
+    def __init__(self, cog, ctx):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.ctx = ctx
+        self.message: Optional[discord.Message] = None
+        
+        # Add select menu
+        self.select_menu = MainMenuSelect(cog, ctx)
+        self.add_item(self.select_menu)
+    
+    async def initialize_menu(self):
+        """Initialize the menu when first shown."""
+        await self.select_menu.update_options()
+    
     async def on_timeout(self):
         """Handle view timeout."""
         try:
-            for item in self.children:
-                item.disabled = True
+            self.select_menu.disabled = True
             if self.message:
                 await self.message.edit(view=self)
         except (discord.NotFound, discord.HTTPException):

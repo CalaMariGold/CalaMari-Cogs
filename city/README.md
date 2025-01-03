@@ -4,14 +4,16 @@ A comprehensive city simulation system featuring a crime system with various act
 
 ## Features
 
-- 🦹 **Interactive Crime System**
-  - Multiple crime types with varying risk levels and rewards
-  - Dynamic success rates and cooldowns
-  - Target-based crimes (pickpocket, mugging) with anti-farming measures
-  - Random events that affect success rates and rewards
-  - Jail system with bail and jailbreak mechanics
+- 🦹‍♂️ Multiple crime types with varying risk levels
+- 🏴‍☠️ Black Market shop for special items and perks
+- 🎒 Personal inventory system
+- ⛓️ Jail system with bail and jailbreak mechanics
+- 📊 Detailed statistics and leaderboards
+- 💰 Dynamic reward system
+- ⚖️ Risk vs. reward gameplay
+- 🎯 Target other users for crimes
 
-- 🎮 **Button-Based Interface**
+- 🎮 **Button/Dropdown-Based Interface**
   - Modern, intuitive button controls
   - Color-coded risk levels
   - Dynamic button states based on user status
@@ -115,8 +117,6 @@ If you encounter any issues or have suggestions, please open an issue on the Git
 - `bail_cost_multiplier` - How much bail costs based on remaining time
 - `min_steal_balance` - Minimum balance required to be targeted
 - `max_steal_amount` - Maximum amount that can be stolen in one crime
-- `notify_cost` - Cost to unlock jail release notifications
-- `notify_cost_enabled` - Whether notifications require payment to unlock
 
 ### Per-Crime Settings
 Each crime type can be configured with:
