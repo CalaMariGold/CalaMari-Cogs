@@ -8,7 +8,7 @@ import random
 import time
 import asyncio
 from .scenarios import get_random_scenario, get_random_jailbreak_scenario
-from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView, BlackmarketView, InventoryView
+from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView, BlackmarketView, InventoryView, AddScenarioModal
 from .data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
 from .blackmarket import BLACKMARKET_ITEMS
 from datetime import datetime
@@ -1160,3 +1160,176 @@ class CrimeCommands:
             
         except Exception as e:
             await ctx.send(_("An error occurred while viewing your inventory: {}").format(str(e)))
+
+    @crime_set.group(name="scenarios")
+    @commands.guild_only()
+    @commands.admin_or_permissions(administrator=True)
+    async def crime_set_scenarios(self, ctx: commands.Context):
+        """Manage custom random scenarios for this server.
+        
+        Commands:
+        - add: Add a new custom scenario
+        - list: List all custom scenarios
+        - remove: Remove a custom scenario
+        """
+        pass
+
+    @crime_set_scenarios.command(name="add")
+    @commands.guild_only()
+    @commands.admin_or_permissions(administrator=True)
+    async def add_scenario(self, ctx: commands.Context):
+        """Add a custom random scenario to the crime pool.
+        
+        This will guide you through creating a custom scenario by asking for:
+        - Scenario name
+        - Risk level (low, medium, high)
+        - Attempt text
+        - Success text (use {amount} and {currency} placeholders)
+        - Fail text
+        
+        Custom scenarios are saved per server and persist through bot restarts.
+        """
+        # Start scenario creation process
+        await ctx.send("Let's create a new random scenario! I'll ask you for each piece of information.")
+        
+        try:
+            # Get scenario name
+            await ctx.send("What would you like to name this scenario? (e.g. cookie_heist)")
+            msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=30)
+            name = msg.content.lower()
+            
+            # Get risk level
+            await ctx.send("What risk level should this be? (low, medium, or high)")
+            while True:
+                msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=30)
+                risk = msg.content.lower()
+                if risk not in ["low", "medium", "high"]:
+                    await ctx.send("Please enter either 'low', 'medium', or 'high'.")
+                else:
+                    break
+            
+            # Get attempt text
+            await ctx.send("Enter the attempt text (use {user} for the user's mention):")
+            msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
+            attempt_text = msg.content
+            
+            # Get success text
+            await ctx.send("Enter the success text (use {user} for the user's mention, {amount} for the reward amount, and {currency} for the currency name):")
+            msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
+            success_text = msg.content
+            
+            # Get fail text
+            await ctx.send("Enter the fail text (use {user} for the user's mention, {fine} for the fine amount, and {currency} for the currency name):")
+            msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
+            fail_text = msg.content
+            
+            # Set values based on risk level
+            if risk == "low":
+                success_rate = 0.7
+                min_reward = 100
+                max_reward = 300
+                jail_time = 180
+                fine_multiplier = 0.3
+            elif risk == "medium":
+                success_rate = 0.5
+                min_reward = 300
+                max_reward = 800
+                jail_time = 300
+                fine_multiplier = 0.4
+            else:  # high
+                success_rate = 0.3
+                min_reward = 800
+                max_reward = 2000
+                jail_time = 600
+                fine_multiplier = 0.5
+                
+            # Create new scenario
+            new_scenario = {
+                "name": name,
+                "risk": risk,
+                "min_reward": min_reward,
+                "max_reward": max_reward,
+                "success_rate": success_rate,
+                "jail_time": jail_time,
+                "fine_multiplier": fine_multiplier,
+                "attempt_text": attempt_text,
+                "success_text": success_text,
+                "fail_text": fail_text
+            }
+            
+            # Add to guild's custom scenarios
+            async with self.config.guild(ctx.guild).custom_scenarios() as scenarios:
+                scenarios.append(new_scenario)
+            
+            # Send confirmation
+            embed = discord.Embed(
+                title="✅ Custom Scenario Added!",
+                description=f"Your scenario '{name}' has been added to this server's random crime pool.",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="Risk Level", value=risk.title(), inline=True)
+            embed.add_field(name="Success Rate", value=f"{int(success_rate * 100)}%", inline=True)
+            embed.add_field(name="Reward Range", value=f"{min_reward:,} - {max_reward:,}", inline=True)
+            
+            await ctx.send(embed=embed)
+            
+        except asyncio.TimeoutError:
+            await ctx.send("❌ Scenario creation timed out. Please try again.")
+
+    @crime_set_scenarios.command(name="list")
+    @commands.guild_only()
+    @commands.admin_or_permissions(administrator=True)
+    async def list_scenarios(self, ctx: commands.Context):
+        """List all custom scenarios in this server."""
+        custom_scenarios = await self.config.guild(ctx.guild).custom_scenarios()
+        
+        if not custom_scenarios:
+            await ctx.send("This server has no custom scenarios.")
+            return
+        
+        # Create embed to display scenarios
+        embed = discord.Embed(
+            title="📜 Custom Random Scenarios",
+            description=f"This server has {len(custom_scenarios)} custom scenarios:",
+            color=await ctx.embed_color()
+        )
+        
+        for scenario in custom_scenarios:
+            # Format success rate as percentage
+            success_rate = int(scenario["success_rate"] * 100)
+            
+            # Create field content
+            details = [
+                f"**Risk Level:** {scenario['risk'].title()}",
+                f"**Success Rate:** {success_rate}%",
+                f"**Reward:** {scenario['min_reward']:,} - {scenario['max_reward']:,}",
+                f"**Jail Time:** {scenario['jail_time']} seconds",
+                f"**Fine Multiplier:** {scenario['fine_multiplier']}"
+            ]
+            
+            embed.add_field(
+                name=f"🎲 {scenario['name']}",
+                value="\n".join(details),
+                inline=False
+            )
+        
+        await ctx.send(embed=embed)
+
+    @crime_set_scenarios.command(name="remove")
+    @commands.guild_only()
+    @commands.admin_or_permissions(administrator=True)
+    async def remove_scenario(self, ctx: commands.Context, scenario_name: str):
+        """Remove a custom scenario by name.
+        
+        Example:
+        - [p]crimeset scenarios remove cookie_heist
+        """
+        async with self.config.guild(ctx.guild).custom_scenarios() as scenarios:
+            # Find scenario with matching name
+            for i, scenario in enumerate(scenarios):
+                if scenario["name"].lower() == scenario_name.lower():
+                    removed = scenarios.pop(i)
+                    await ctx.send(f"✅ Removed custom scenario: {removed['name']}")
+                    return
+            
+            await ctx.send("❌ No custom scenario found with that name.")

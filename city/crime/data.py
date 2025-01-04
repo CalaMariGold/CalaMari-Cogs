@@ -68,19 +68,20 @@ CRIME_TYPES = {
 
 # Default guild settings
 DEFAULT_GUILD = {
-    "crime_options": CRIME_TYPES.copy(),  # Use the same crime types
+    "crime_options": CRIME_TYPES,
     "global_settings": {
+        "allow_bail": True,
+        "bail_cost_multiplier": 1.5,
+        "min_steal_balance": 100,
+        "max_steal_amount": 1000,
         "default_jail_time": 1800,  # 30 minutes
         "default_fine_multiplier": 0.5,
-        "allow_bail": True,
-        "bail_cost_multiplier": 0.35,  # Bail costs 0.35x the jail sentence
-        "min_steal_balance": 100,  # Minimum balance required to be targeted
-        "max_steal_amount": 1000,  # Maximum amount that can be stolen in one crime
         "protect_low_balance": True,  # Prevent stealing from users with very low balance
         "show_success_rate": True,  # Show success rate in crime messages
         "show_fine_amount": True,   # Show potential fine amounts
         "enable_random_events": True  # Enable random events during crimes
-    }
+    },
+    "custom_scenarios": []  # List to store custom scenarios for this guild
 }
 
 # Default member settings specific to crime

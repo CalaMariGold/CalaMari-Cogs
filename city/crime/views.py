@@ -8,7 +8,7 @@ from redbot.core.utils.chat_formatting import humanize_number
 from typing import Optional, Tuple
 from ..utils import calculate_stolen_amount, can_target_user
 import asyncio
-from .scenarios import get_random_scenario, get_crime_event, format_text
+from .scenarios import get_random_scenario, get_crime_event, format_text, get_all_scenarios
 from .blackmarket import BLACKMARKET_ITEMS, BlackmarketView, BlackmarketSelect, InventoryView, InventorySelect
 
 _ = Translator("Crime", __file__)
@@ -530,7 +530,8 @@ class CrimeView(discord.ui.View):
             
             # Handle random scenario if crime type is random
             if self.crime_type == "random":
-                self.scenario = get_random_scenario()
+                scenarios = await get_all_scenarios(self.cog.config, interaction.guild)
+                self.scenario = get_random_scenario(scenarios)
                 self.crime_data = self.crime_data.copy()  # Create a copy to modify
                 self.crime_data.update({
                     "min_reward": self.scenario["min_reward"],
@@ -1683,3 +1684,114 @@ class MainMenuView(discord.ui.View):
                 await self.message.edit(view=self)
         except (discord.NotFound, discord.HTTPException):
             pass
+
+class AddScenarioModal(discord.ui.Modal):
+    """Modal for adding a custom random scenario."""
+    def __init__(self, cog):
+        super().__init__(title="Add Custom Random Scenario")
+        self.cog = cog
+        
+        self.name = discord.ui.TextInput(
+            label="Scenario Name",
+            placeholder="e.g. cookie_heist",
+            required=True,
+            min_length=3,
+            max_length=50
+        )
+        self.add_item(self.name)
+        
+        self.risk = discord.ui.TextInput(
+            label="Risk Level",
+            placeholder="low, medium, or high",
+            required=True,
+            min_length=3,
+            max_length=6
+        )
+        self.add_item(self.risk)
+        
+        self.attempt_text = discord.ui.TextInput(
+            label="Attempt Text",
+            placeholder="🍪 {user} sneaks into the cookie factory...",
+            required=True,
+            min_length=10,
+            max_length=200
+        )
+        self.add_item(self.attempt_text)
+        
+        self.success_text = discord.ui.TextInput(
+            label="Success Text",
+            placeholder="🍪 {user} made off with cookies worth {amount} {currency}!",
+            required=True,
+            min_length=10,
+            max_length=200
+        )
+        self.add_item(self.success_text)
+        
+        self.fail_text = discord.ui.TextInput(
+            label="Fail Text",
+            placeholder="🍪 {user} got caught with their hand in the cookie jar!",
+            required=True,
+            min_length=10,
+            max_length=200
+        )
+        self.add_item(self.fail_text)
+        
+    async def on_submit(self, interaction: discord.Interaction):
+        """Handle form submission."""
+        # Validate risk level
+        risk = self.risk.value.lower()
+        if risk not in ["low", "medium", "high"]:
+            await interaction.response.send_message(
+                "Invalid risk level. Must be 'low', 'medium', or 'high'.",
+                ephemeral=True
+            )
+            return
+            
+        # Get corresponding success rate and other values based on risk
+        if risk == "low":
+            success_rate = SUCCESS_RATE_HIGH
+            min_reward = 100
+            max_reward = 300
+            jail_time = 180
+            fine_multiplier = 0.3
+        elif risk == "medium":
+            success_rate = SUCCESS_RATE_MEDIUM
+            min_reward = 300
+            max_reward = 800
+            jail_time = 300
+            fine_multiplier = 0.4
+        else:  # high
+            success_rate = SUCCESS_RATE_LOW
+            min_reward = 800
+            max_reward = 2000
+            jail_time = 600
+            fine_multiplier = 0.5
+            
+        # Create new scenario
+        new_scenario = {
+            "name": self.name.value.lower(),
+            "risk": risk,
+            "min_reward": min_reward,
+            "max_reward": max_reward,
+            "success_rate": success_rate,
+            "jail_time": jail_time,
+            "fine_multiplier": fine_multiplier,
+            "attempt_text": self.attempt_text.value,
+            "success_text": self.success_text.value,
+            "fail_text": self.fail_text.value
+        }
+        
+        # Add to guild's custom scenarios
+        await add_custom_scenario(self.cog.config, interaction.guild, new_scenario)
+        
+        # Send confirmation
+        embed = discord.Embed(
+            title="✅ Custom Scenario Added!",
+            description=f"Your scenario '{self.name.value}' has been added to this server's random crime pool.",
+            color=discord.Color.green()
+        )
+        embed.add_field(name="Risk Level", value=risk.title(), inline=True)
+        embed.add_field(name="Success Rate", value=f"{int(success_rate * 100)}%", inline=True)
+        embed.add_field(name="Reward Range", value=f"{min_reward:,} - {max_reward:,}", inline=True)
+        
+        await interaction.response.send_message(embed=embed)

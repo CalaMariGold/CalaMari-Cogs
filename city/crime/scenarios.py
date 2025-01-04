@@ -72,9 +72,27 @@ def get_crime_event(crime_type: str) -> list:
     
     return events
 
-def get_random_scenario():
-    """Get a random crime scenario."""
-    return random.choice(RANDOM_SCENARIOS)
+async def get_all_scenarios(config, guild):
+    """Get all scenarios including custom ones for the guild."""
+    # Get default scenarios
+    scenarios = RANDOM_SCENARIOS.copy()
+    
+    # Get custom scenarios for this guild
+    custom_scenarios = await config.guild(guild).custom_scenarios()
+    
+    # Add custom scenarios
+    scenarios.extend(custom_scenarios)
+    
+    return scenarios
+
+async def add_custom_scenario(config, guild, scenario):
+    """Add a custom scenario to the guild's config."""
+    async with config.guild(guild).custom_scenarios() as scenarios:
+        scenarios.append(scenario)
+
+def get_random_scenario(scenarios):
+    """Get a random crime scenario from the provided list."""
+    return random.choice(scenarios)
 
 def get_random_jailbreak_scenario():
     """Get a random prison break scenario."""
