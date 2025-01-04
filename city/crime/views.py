@@ -259,7 +259,7 @@ class CrimeView(discord.ui.View):
             if self.crime_type == "random":
                 embed.description = _(self.scenario["success_text"]).format(
                     user=self.interaction.user.mention,
-                    reward=kwargs.get("reward", 0),
+                    amount=kwargs.get("reward", 0),
                     currency=currency
                 )
             elif self.target:

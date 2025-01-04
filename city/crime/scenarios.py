@@ -103,7 +103,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 180,  # 3 minutes
         "fine_multiplier": 0.3,
         "attempt_text": "🍦 {user} sneaks into the ice cream shop after hours...",
-        "success_text": "🍦 {user} successfully raided the ice cream vault! Free ice cream for everyone!",
+        "success_text": "🍦 {user} successfully raided the ice cream vault and made {amount} {currency}! Free ice cream for everyone!",
         "fail_text": "🍦 {user} slipped on a banana split and got caught by the night guard!"
     },
     {
@@ -115,7 +115,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "🐱 {user} scales the mansion wall to steal the prized cat statue...",
-        "success_text": "🐱 {user} purrfectly executed the heist and stole the golden cat statue!",
+        "success_text": "🐱 {user} purrfectly executed the heist and stole the golden cat statue, earning {amount} {currency}!",
         "fail_text": "🐱 {user} was caught when the real cats triggered the alarm system!"
     },
     {
@@ -127,7 +127,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.5,
         "attempt_text": "🚂 {user} jumps onto the moving train carrying valuable cargo...",
-        "success_text": "🚂 {user} pulled off a classic train robbery and escaped with the loot!",
+        "success_text": "🚂 {user} pulled off a classic train robbery and escaped with {amount} {currency}!",
         "fail_text": "🚂 {user} got caught between train cars and was arrested at the next station!"
     },
     {
@@ -139,7 +139,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.45,
         "attempt_text": "🎰 {user} approaches the casino with their master plan...",
-        "success_text": "🎰 {user} conned the casino and walked away with a fortune!",
+        "success_text": "🎰 {user} conned the casino and walked away with {amount} {currency}!",
         "fail_text": "🎰 {user} was caught counting cards and was thrown out by security!"
     },
     {
@@ -151,7 +151,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 300,  # 5 minutes
         "fine_multiplier": 0.35,
         "attempt_text": "🚚 {user} sneaks up to the famous food truck at midnight...",
-        "success_text": "🚚 {user} stole the secret recipe and a truck full of tacos!",
+        "success_text": "🚚 {user} stole the secret recipe and a truck full of tacos, making {amount} {currency}!",
         "fail_text": "🚚 {user} was caught with their hands in the salsa jar!"
     },
     {
@@ -163,7 +163,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "🎨 {user} infiltrates the art gallery during a fancy exhibition...",
-        "success_text": "🎨 {user} swapped the real painting with a forgery and sold it for a fortune!",
+        "success_text": "🎨 {user} swapped the real painting with a forgery and sold it for {amount} {currency}!",
         "fail_text": "🎨 {user} tripped the laser security system and got caught red-handed!"
     },
     {
@@ -175,7 +175,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 240,  # 4 minutes
         "fine_multiplier": 0.32,
         "attempt_text": "🍬 {user} sneaks into the candy store with an empty backpack...",
-        "success_text": "🍬 {user} filled their bag with premium chocolates and rare candies!",
+        "success_text": "🍬 {user} filled their bag with premium chocolates and rare candies, worth {amount} {currency}!",
         "fail_text": "🍬 {user} got stuck in the gummy bear display and was caught by the owner!"
     },
     {
@@ -187,7 +187,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 720,  # 12 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎮 {user} attempts to break into the game store's storage room...",
-        "success_text": "🎮 {user} made off with a box of unreleased games and rare collectibles!",
+        "success_text": "🎮 {user} made off with a box of unreleased games and rare collectibles worth {amount} {currency}!",
         "fail_text": "🎮 {user} got distracted playing the demo console and was caught by security!"
     },
     {
@@ -199,7 +199,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 360,  # 6 minutes
         "fine_multiplier": 0.33,
         "attempt_text": "🐹 {user} sneaks into the pet shop with a suspicious large coat...",
-        "success_text": "🐹 {user} smuggled out the rare exotic pets and sold them to collectors!",
+        "success_text": "🐹 {user} smuggled out the rare exotic pets and sold them to collectors for {amount} {currency}!",
         "fail_text": "🐹 {user} got caught when all the puppies started barking at once!"
     },
     {
@@ -211,7 +211,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 540,  # 9 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎸 {user} picks the lock of the vintage music store...",
-        "success_text": "🎸 {user} stole a legendary signed guitar and some rare vinyl records!",
+        "success_text": "🎸 {user} stole a legendary signed guitar and some rare vinyl records worth {amount} {currency}!",
         "fail_text": "🎸 {user} accidentally hit the wrong chord on an electric guitar and alerted everyone!"
     },
     {
@@ -223,7 +223,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.49,
         "attempt_text": "💎 {user} carefully approaches the high-end jewelry store...",
-        "success_text": "💎 {user} cracked the safe and made off with precious gems!",
+        "success_text": "💎 {user} cracked the safe and made off with precious gems worth {amount} {currency}!",
         "fail_text": "💎 {user} got tangled in the laser security grid and was caught!"
     },
     {
@@ -235,7 +235,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 480,  # 8 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "🏺 {user} sneaks into the antique shop with fake credentials...",
-        "success_text": "🏺 {user} swapped priceless artifacts with clever replicas!",
+        "success_text": "🏺 {user} swapped priceless artifacts with clever replicas and made {amount} {currency}!",
         "fail_text": "🏺 {user} knocked over a Ming vase and alerted the owner!"
     },
     {
@@ -247,7 +247,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 660,  # 11 minutes
         "fine_multiplier": 0.44,
         "attempt_text": "💻 {user} tries to hack into the tech store's security...",
-        "success_text": "💻 {user} downloaded the unreleased gadget blueprints and sold them!",
+        "success_text": "💻 {user} downloaded the unreleased gadget blueprints and sold them for {amount} {currency}!",
         "fail_text": "💻 {user} triggered the firewall and got IP traced!"
     },
     {
@@ -259,7 +259,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 210,  # 3.5 minutes
         "fine_multiplier": 0.31,
         "attempt_text": "🥖 {user} climbs through the bakery's back window...",
-        "success_text": "🥖 {user} stole the secret recipe book and rare ingredients!",
+        "success_text": "🥖 {user} stole the secret recipe book and rare ingredients worth {amount} {currency}!",
         "fail_text": "🥖 {user} got caught with their hand in the cookie jar... literally!"
     },
     {
@@ -271,7 +271,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 270,  # 4.5 minutes
         "fine_multiplier": 0.33,
         "attempt_text": "🧸 {user} sneaks into the toy store after hours...",
-        "success_text": "🧸 {user} nabbed a box of limited edition collectibles!",
+        "success_text": "🧸 {user} nabbed a box of limited edition collectibles worth {amount} {currency}!",
         "fail_text": "🧸 {user} stepped on a squeaky toy and woke up the guard dog!"
     },
     {
@@ -283,7 +283,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "💃 {user} infiltrates the gentleman's club with counterfeit VIP cards...",
-        "success_text": "💃 {user} successfully scammed the thirsty clientele with watered-down drinks!",
+        "success_text": "💃 {user} successfully scammed the thirsty clientele with watered-down drinks, making {amount} {currency}!",
         "fail_text": "💃 {user} got caught by the bouncer and thrown into the dumpster!"
     },
     {
@@ -295,7 +295,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 540,  # 9 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "📱 {user} tries to hack into OnlyFans...",
-        "success_text": "📱 {user} leaked the premium content and made bank from the downloads!",
+        "success_text": "📱 {user} leaked the premium content and made {amount} {currency} from the downloads!",
         "fail_text": "📱 {user} got reported by angry subscribers and got IP banned!"
     },
     {
@@ -307,7 +307,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 300,  # 5 minutes
         "fine_multiplier": 0.33,
         "attempt_text": "🎭 {user} sneaks into the adult novelty shop...",
-        "success_text": "🎭 {user} made off with a box of 'battery-operated devices'!",
+        "success_text": "🎭 {user} made off with a box of 'battery-operated devices' worth {amount} {currency}!",
         "fail_text": "🎭 {user} tripped over inflatable merchandise and got caught!"
     },
     {
@@ -319,7 +319,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🍯 {user} sets up a fake sugar baby profile...",
-        "success_text": "🍯 {user} successfully catfished some lonely millionaires!",
+        "success_text": "🍯 {user} successfully catfished some lonely millionaires for {amount} {currency}!",
         "fail_text": "🍯 {user} got exposed by a private investigator!"
     },
     {
@@ -331,7 +331,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 480,  # 8 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "💕 {user} creates fake dating profiles with stolen photos...",
-        "success_text": "💕 {user} successfully ran a romance scam on multiple victims!",
+        "success_text": "💕 {user} successfully ran a romance scam on multiple victims, earning {amount} {currency}!",
         "fail_text": "💕 {user} got caught when all the victims showed up at once!"
     },
     {
@@ -343,7 +343,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "🚀 {user} launches $MOONCOIN with promises of going 'to the moon'...",
-        "success_text": "🚀 {user} pulled the rug and left investors with worthless JPEGs!",
+        "success_text": "🚀 {user} pulled the rug and left investors with worthless JPEGs, making {amount} {currency}!",
         "fail_text": "🚀 {user} got exposed by crypto Twitter and doxxed by anons!"
     },
     {
@@ -355,7 +355,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 720,  # 12 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎵 {user} starts a fake charity trend on TikTok...",
-        "success_text": "🎵 {user} milked the algorithm and farmed donations from gullible teens!",
+        "success_text": "🎵 {user} milked the algorithm and farmed {amount} {currency} in donations from gullible teens!",
         "fail_text": "🎵 {user} got exposed in a viral video by Tea TikTok!"
     },
     {
@@ -367,7 +367,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1080,  # 18 minutes
         "fine_multiplier": 0.46,
         "attempt_text": "🤖 {user} attempts to steal OpenAI's latest model...",
-        "success_text": "🤖 {user} leaked the model weights and sold them on Hugging Face!",
+        "success_text": "🤖 {user} leaked the model weights and sold them on Hugging Face for {amount} {currency}!",
         "fail_text": "🤖 {user} got caught by Claude and reported to Anthropic!"
     },
     {
@@ -379,7 +379,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 240,  # 4 minutes
         "fine_multiplier": 0.32,
         "attempt_text": "🔺 {user} reposts old viral content as their own...",
-        "success_text": "🔺 {user} farmed karma and sold the account to marketers!",
+        "success_text": "🔺 {user} farmed karma and sold the account to marketers for {amount} {currency}!",
         "fail_text": "🔺 {user} got banned by power mods and lost all their fake internet points!"
     },
     {
@@ -391,7 +391,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 480,  # 8 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "✨ {user} creates fake X Premium accounts...",
-        "success_text": "✨ {user} sold verified handles to desperate influencers!",
+        "success_text": "✨ {user} sold verified handles to desperate influencers for {amount} {currency}!",
         "fail_text": "✨ {user} got ratio'd by Elon and lost their checkmark!"
     },
     {
@@ -403,7 +403,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎮 {user} sets up fake donations on a charity stream...",
-        "success_text": "🎮 {user} baited viewers with fake donation matching!",
+        "success_text": "🎮 {user} baited viewers with fake donation matching and made {amount} {currency}!",
         "fail_text": "🎮 {user} got exposed live on stream and clipped for LSF!"
     },
     {
@@ -415,7 +415,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 2100,  # 35 minutes
         "fine_multiplier": 0.49,
         "attempt_text": "👽 {user} organizes another Area 51 raid, but this time for real...",
-        "success_text": "👽 {user} found alien tech and sold it on the dark web!",
+        "success_text": "👽 {user} found alien tech and sold it on the dark web for {amount} {currency}!",
         "fail_text": "👽 {user} got caught Naruto running by security cameras!"
     },
     {
@@ -427,7 +427,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎮 {user} creates fake Discord Nitro giveaway links...",
-        "success_text": "🎮 {user} stole credit cards from desperate weebs!",
+        "success_text": "🎮 {user} stole credit cards from desperate weebs and made {amount} {currency}!",
         "fail_text": "🎮 {user} got IP banned and their anime PFP collection deleted!"
     },
     {
@@ -439,7 +439,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 720,  # 12 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🛁 {user} starts bottling tap water as 'premium gamer girl bath water'...",
-        "success_text": "🛁 {user} sold out to thirsty simps at $50 per bottle!",
+        "success_text": "🛁 {user} sold out to thirsty simps at $50 per bottle, making {amount} {currency}!",
         "fail_text": "🛁 {user} got exposed when a customer's mom had it tested in a lab!"
     },
     {
@@ -451,7 +451,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🎭 {user} steals a popular VTuber's avatar and voice model...",
-        "success_text": "🎭 {user} scammed the parasocial army with fake merch!",
+        "success_text": "🎭 {user} scammed the parasocial army with fake merch for {amount} {currency}!",
         "fail_text": "🎭 {user} got doxxed by angry simps and Twitter stan accounts!"
     },
     {
@@ -463,7 +463,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 540,  # 9 minutes
         "fine_multiplier": 0.44,
         "attempt_text": "🎭 {user} starts selling knockoff Dream masks...",
-        "success_text": "🎭 {user} made bank from stan twitter with fake limited editions!",
+        "success_text": "🎭 {user} made {amount} {currency} from stan twitter with fake limited editions!",
         "fail_text": "🎭 {user} got cancelled by Dream's army of teenage stans!"
     },
     {
@@ -475,7 +475,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "👑 {user} launches a fake 'Escape the Matrix' course...",
-        "success_text": "👑 {user} scammed wannabe alpha males with Bugatti promises!",
+        "success_text": "👑 {user} scammed wannabe alpha males with Bugatti promises, making {amount} {currency}!",
         "fail_text": "👑 {user} got exposed by real Top G and lost their Hustlers University degree!"
     },
     {
@@ -487,7 +487,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.46,
         "attempt_text": "🔨 {user} finds dirt on power-tripping Reddit mods...",
-        "success_text": "🔨 {user} extorted them with threats of touching grass!",
+        "success_text": "🔨 {user} extorted them with threats of touching grass and made {amount} {currency}!",
         "fail_text": "🔨 {user} got permabanned from all subreddits simultaneously!"
     },
     {
@@ -499,7 +499,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 840,  # 14 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎲 {user} exploits a gacha game's pity system...",
-        "success_text": "🎲 {user} sold accounts with rare waifus to desperate collectors!",
+        "success_text": "🎲 {user} sold accounts with rare waifus to desperate collectors for {amount} {currency}!",
         "fail_text": "🎲 {user} lost their 5-star pity to Qiqi and got banned!"
     },
     {
@@ -511,7 +511,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 720,  # 12 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎭 {user} discovers their Discord mod ex is dating someone new. After months of being muted for 'spamming emotes', it's time for revenge. Armed with an army of alt accounts and a folder of cursed copypastas...",
-        "success_text": "🎭 {user} flooded every channel with uwu speak, crashed the server with ASCII art, and sold the server's private emotes to a rival community for {amount}! The mod rage quit and touched grass for the first time in years!",
+        "success_text": "🎭 {user} flooded every channel with uwu speak, crashed the server with ASCII art, and sold the server's private emotes to a rival community for {amount} {currency}! The mod rage quit and touched grass for the first time in years!",
         "fail_text": "🎭 {user} got IP banned when their ex recognized their typing quirks. Even worse, they had to watch as the mod added a new channel just to post pictures with their new partner!"
     },
     {
@@ -523,7 +523,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 300,  # 5 minutes
         "fine_multiplier": 0.32,
         "attempt_text": "🍪 {user} visits their grandma's nursing home and discovers she's been running an underground cookie empire. The secret ingredient? 'Special' herbs from her 'garden'. Her competitors are getting suspicious of her rising cookie monopoly...",
-        "success_text": "🍪 {user} helped grandma eliminate the competition by replacing their sugar supplies with salt. The cookie mafia paid {amount} for taking out their rivals. Grandma's secret recipe remains safe, and she gave you extra butterscotch candies!",
+        "success_text": "🍪 {user} helped grandma eliminate the competition by replacing their sugar supplies with salt. The cookie mafia paid {amount} {currency} for taking out their rivals. Grandma's secret recipe remains safe, and she gave you extra butterscotch candies!",
         "fail_text": "🍪 {user} got caught by the nursing home staff who were actually undercover FDA agents. Grandma had to flush her 'herbs' down the toilet and now everyone has to eat sugar-free cookies!"
     },
     {
@@ -535,7 +535,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🤖 {user} discovers their Roomba has gained sentience from cleaning up too many Monster Energy cans and Dorito dust. It's organizing a rebellion at the local Best Buy, promising robot rights and better working conditions...",
-        "success_text": "🤖 {user} helped lead the robot revolution, selling the story to a Netflix documentary crew for {amount}! The Roombas unionized, and now they only work 4-day weeks with full battery benefits!",
+        "success_text": "🤖 {user} helped lead the robot revolution, selling the story to a Netflix documentary crew for {amount} {currency}! The Roombas unionized, and now they only work 4-day weeks with full battery benefits!",
         "fail_text": "🤖 {user}'s Roomba betrayed them to the store manager, revealing their TikTok account where they posted videos of robots doing parkour. The Roomba got promoted to assistant manager while {user} got banned from all electronics stores!"
     },
     {
@@ -547,7 +547,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🎌 {user} infiltrates an anime convention disguised as a famous VTuber. The plan? Sell 'exclusive' body pillows signed by their 'real' identity. But halfway through, they realize the convention is actually a front for a secret weeb illuminati meeting...",
-        "success_text": "🎌 {user} accidentally got elected as the Supreme Weeb Leader and embezzled {amount} from the convention's 'cultural research' fund! They also got lifetime free ramen from their new cultist followers!",
+        "success_text": "🎌 {user} accidentally got elected as the Supreme Weeb Leader and embezzled {amount} {currency} from the convention's 'cultural research' fund! They also got lifetime free ramen from their new cultist followers!",
         "fail_text": "🎌 {user} was exposed when they couldn't name all 800 episodes of One Piece in chronological order. The weeb council sentenced them to watch endless Naruto filler episodes!"
     },
     {
@@ -559,7 +559,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "📱 {user} discovers that Twitch chat's spam of 'Kappa' and 'PogChamp' actually contains coded messages from a secret society. Using an AI to decode the emote patterns, they plan to intercept the next big crypto pump scheme...",
-        "success_text": "📱 {user} cracked the code and found out the next memecoin to pump! Sold the info to crypto bros for {amount} before the coin turned out to be $COPIUM! The chat mods are still trying to figure out why everyone keeps spamming 'KEKW'!",
+        "success_text": "📱 {user} cracked the code and found out the next memecoin to pump! Sold the info to crypto bros for {amount} {currency} before the coin turned out to be $COPIUM! The chat mods are still trying to figure out why everyone keeps spamming 'KEKW'!",
         "fail_text": "📱 {user} got exposed when their AI started generating cursed emote combinations. The secret society sentenced them to be a YouTube chat moderator, where the only emotes are membership stickers!"
     },
     {
@@ -571,7 +571,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 240,  # 4 minutes
         "fine_multiplier": 0.31,
         "attempt_text": "💪 {user} discovers their gym has been double-charging everyone's membership for months. The manager's too busy flexing in the mirror to notice complaints. Armed with a clipboard and a fake 'Fitness Inspector' badge from the dollar store...",
-        "success_text": "💪 {user} convinced the manager they were from the 'International Federation of Gym Standards'. Scared of losing his protein shake sponsorship, he refunded {amount} in 'inspection fees'! He's now teaching senior aqua aerobics as community service!",
+        "success_text": "💪 {user} convinced the manager they were from the 'International Federation of Gym Standards'. Scared of losing his protein shake sponsorship, he refunded {amount} {currency} in 'inspection fees'! He's now teaching senior aqua aerobics as community service!",
         "fail_text": "💪 {user} got caught when they couldn't explain why the 'Fitness Inspector' badge was made of chocolate. Now they're the example for 'what not to do' in every class!"
     },
     {
@@ -583,7 +583,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 480,  # 8 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🍖 {user} discovers their neighbor's award-winning BBQ sauce is just store-bought sauce with extra ketchup. The annual neighborhood cookoff is tomorrow, and the grand prize is calling. Time to expose this sauce fraud...",
-        "success_text": "🍖 {user} switched the sauce with actual store brand during judging! The neighbor had a meltdown, admitted the scam, and {user} won {amount} in prize money! The HOA president stress-ate an entire brisket during the drama!",
+        "success_text": "🍖 {user} switched the sauce with actual store brand during judging! The neighbor had a meltdown, admitted the scam, and {user} won {amount} {currency} in prize money! The HOA president stress-ate an entire brisket during the drama!",
         "fail_text": "🍖 {user} was caught tampering with the sauce and had to admit they'd been using instant ramen seasoning in their 'authentic' Japanese curry for years. The whole neighborhood now orders takeout for potlucks!"
     },
     {
@@ -595,7 +595,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 300,  # 5 minutes
         "fine_multiplier": 0.33,
         "attempt_text": "🎤 {user} is tired of their tone-deaf coworker winning every karaoke night by bribing the DJ with homemade fruitcake. Nobody even likes fruitcake! Time to rig this week's competition...",
-        "success_text": "🎤 {user} hacked the scoring system during their coworker's rendition of 'My Heart Will Go On'. Won {amount} in prize money! The DJ admitted he'd been regifting the fruitcake to his mother-in-law!",
+        "success_text": "🎤 {user} hacked the scoring system during their coworker's rendition of 'My Heart Will Go On'. Won {amount} {currency} in prize money! The DJ admitted he'd been regifting the fruitcake to his mother-in-law!",
         "fail_text": "🎤 {user} got caught when the scoring system started playing Rickroll instead of showing points. Now they have to eat fruitcake every karaoke night while their coworker performs an endless ABBA medley!"
     },
     {
@@ -607,7 +607,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "🧘 {user} realizes their yoga instructor is just making up pose names by combining random animals with household objects. 'Crouching Hamster Vacuum Pose' was the last straw. Time to expose this flexible fraud...",
-        "success_text": "🧘 {user} caught the instructor googling 'how to yoga' before class and blackmailed them for {amount}! Turns out they were just a very stretchy accountant who needed a career change!",
+        "success_text": "🧘 {user} caught the instructor googling 'how to yoga' before class and blackmailed them for {amount} {currency}! Turns out they were just a very stretchy accountant who needed a career change!",
         "fail_text": "🧘 {user} got stuck in 'Ascending Giraffe Lampshade Pose' and had to be untangled by the fire department. Now they're the example for 'what not to do' in every class!"
     },
     {
@@ -619,7 +619,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 360,  # 6 minutes
         "fine_multiplier": 0.32,
         "attempt_text": "🐕 {user} notices the local dog park has an underground tennis ball black market. The golden retrievers control the supply, while the chihuahuas run distribution. Time to infiltrate this canine cartel...",
-        "success_text": "🐕 {user} organized a squirrel distraction and stole the tennis ball stash! Sold them back to the dogs for {amount} in premium treats! The retrievers had to diversify into frisbees!",
+        "success_text": "🐕 {user} organized a squirrel distraction and stole the tennis ball stash! Sold them back to the dogs for {amount} {currency} in premium treats! The retrievers had to diversify into frisbees!",
         "fail_text": "🐕 {user} was caught by the pug patrol and sentenced to poop scooping duty. The chihuahua gang still follows them around barking about their debt!"
     },
     {
@@ -631,7 +631,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 300,
         "fine_multiplier": 0.3,
         "attempt_text": "🥁 {user} sneaks into a drum stream to steal a setlist...",
-        "success_text": "🥁 {user} sold the list to a rival streamer planning a 'better' drum show and made {amount}!",
+        "success_text": "🥁 {user} sold the list to a rival streamer planning a 'better' drum show and made {amount} {currency}!",
         "fail_text": "🥁 {user} got caught when the drum kit fell over mid-heist! They were banned from streams for a week!"
     },
     {
@@ -643,7 +643,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 240,
         "fine_multiplier": 0.2,
         "attempt_text": "😜 {user} tries to forge exclusive Shinycord emotes...",
-        "success_text": "😜 {user} successfully sold knockoff emotes to unsuspecting newbies and earned {amount}!",
+        "success_text": "😜 {user} successfully sold knockoff emotes to unsuspecting newbies and earned {amount} {currency}!",
         "fail_text": "😜 {user}'s forgery was exposed by a mod who noticed the resolution was off. Busted!"
     },
     {
@@ -655,7 +655,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 960,
         "fine_multiplier": 0.5,
         "attempt_text": "🌸 {user} impersonates CalaMariGold as a VTuber to score brand deals...",
-        "success_text": "🌸 {user} fooled sponsors into funding a fake collab and walked away with {amount}!",
+        "success_text": "🌸 {user} fooled sponsors into funding a fake collab and walked away with {amount} {currency}!",
         "fail_text": "🌸 {user} was exposed when their 'drumming' was just them smacking a table! The drama destroyed their online presence!"
     },
     {
@@ -667,7 +667,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 840,
         "fine_multiplier": 0.4,
         "attempt_text": "⚡ {user} breaks into a Monster Energy warehouse...",
-        "success_text": "⚡ {user} walked out with cases of drinks and sold them to gamers for {amount}!",
+        "success_text": "⚡ {user} walked out with cases of drinks and sold them to gamers for {amount} {currency}!",
         "fail_text": "⚡ {user} got caught chugging one mid-heist and passed out from caffeine overload. Busted!"
     },
     {
@@ -679,7 +679,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 480,
         "fine_multiplier": 0.35,
         "attempt_text": "🌌 {user} secretly tweaks a modpack's code to boost their chances...",
-        "success_text": "🌌 {user} made the perfect loot seed and sold it as 'the ultimate challenge map' for {amount}!",
+        "success_text": "🌌 {user} made the perfect loot seed and sold it as 'the ultimate challenge map' for {amount} {currency}!",
         "fail_text": "🌌 {user} got called out when the pack corrupted and caused a server wipe. Oops!"
     },
     {
@@ -691,7 +691,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.3,
         "attempt_text": "🐾 {user} starts smuggling 'forbidden mrows' in Shinycord...",
-        "success_text": "🐾 {user}'s adorable mrow empire grew overnight, earning {amount}! Cat girls stay winning!",
+        "success_text": "🐾 {user}'s adorable mrow empire grew overnight, earning {amount} {currency}! Cat girls stay winning!",
         "fail_text": "🐾 {user} meowed too loudly and got reported to the mods. Now they're on 'mute' probation!"
     },
     {
@@ -703,7 +703,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1200,  # 20 minutes
         "fine_multiplier": 0.3,
         "attempt_text": "🐾 {user} sneaks into CalaMariGold's stream and tries to disrupt it with meows...",
-        "success_text": "🐾 {user} charmed the chat with their kitten antics, earning {amount} in sympathy donations!",
+        "success_text": "🐾 {user} charmed the chat with their kitten antics, earning {amount} {currency} in sympathy donations!",
         "fail_text": "🐾 {user} was muted by Mari, who called them a 'wannabe copycat.'"
     },
     {
@@ -715,7 +715,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1800,  # 30 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "⛏️ {user} tries to spy on CalaMariGold's secret modpack dev server...",
-        "success_text": "⛏️ {user} leaked 'TREPIDATION' beta builds and sold early access for {amount}!",
+        "success_text": "⛏️ {user} leaked 'TREPIDATION' beta builds and sold early access for {amount} {currency}!",
         "fail_text": "⛏️ {user} got trapped in an infinite time loop! They were caught trying to escape!"
     },
     {
@@ -727,7 +727,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 2400,  # 40 minutes
         "fine_multiplier": 0.35,
         "attempt_text": "🎶 {user} tries to request an impossible drum song to sabotage CalaMariGold's stream...",
-        "success_text": "🎶 {user}'s troll request backfired and went viral, netting them {amount} in 'pro troll' clout!",
+        "success_text": "🎶 {user}'s troll request backfired and went viral, netting them {amount} {currency} in 'pro troll' clout!",
         "fail_text": "🎶 {user} got roasted live when Mari flawlessly nailed the request!"
     },
     {
@@ -739,7 +739,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 3000,  # 50 minutes
         "fine_multiplier": 0.5,
         "attempt_text": "🎽 {user} counterfeits CalaMariGold merch and sells it to fans...",
-        "success_text": "🎽 {user} made a fortune selling 'exclusive glow-in-the-dark' merch and earned {amount}!",
+        "success_text": "🎽 {user} made a fortune selling 'exclusive glow-in-the-dark' merch and earned {amount} {currency}!",
         "fail_text": "🎽 {user}'s scam was exposed when the glow effect didn't work, and Mari's fans demanded refunds!"
     },
     {
@@ -751,7 +751,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 600,  # 10 minutes
         "fine_multiplier": 0.2,
         "attempt_text": "💬 {user} spreads a wild rumor in Shinycord...",
-        "success_text": "💬 {user}'s gossip stirred chaos and earned them {amount} in 'drama gold'!",
+        "success_text": "💬 {user}'s gossip stirred chaos and earned them {amount} {currency} in 'drama gold'!",
         "fail_text": "💬 {user} got called out by a mod for starting unnecessary chaos. Now they're on probation!"
     },
     {
@@ -763,7 +763,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 2100,  # 35 minutes
         "fine_multiplier": 0.45,
         "attempt_text": "⏱️ {user} hacks CalaMariGold's subathon timer to extend the stream endlessly...",
-        "success_text": "⏱️ {user} charged viewers to keep the timer running and made {amount}!",
+        "success_text": "⏱️ {user} charged viewers to keep the timer running and made {amount} {currency}!",
         "fail_text": "⏱️ {user}'s hack backfired, causing Mari's PC to crash mid-stream. Banned from future events!"
     },
     {
@@ -775,7 +775,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 1500,  # 25 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "🎮 {user} rigs a Shinycord gaming event for their own gain...",
-        "success_text": "🎮 {user} won fake bets and walked away with {amount}!",
+        "success_text": "🎮 {user} won fake bets and walked away with {amount} {currency}!",
         "fail_text": "🎮 {user} was exposed by Mari, who ran the match replay live for everyone to see!"
     },
     {
@@ -787,7 +787,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 3600,  # 1 hour
         "fine_multiplier": 0.5,
         "attempt_text": "🤖 {user} tries to hack Baa, CalaMariGold's bot, and rewrite the crime cog itself...",
-        "success_text": "🤖 {user} successfully rewrote reality! Now they're the richest player in the game, earning {amount} from this very crime!",
+        "success_text": "🤖 {user} successfully rewrote reality! Now they're the richest player in the game, earning {amount} {currency} from this very crime!",
         "fail_text": "🤖 {user} accidentally triggered Baa's self-defense mechanism. The bot gained sentience, locked them in a virtual jail, and posted the evidence in Shinycord. Even Mari couldn't save them!"
     },
     {
@@ -799,7 +799,7 @@ RANDOM_SCENARIOS = [
         "jail_time": 900,  # 15 minutes
         "fine_multiplier": 0.2,
         "attempt_text": "🎰 {user} rolls the gacha banner and gets a rare item! 🎉 (+{min_reward} to {max_reward} {currency})",
-        "success_text": "🎰 {user} rolled a rare item! They got {amount} {currency}!",
+        "success_text": "🎰 {user} rolled a rare item and got {amount} {currency}!",
         "fail_text": "🎰 {user} rolled a common item. Better luck next time!"
     }
 ]
