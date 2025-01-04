@@ -1,6 +1,6 @@
 # City
 
-A comprehensive city simulation system featuring a crime system with various activities, dynamic events, and an interactive button-based interface.
+A comprehensive city simulation system with various activities (currently only contains crime module). Features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, dynamic events, and custom scenarios.
 
 ## Features
 
