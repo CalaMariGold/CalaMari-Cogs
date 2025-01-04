@@ -1,7 +1,9 @@
 """Random crime scenarios for the crime system."""
 
 import random
-from redbot.core import bank
+import discord
+from redbot.core import bank, commands, Config
+from typing import Union, List, Dict, Optional
 
 # Constants for risk levels and success rates
 RISK_LOW = "low"
@@ -12,7 +14,7 @@ SUCCESS_RATE_HIGH = 0.75
 SUCCESS_RATE_MEDIUM = 0.50
 SUCCESS_RATE_LOW = 0.30
 
-async def format_text(text: str, ctx, **kwargs) -> str:
+async def format_text(text: str, ctx: Union[commands.Context, discord.Interaction], **kwargs) -> str:
     """Format text by replacing placeholders with actual values.
     
     Args:
@@ -72,8 +74,12 @@ def get_crime_event(crime_type: str) -> list:
     
     return events
 
-async def get_all_scenarios(config, guild):
-    """Get all scenarios including custom ones for the guild."""
+async def get_all_scenarios(config: Config, guild: discord.Guild) -> List[Dict]:
+    """Get all available random scenarios.
+    
+    This includes both default scenarios and any custom scenarios added by the guild.
+    If custom_scenarios_only is enabled, only returns custom scenarios.
+    """
     # Get default scenarios
     scenarios = RANDOM_SCENARIOS.copy()
     
@@ -85,17 +91,27 @@ async def get_all_scenarios(config, guild):
     
     return scenarios
 
-async def add_custom_scenario(config, guild, scenario):
+async def add_custom_scenario(config: Config, guild: discord.Guild, scenario: Dict) -> None:
     """Add a custom scenario to the guild's config."""
     async with config.guild(guild).custom_scenarios() as scenarios:
         scenarios.append(scenario)
 
-def get_random_scenario(scenarios):
-    """Get a random crime scenario from the provided list."""
+def get_random_scenario(scenarios: List[Dict]) -> Dict:
+    """Get a random scenario from the list."""
     return random.choice(scenarios)
 
-def get_random_jailbreak_scenario():
-    """Get a random prison break scenario."""
+def get_random_jailbreak_scenario() -> Dict:
+    """Get a random prison break scenario.
+    
+    Returns:
+        Dict: A dictionary containing the scenario data with keys:
+        - name: Scenario identifier
+        - attempt_text: Text shown when attempting
+        - success_text: Text shown on success
+        - fail_text: Text shown on failure
+        - base_chance: Base success chance (0.0 to 1.0)
+        - events: List of possible random events that can affect success chance or rewards
+    """
     return random.choice(PRISON_BREAK_SCENARIOS)
 
 

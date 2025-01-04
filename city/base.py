@@ -243,7 +243,7 @@ class CityBase:
                 item.disabled = True
             await interaction.response.edit_message(view=self)
 
-        async def on_timeout(self):
+        async def on_timeout(self) -> None:
             # Disable all buttons if the view times out
             for item in self.children:
                 item.disabled = True
@@ -304,10 +304,8 @@ class CityBase:
             )
             
             # Start listening for the confirmation message
-            def check(m):
-                return (m.author.id == self.ctx.author.id and 
-                       m.channel.id == self.ctx.channel.id and 
-                       m.content == self.confirmation_phrase)
+            def check(m) -> bool:
+                return m.author.id == self.ctx.author.id and m.channel.id == self.ctx.channel.id and m.content.lower() == "confirm"
             
             try:
                 await self.ctx.bot.wait_for('message', timeout=30.0, check=check)
@@ -336,8 +334,7 @@ class CityBase:
                 item.disabled = True
             await interaction.response.edit_message(view=self)
 
-        async def on_timeout(self):
-            self.value = None
+        async def on_timeout(self) -> None:
             # Disable all buttons if the view times out
             for item in self.children:
                 item.disabled = True

@@ -1,11 +1,11 @@
 """Utility functions for the city cog."""
 
 import discord
-from redbot.core import bank
+from redbot.core import bank, commands
 from datetime import datetime, timezone
 import time
 import random
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
     """Format cooldown time into a human readable string.
@@ -31,7 +31,7 @@ def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
         
     return f"⏳ {time_str}" if include_emoji else time_str
 
-async def can_target_user(interaction_or_ctx, target: discord.Member, action_data: dict, settings: dict) -> Tuple[bool, str]:
+async def can_target_user(interaction_or_ctx: Union[discord.Interaction, commands.Context], target: discord.Member, action_data: dict, settings: dict) -> Tuple[bool, str]:
     """Base targeting checks for any action.
     
     Args:
@@ -82,7 +82,7 @@ async def can_target_user(interaction_or_ctx, target: discord.Member, action_dat
         
     return True, ""
 
-async def calculate_stolen_amount(target: discord.Member, crime_data: dict, settings: dict):
+async def calculate_stolen_amount(target: discord.Member, crime_data: dict, settings: dict) -> int:
     """Calculate how much to steal from the target based on settings.
     
     Args:

@@ -1,7 +1,7 @@
 """Blackmarket items and views for the crime system."""
 
 import discord
-from redbot.core import bank
+from redbot.core import bank, commands
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import time
@@ -30,7 +30,7 @@ BLACKMARKET_ITEMS = {
 class BlackmarketView(discord.ui.View):
     """View for the blackmarket shop."""
     
-    def __init__(self, cog, ctx):
+    def __init__(self, cog: commands.Cog, ctx: commands.Context):
         super().__init__(timeout=60)
         self.cog = cog
         self.ctx = ctx
@@ -42,7 +42,7 @@ class BlackmarketView(discord.ui.View):
 class BlackmarketSelect(discord.ui.Select):
     """Dropdown select menu for blackmarket items."""
     
-    def __init__(self, cog, ctx):
+    def __init__(self, cog: commands.Cog, ctx: commands.Context):
         self.cog = cog
         self.ctx = ctx
         
@@ -168,7 +168,7 @@ class BlackmarketSelect(discord.ui.Select):
 class InventoryView(discord.ui.View):
     """View for the inventory."""
     
-    def __init__(self, cog, ctx):
+    def __init__(self, cog: commands.Cog, ctx: commands.Context):
         super().__init__(timeout=60)
         self.cog = cog
         self.ctx = ctx
@@ -182,7 +182,7 @@ class InventoryView(discord.ui.View):
         self.add_item(self.activate_select)
         self.add_item(self.sell_select)
     
-    async def initialize_dropdowns(self):
+    async def initialize_dropdowns(self) -> None:
         """Initialize both dropdowns when the view is first shown."""
         member_data = await self.cog.config.member(self.ctx.author).all()
         
@@ -197,7 +197,7 @@ class InventoryView(discord.ui.View):
 class InventorySelect(discord.ui.Select):
     """Dropdown select menu for activating inventory items."""
     
-    def __init__(self, cog, ctx):
+    def __init__(self, cog: commands.Cog, ctx: commands.Context):
         self.cog = cog
         self.ctx = ctx
         
@@ -219,8 +219,16 @@ class InventorySelect(discord.ui.Select):
             disabled=True  # Start disabled until we update options
         )
         
-    async def update_options(self):
-        """Update the select menu options based on user's inventory."""
+    async def update_options(self) -> None:
+        """Update the select menu options based on user's inventory.
+        
+        Refreshes the dropdown with current items, their uses/duration, and proper formatting.
+        Disables the dropdown if no items are available. Handles both consumable items
+        and permanent perks, showing appropriate status information for each:
+        - Consumables: Shows remaining uses or duration
+        - Perks: Shows permanent status and description
+        - Time-based items: Shows remaining time in hours/minutes
+        """
         member_data = await self.cog.config.member(self.ctx.author).all()
         current_time = int(time.time())
         
@@ -375,7 +383,7 @@ class InventorySelect(discord.ui.Select):
 class InventorySellSelect(discord.ui.Select):
     """Dropdown select menu for selling inventory items."""
     
-    def __init__(self, cog, ctx):
+    def __init__(self, cog: commands.Cog, ctx: commands.Context):
         self.cog = cog
         self.ctx = ctx
         
@@ -397,7 +405,7 @@ class InventorySellSelect(discord.ui.Select):
             disabled=True  # Start disabled until we update options
         )
         
-    async def update_options(self):
+    async def update_options(self) -> None:
         """Update the select menu options based on user's inventory."""
         member_data = await self.cog.config.member(self.ctx.author).all()
         currency_name = await bank.get_currency_name(self.ctx.guild)
