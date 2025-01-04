@@ -12,6 +12,7 @@ A comprehensive city simulation system featuring a crime system with various act
 - 💰 Dynamic reward system
 - ⚖️ Risk vs. reward gameplay
 - 🎯 Target other users for crimes
+- 🎲 Custom random scenarios with server-specific events
 
 - 🎮 **Button/Dropdown-Based Interface**
   - Modern, intuitive button controls
@@ -76,9 +77,10 @@ If you encounter any issues or have suggestions, please open an issue on the Git
 
 #### 🎲 Random Crime
 - Random risk level
-- Dynamic scenarios
+- Dynamic scenarios (both default and custom)
 - Varying rewards and penalties
 - Unique events and outcomes
+- Server admins can create custom scenarios
 
 ### Commands
 
@@ -99,6 +101,10 @@ If you encounter any issues or have suggestions, please open an issue on the Git
   - `jailtime <crime_type> <seconds>` - Set jail time duration
   - `fine <crime_type> <multiplier>` - Set fine multiplier
   - `reload_defaults` - Reset to default settings
+  - `scenarios` - Manage custom random scenarios:
+    - `add` - Create a new custom scenario
+    - `list` - View all custom scenarios
+    - `remove <name>` - Remove a custom scenario
   - `global` - Configure global settings:
     - `bailcost <multiplier>` - Set bail cost multiplier
     - `togglebail <enabled>` - Enable/disable bail system

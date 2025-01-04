@@ -15,7 +15,7 @@ To add these cogs to your instance:
 
 | Name | Description | Commands |
 |------|-------------|----------|
-| City | A comprehensive city simulation system with various activities. Features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, and dynamic events. | `[p]crime`, `[p]crimeset` |
+| City | A comprehensive city simulation system with various activities. Features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, dynamic events, and custom scenarios. | `[p]crime`, `[p]crimeset` |
 | LootDrop | A dynamic resource distribution system that creates random drops in channels and threads. Features streak bonuses, polished buttons, party drops, risk/reward mechanics, and leaderboards. | `[p]lootdrop`, `[p]lootdrop set` |
 
 ## Support
