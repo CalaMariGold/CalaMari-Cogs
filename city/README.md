@@ -108,8 +108,6 @@ If you encounter any issues or have suggestions, please open an issue on the Git
   - `global` - Configure global settings:
     - `bailcost <multiplier>` - Set bail cost multiplier
     - `togglebail <enabled>` - Enable/disable bail system
-    - `notifycost <cost>` - Set notification unlock cost
-    - `togglenotifycost <enabled>` - Enable/disable notification cost
     - `view` - View all current settings
 
 **Owner Commands:**
