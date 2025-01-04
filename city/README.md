@@ -43,6 +43,12 @@ A comprehensive city simulation system with various activities (currently only c
 3. Register your bank if not already done: `[p]bank register`
 4. Customize settings as desired using the `[p]crimeset` commands
 
+## Donate
+
+If you enjoy using this cog, you can support my work:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/calamarigold)
+
 ## Support
 
 If you encounter any issues or have suggestions, please open an issue on the GitHub repository.

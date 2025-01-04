@@ -18,6 +18,12 @@ To add these cogs to your instance:
 | City | A comprehensive city simulation system with various activities. Features a crime system for earning credits through virtual crimes with different risk levels, cooldowns, rewards, jail system, jail breaks, dynamic events, and custom scenarios. | `[p]crime`, `[p]crimeset` |
 | LootDrop | A dynamic resource distribution system that creates random drops in channels and threads. Features streak bonuses, polished buttons, party drops, risk/reward mechanics, and leaderboards. | `[p]lootdrop`, `[p]lootdrop set` |
 
+## Donate
+
+If you find my cogs useful, you can support my work:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/calamarigold)
+
 ## Support
 
 If you encounter any issues or have suggestions, please open an issue on the GitHub repository.
