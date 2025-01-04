@@ -91,7 +91,6 @@ If you encounter any issues or have suggestions, please open an issue on the Git
   - `bail` - Pay to get out of jail early
   - `jailbreak` - Attempt to escape from jail
   - `leaderboard` - View the server's crime leaderboard
-  - `notify` - Toggle jail release notifications
 
 **Admin Commands:**
 - `[p]crimeset` - Configure crime settings
