@@ -183,7 +183,7 @@ def format_crime_description(crime_type: str, data: dict, cooldown_status: str) 
         • Whether it requires a target
     """
     # Get risk emoji
-    risk_emoji = "🟢" if data["risk"] == "low" else "🟡" if data["risk"] == "medium" else "🔴"
+    risk_emoji = "???" if crime_type == "random" else "🟢" if data["risk"] == "low" else "🟡" if data["risk"] == "medium" else "🔴"
     
     # Format description based on crime type
     if crime_type == "random":
