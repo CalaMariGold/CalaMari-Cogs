@@ -958,7 +958,7 @@ class LootDrop(commands.Cog):
     
     @lootdrop.command(name="leaderboard", aliases=["lb"])
     async def lootdrop_leaderboard(self, ctx: commands.Context) -> None:
-        """View the loot drop leaderboard"""
+        """View the loot drop leaderboard (Top 5)"""
         _, leaderboard = await self.get_leaderboard_position(ctx.guild, str(ctx.author.id))
         
         if not leaderboard:
@@ -970,9 +970,9 @@ class LootDrop(commands.Cog):
             color=discord.Color.gold()
         )
         
-        # Get top 10 users
+        # Get top 5 users
         description = []
-        for i, (user_id, total, good, highest_streak) in enumerate(leaderboard[:10], 1):
+        for i, (user_id, total, good, highest_streak) in enumerate(leaderboard[:5], 1):
             user = ctx.guild.get_member(int(user_id))
             if not user:
                 continue
@@ -990,9 +990,9 @@ class LootDrop(commands.Cog):
         else:
             embed.description = "No valid leaderboard entries found"
         
-        # Add author's position if not in top 10
+        # Add author's position if not in top 5
         author_pos, _ = await self.get_leaderboard_position(ctx.guild, str(ctx.author.id))
-        if author_pos > 10:
+        if author_pos > 5:
             stats = await self.config.guild(ctx.guild).user_stats()
             author_stats = stats.get(str(ctx.author.id), {"good": 0, "bad": 0, "highest_streak": 0})
             total = author_stats["good"] + author_stats.get("bad", 0)
@@ -1113,13 +1113,21 @@ class LootDrop(commands.Cog):
         leaderboard = [
             (uid, data["good"] + data.get("bad", 0), data["good"], data.get("highest_streak", 0))
             for uid, data in stats.items()
+            if data["good"] + data.get("bad", 0) > 0  # Only include users with at least one drop
         ]
         
         # Sort by total claims (desc) and then highest streak (desc)
         leaderboard.sort(key=lambda x: (x[1], x[3]), reverse=True)
         
         # Find user's position (1-based index)
-        position = next((i + 1 for i, (uid, _, _, _) in enumerate(leaderboard) if uid == user_id), 0)
+        # If user has drops but somehow not in leaderboard, give last place instead of 0
+        user_stats = stats.get(user_id, {"good": 0, "bad": 0})
+        total_drops = user_stats["good"] + user_stats.get("bad", 0)
+        
+        if total_drops == 0:
+            position = 0
+        else:
+            position = next((i + 1 for i, (uid, _, _, _) in enumerate(leaderboard) if uid == user_id), len(leaderboard) + 1)
         
         return position, leaderboard
 
