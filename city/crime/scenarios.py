@@ -841,330 +841,51 @@ RANDOM_SCENARIOS = [
 # Crime-specific events
 CRIME_EVENTS = {
     "pickpocket": [
-        {
-            "name": "distracted_target",
-            "chance_bonus": 0.15,
-            "text": "Your target is busy on their phone! 📱 (+15% success chance)"
-        },
-        {
-            "name": "crowded_area",
-            "chance_bonus": 0.1,
-            "text": "The area is crowded, making it easier to blend in! 👥 (+10% success chance)"
-        },
-        {
-            "name": "alert_target",
-            "chance_penalty": 0.2,
-            "text": "Your target seems unusually alert! 👀 (-20% success chance)"
-        },
-        {
-            "name": "loose_wallet",
-            "reward_multiplier": 1.5,
-            "text": "You spot their wallet hanging loosely! 💰 (1.5x reward)"
-        },
-        {
-            "name": "anime_protagonist",
-            "chance_penalty": 0.25,
-            "text": "Your target has anime protagonist hair! They must be powerful! 🌟 (-25% success chance)"
-        },
-        {
-            "name": "discord_nitro",
-            "reward_multiplier": 1.5,
-            "text": "You found their Discord Nitro subscription! 🎮 (1.5x reward)"
-        },
-        {
-            "name": "catgirl_distraction",
-            "chance_penalty": 0.15,
-            "text": "A cute catgirl walked by and distracted you! 😺 (-15% success chance)"
-        },
-        {
-            "name": "vtuber_donation",
-            "reward_multiplier": 1.75,
-            "text": "They were about to donate to their favorite VTuber! 💝 (1.75x reward)"
-        },
-        {
-            "name": "tourist_group",
-            "chance_bonus": 0.2,
-            "text": "A large group of distracted tourists just arrived! 📸 (+20% success chance)"
-        },
-        {
-            "name": "street_performer",
-            "chance_bonus": 0.15,
-            "text": "A street performer is drawing everyone's attention! 🎭 (+15% success chance)"
-        },
-        {
-            "name": "rush_hour",
-            "chance_bonus": 0.25,
-            "text": "It's rush hour and everyone's in a hurry! 🏃 (+25% success chance)"
-        },
-        {
-            "name": "undercover_cop",
-            "chance_penalty": 0.20,
-            "jail_multiplier": 1.5,
-            "text": "There's an undercover cop nearby! 👮 (-20% success chance, +50% jail time if caught)"
-        },
-        {
-            "name": "rainy_weather",
-            "chance_bonus": 0.15,
-            "reward_multiplier": 0.8,
-            "text": "It's raining - less witnesses but harder to run! 🌧️ (+15% success chance, -20% reward)"
-        },
-        {
-            "name": "festival_crowd",
-            "chance_penalty": 0.1,
-            "reward_multiplier": 1.1,
-            "text": "There's a festival nearby - more targets but more security! 🎪 (-10% success chance, +10% reward)"
-        },
-        {
-            "name": "slippery_hands",
-            "chance_penalty": 0.15,
-            "reward_multiplier": 1.2,
-            "text": "Your hands are sweaty but you spot a valuable target! 💦 (-15% success chance, +20% reward)"
-        },
-        {
-            "name": "dropped_wallet",
-            "credits_bonus": 100,
-            "text": "You found a dropped wallet on the way! 💰 (+{credits_bonus} {currency})"
-        },
-        {
-            "name": "pickpocket_victim",
-            "credits_penalty": 100,
-            "text": "Someone pickpocketed you while you were distracted! 💸 (-{credits_penalty} {currency})"
-        }
+        {"text": "Your target is busy on their phone! 📱 (+15% success chance)", "chance_bonus": 0.15},
+        {"text": "The area is crowded, making it easier to blend in! 👥 (+10% success chance)", "chance_bonus": 0.1},
+        {"text": "Your target seems unusually alert! 👀 (-20% success chance)", "chance_penalty": 0.2},
+        {"text": "You spot their wallet hanging loosely! 💰 (1.5x reward)", "reward_multiplier": 1.5},
+        {"text": "Your target has anime protagonist hair! They must be powerful! 🌟 (-25% success chance)", "chance_penalty": 0.25},
+        {"text": "You found their Discord Nitro subscription! 🎮 (1.5x reward)", "reward_multiplier": 1.5},
+        {"text": "A cute catgirl walked by and distracted you! 😺 (-15% success chance)", "chance_penalty": 0.15},
+        {"text": "They were about to donate to their favorite VTuber! 💝 (1.75x reward)", "reward_multiplier": 1.75},
+        {"text": "A large group of distracted tourists just arrived! 📸 (+20% success chance)", "chance_bonus": 0.2},
+        {"text": "A street performer is drawing everyone's attention! 🎭 (+15% success chance)", "chance_bonus": 0.15},
+        {"text": "It's rush hour and everyone's in a hurry! 🏃 (+25% success chance)", "chance_bonus": 0.25},
+        {"text": "There's an undercover cop nearby! 👮 (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.5},
+        {"text": "It's raining - less witnesses but harder to run! 🌧️ (+15% success chance, -20% reward)", "chance_bonus": 0.15, "reward_multiplier": 0.8},
+        {"text": "There's a festival nearby - more targets but more security! 🎪 (-10% success chance, +10% reward)", "chance_penalty": 0.1, "reward_multiplier": 1.1},
+        {"text": "You found a dropped wallet! 💰 (+{credits_bonus} {currency})", "credits_bonus": 100},
+        {"text": "Someone pickpocketed you while you were distracted! 💸 (-{credits_penalty} {currency})", "credits_penalty": 100}
     ],
     "mugging": [
-        {
-            "name": "dark_alley",
-            "chance_bonus": 0.2,
-            "text": "You found a perfect dark alley! 🌙 (+20% success chance)"
-        },
-        {
-            "name": "martial_arts",
-            "chance_penalty": 0.25,
-            "text": "Your target knows martial arts! 🥋 (-25% success chance)"
-        },
-        {
-            "name": "rich_target",
-            "reward_multiplier": 1.5,
-            "text": "Your target is wearing expensive jewelry! 💎 (1.5x reward)"
-        },
-        {
-            "name": "police_nearby",
-            "chance_penalty": 0.2,
-            "jail_multiplier": 1.3,
-            "text": "There's a police car nearby! 👮 (-20% success chance, +30% jail time if caught)"
-        },
-        {
-            "name": "genshin_whale",
-            "reward_multiplier": 1.5,
-            "text": "Your target has C6 on every character! 🐋 (1.5x reward)"
-        },
-        {
-            "name": "pokemon_trainer",
-            "chance_penalty": 0.2,
-            "text": "Your target is a Pokémon champion! ⚡ (-20% success chance)"
-        },
-        {
-            "name": "cosplay_confusion",
-            "chance_bonus": 0.15,
-            "text": "Everyone thinks this is a cosplay performance! 🎭 (+15% success chance)"
-        },
-        {
-            "name": "gacha_luck",
-            "reward_multiplier": 1.3,
-            "chance_bonus": 0.15,
-            "text": "Your target just hit pity! 🎲 (1.3x reward, +10% success chance)"
-        },
-        {
-            "name": "foggy_night",
-            "chance_bonus": 0.2,
-            "text": "The thick fog provides perfect cover! 🌫️ (+20% success chance)"
-        },
-        {
-            "name": "street_camera",
-            "chance_penalty": 0.2,
-            "text": "A security camera is watching the area! 📹 (-20% success chance)"
-        },
-        {
-            "name": "emergency_button",
-            "chance_penalty": 0.25,
-            "text": "Your target has a panic button! 🚨 (-25% success chance)"
-        },
-        {
-            "name": "stormy_night",
-            "chance_bonus": 0.1,
-            "reward_multiplier": 0.9,
-            "text": "The storm provides cover but makes it hard to see! ⛈️ (+10% success chance, -10% reward)"
-        },
-        {
-            "name": "drunk_target",
-            "chance_bonus": 0.15,
-            "reward_multiplier": 0.8,
-            "text": "Your target is drunk - easier to catch but less money! 🍺 (+15% success chance, -20% reward)"
-        },
-        {
-            "name": "risky_shortcut",
-            "chance_bonus": 0.2,
-            "jail_multiplier": 1.3,
-            "text": "You found a shortcut through an alley! 🏃 (+20% success chance, +30% jail time if caught)"
-        },
-        {
-            "name": "street_performer_tip",
-            "credits_bonus": 150,
-            "text": "A street performer gave you their tips! 🎭 (+{credits_bonus} {currency})"
-        },
-        {
-            "name": "dropped_loot",
-            "credits_penalty": 150,
-            "text": "You dropped some of your loot while running! 💸 (-{credits_penalty} {currency})"
-        }
+        {"text": "You found a perfect dark alley! 🌙 (+20% success chance)", "chance_bonus": 0.2},
+        {"text": "Your target knows martial arts! 🥋 (-25% success chance)", "chance_penalty": 0.25},
+        {"text": "Your target is wearing expensive jewelry! 💎 (1.5x reward)", "reward_multiplier": 1.5},
+        {"text": "There's a police car nearby! 👮 (-20% success chance, +30% jail time if caught)", "chance_penalty": 0.2, "jail_multiplier": 1.3},
+        {"text": "The storm provides cover but makes it hard to see! ⛈️ (+10% success chance, -10% reward)", "chance_bonus": 0.1, "reward_multiplier": 0.9},
+        {"text": "Your target is drunk - easier to catch but less money! 🍺 (+15% success chance, -20% reward)", "chance_bonus": 0.15, "reward_multiplier": 0.8},
+        {"text": "You found a shortcut through an alley! 🏃 (+20% success chance, +30% jail time if caught)", "chance_bonus": 0.2, "jail_multiplier": 1.3},
+        {"text": "A street performer gave you their tips! 🎭 (+{credits_bonus} {currency})", "credits_bonus": 150},
+        {"text": "You dropped some of your loot while running! 💸 (-{credits_penalty} {currency})", "credits_penalty": 150}
     ],
     "rob_store": [
-        {
-            "name": "shift_change",
-            "chance_bonus": 0.2,
-            "text": "You caught them during shift change! 🔄 (+20% success chance)"
-        },
-        {
-            "name": "security_system",
-            "chance_penalty": 0.25,
-            "text": "The store has a new security system! 🔒 (-25% success chance)"
-        },
-        {
-            "name": "cash_delivery",
-            "reward_multiplier": 1.5,
-            "text": "The cash delivery just arrived! 💵 (1.5x reward)"
-        },
-        {
-            "name": "guard_dog",
-            "chance_penalty": 0.2,
-            "jail_multiplier": 1.25,
-            "text": "There's a guard dog on duty! 🐕 (-20% success chance, +25% jail time if caught)"
-        },
-        {
-            "name": "anime_sale",
-            "reward_multiplier": 1.5,
-            "text": "The store just got a shipment of rare anime figures! 🎌 (1.5x reward)"
-        },
-        {
-            "name": "power_outage",
-            "chance_bonus": 0.2,
-            "text": "Someone's streaming caused a power outage! 💻 (+20% success chance)"
-        },
-        {
-            "name": "discord_mod",
-            "chance_penalty": 0.20,
-            "jail_multiplier": 1.3,
-            "text": "The store owner is a Discord mod! They never sleep! 🛡️ (-20% success chance, +30% jail time if caught)"
-        },
-        {
-            "name": "gacha_banner",
-            "reward_multiplier": 0.8,
-            "text": "The store's gacha banner is too tempting! You spent some time rolling... 🎰 (0.8x reward)"
-        },
-        {
-            "name": "broken_camera",
-            "chance_bonus": 0.2,
-            "text": "The security cameras are malfunctioning! 📹 (+20% success chance)"
-        },
-        {
-            "name": "silent_alarm",
-            "chance_penalty": 0.20,
-            "jail_multiplier": 1.3,
-            "text": "Someone triggered the silent alarm! 🚨 (-20% success chance, +30% jail time if caught)"
-        },
-        {
-            "name": "armed_customer",
-            "chance_penalty": 0.25,
-            "text": "One of the customers is armed! 🔫 (-25% success chance)"
-        },
-        {
-            "name": "police_station",
-            "chance_penalty": 0.25,
-            "jail_multiplier": 1.5,
-            "text": "The store is right next to a police station! 👮 (-20% success chance, +50% jail time if caught)"
-        },
-        {
-            "name": "register_bonus",
-            "credits_bonus": 200,
-            "text": "You found extra cash in the register! 💰 (+{credits_bonus} {currency})"
-        },
-        {
-            "name": "property_damage",
-            "credits_penalty": 200,
-            "text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})"
-        }
+        {"text": "You caught them during shift change! 🔄 (+20% success chance)", "chance_bonus": 0.2},
+        {"text": "The security cameras are malfunctioning! 📹 (+20% success chance)", "chance_bonus": 0.2},
+        {"text": "Someone triggered the silent alarm! 🚨 (-20% success chance, +30% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.3},
+        {"text": "One of the customers is armed! 🔫 (-25% success chance)", "chance_penalty": 0.25},
+        {"text": "The store is right next to a police station! 👮 (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.25, "jail_multiplier": 1.5},
+        {"text": "You found extra cash in the register! 💰 (+{credits_bonus} {currency})", "credits_bonus": 200},
+        {"text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})", "credits_penalty": 200}
     ],
     "bank_heist": [
-        {
-            "name": "inside_help",
-            "chance_bonus": 0.25,
-            "text": "You have an inside contact! 🤝 (+25% success chance)"
-        },
-        {
-            "name": "vault_upgrade",
-            "chance_penalty": 0.25,
-            "text": "The vault was recently upgraded! 🔒 (-25% success chance)"
-        },
-        {
-            "name": "money_transport",
-            "reward_multiplier": 1.5,
-            "jail_multiplier": 1.3,
-            "text": "You hit during a money transport! 🚛 (1.5x reward, +30% jail time if caught)"
-        },
-        {
-            "name": "swat_team",
-            "chance_penalty": 0.20,
-            "jail_multiplier": 1.5,
-            "text": "SWAT team is on high alert! 👮 (-20% success chance, +50% jail time if caught)"
-        },
-        {
-            "name": "crypto_wallet",
-            "reward_multiplier": 1.5,
-            "chance_penalty": 0.2,
-            "text": "Found the bank's crypto wallet! 🖥️ (1.5x reward, -20% success chance)"
-        },
-        {
-            "name": "ddos_attack",
-            "chance_bonus": 0.2,
-            "text": "Someone's DDoSing the security system! 🖥️ (+20% success chance)"
-        },
-        {
-            "name": "bot_army",
-            "chance_bonus": 0.2,
-            "reward_multiplier": 1.2,
-            "text": "Your Discord bot army is helping out! 🤖 (+20% success chance, +20% reward)"
-        },
-        {
-            "name": "construction_work",
-            "chance_bonus": 0.2,
-            "text": "Construction work is masking your activities! 🏗️ (+20% success chance)"
-        },
-        {
-            "name": "getaway_driver",
-            "chance_bonus": 0.25,
-            "text": "You found an expert getaway driver! 🚗 (+25% success chance)"
-        },
-        {
-            "name": "bank_holiday",
-            "chance_penalty": 0.25,
-            "text": "It's a bank holiday with extra security! 📅 (-25% success chance)"
-        },
-        {
-            "name": "fbi_investigation",
-            "chance_penalty": 0.20,
-            "jail_multiplier": 1.5,
-            "text": "The FBI is conducting an investigation! 🕴️ (-20% success chance, +50% jail time if caught)"
-        },
-        {
-            "name": "vault_bonus",
-            "credits_bonus": 300,
-            "text": "You found a secret compartment in the vault! 💰 (+{credits_bonus} {currency})"
-        },
-        {
-            "name": "equipment_cost",
-            "credits_penalty": 300,
-            "text": "Your expensive equipment was damaged! 💸 (-{credits_penalty} {currency})"
-        }
+        {"text": "You have an inside contact! 🤝 (+25% success chance)", "chance_bonus": 0.25},
+        {"text": "Construction work is masking your activities! 🏗️ (+20% success chance)", "chance_bonus": 0.2},
+        {"text": "You found an expert getaway driver! 🚗 (+25% success chance)", "chance_bonus": 0.25},
+        {"text": "It's a bank holiday with extra security! 📅 (-25% success chance)", "chance_penalty": 0.25},
+        {"text": "The FBI is conducting an investigation! 🕴️ (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.5},
+        {"text": "You found a secret compartment in the vault! 💰 (+{credits_bonus} {currency})", "credits_bonus": 300},
+        {"text": "Your expensive equipment was damaged! 💸 (-{credits_penalty} {currency})", "credits_penalty": 300}
     ]
 }
 
@@ -1184,7 +905,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "You found a small pouch of {currency}!", "currency_bonus": 200},
             {"text": "You hit solid rock! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "A guard patrol is coming! (-10% success chance)", "chance_penalty": 0.10},
-            {"text": "Your shovel broke and you had to buy a new one.", "currency_penalty": 150}
+            {"text": "Your shovel broke and you had to buy a new one.", "currency_penalty": 150},
+            {"text": "You discovered an old prohibition tunnel! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "A friendly prison rat is helping you dig! (+5% success chance)", "chance_bonus": 0.05},
+            {"text": "You found a treasure chest!", "currency_bonus": 400},
+            {"text": "The tunnel flooded! (-20% success chance)", "chance_penalty": 0.20},
+            {"text": "Your cellmate is snoring loudly, slowing progress! (-5% success chance)", "chance_penalty": 0.05},
+            {"text": "Had to bribe the prison geologist.", "currency_penalty": 300}
         ]
     },
     {
@@ -1192,14 +919,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🚨 {user} starts a prison riot as a distraction...",
         "success_text": "🚨 In the chaos of the riot, {user} slips away unnoticed! Freedom at last!",
         "fail_text": "🚨 The riot was quickly contained. {user} was identified as the instigator and sent to solitary.",
-        "base_chance": 0.40,
+        "base_chance": 0.35,
         "events": [
             {"text": "Other prisoners join your cause! (+20% success chance)", "chance_bonus": 0.20},
             {"text": "You found a guard's keycard! (+15% success chance)", "chance_bonus": 0.15},
             {"text": "You looted the commissary during the chaos!", "currency_bonus": 300},
             {"text": "The guards were prepared! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "Security cameras caught your plan! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "You had to bribe another prisoner to keep quiet.", "currency_penalty": 250}
+            {"text": "You had to bribe another prisoner to keep quiet.", "currency_penalty": 250},
+            {"text": "The prison's WiFi went down - guards are distracted! (+15% success chance)", "chance_bonus": 0.15},
+            {"text": "Someone released all the therapy dogs! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found the warden's secret stash!", "currency_bonus": 500},
+            {"text": "The SWAT team arrived! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "Your riot chant was too cringe! (-10% success chance)", "chance_penalty": 0.10},
+            {"text": "Had to replace broken furniture.", "currency_penalty": 350}
         ]
     },
     {
@@ -1207,14 +940,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🕶 {user} puts on a stolen guard uniform...",
         "success_text": "🕶 Nobody questioned {user} as they walked right out the front door! The perfect disguise!",
         "fail_text": "🕶 The uniform was from last season's collection. {user} was spotted immediately by the fashion-conscious guards.",
-        "base_chance": 0.45,
+        "base_chance": 0.35,
         "events": [
             {"text": "Shift change creates confusion! (+15% success chance)", "chance_bonus": 0.15},
             {"text": "You memorized the guard patterns! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "You found {currency} in the uniform pocket!", "currency_bonus": 250},
             {"text": "Your shoes don't match the uniform! (-10% success chance)", "chance_penalty": 0.10},
             {"text": "A guard recognizes you! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "You had to pay another inmate for the uniform.", "currency_penalty": 200}
+            {"text": "You had to pay another inmate for the uniform.", "currency_penalty": 200},
+            {"text": "It's casual Friday - perfect timing! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "Found the guard's secret handshake manual! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Discovered the guard's poker winnings!", "currency_bonus": 450},
+            {"text": "Your badge is upside down! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "You forgot the guard's catchphrase! (-10% success chance)", "chance_penalty": 0.10},
+            {"text": "Had to buy authentic guard boots.", "currency_penalty": 275}
         ]
     },
     {
@@ -1222,14 +961,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🍽️ {user} attempts to hide in the kitchen's food delivery cart...",
         "success_text": "🍽️ Buried under a mountain of mystery meat, {user} was wheeled right out to the delivery truck. The meat was terrible, but freedom tastes sweet!",
         "fail_text": "🍽️ Return to sender! {user} forgot to put enough stamps on themselves. The postal service has strict policies about shipping prisoners.",
-        "base_chance": 0.30,
+        "base_chance": 0.35,
         "events": [
             {"text": "It's holiday rush season! (+20% success chance)", "chance_bonus": 0.20},
             {"text": "You found a perfect-sized box! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "You discovered undelivered {currency} money orders!", "currency_bonus": 275},
             {"text": "Package inspection in progress! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "The box is too heavy! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Had to pay for express shipping.", "currency_penalty": 225}
+            {"text": "Had to pay for express shipping.", "currency_penalty": 225},
+            {"text": "Health inspector visit - everyone's distracted! (+15% success chance)", "chance_bonus": 0.15},
+            {"text": "The chef is having a meltdown! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found tips from the cooking class!", "currency_bonus": 350},
+            {"text": "Someone ordered a surprise inspection! (-20% success chance)", "chance_penalty": 0.20},
+            {"text": "The food cart has a squeaky wheel! (-10% success chance)", "chance_penalty": 0.10},
+            {"text": "Had to bribe the kitchen staff.", "currency_penalty": 300}
         ]
     },
     {
@@ -1244,7 +989,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "You found valuables in the trash!", "currency_bonus": 225},
             {"text": "Guard dog inspection day! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "The dumpster has holes in it! (-10% success chance)", "chance_penalty": 0.10},
-            {"text": "Had to buy air fresheners.", "currency_penalty": 175}
+            {"text": "Had to buy air fresheners.", "currency_penalty": 175},
+            {"text": "Static electricity makes you invisible! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "Found a lucky sock! (+5% success chance)", "chance_bonus": 0.05},
+            {"text": "Discovered money in the dryer!", "currency_bonus": 275},
+            {"text": "The washing machine is leaking! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "You're allergic to the detergent! (-10% success chance)", "chance_penalty": 0.10},
+            {"text": "Had to pay for premium fabric softener.", "currency_penalty": 225}
         ]
     },
     {
@@ -1252,14 +1003,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🎭 {user} attempts to switch places with a visitor...",
         "success_text": "🎭 The perfect crime! {user}'s identical twin cousin twice removed walked in, and {user} walked out. Family reunions will be awkward though.",
         "fail_text": "🎭 Turns out your 'identical' cousin was actually your complete opposite. The guards couldn't stop laughing as they dragged you back.",
-        "base_chance": 0.30,
+        "base_chance": 0.35,
         "events": [
             {"text": "Your cousin is a master of disguise! (+20% success chance)", "chance_bonus": 0.20},
             {"text": "The visiting room is extra crowded! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "Your cousin slipped you some cash!", "currency_bonus": 300},
             {"text": "The guard is doing double ID checks! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "Your cousin has a distinctive walk! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Had to buy matching clothes.", "currency_penalty": 250}
+            {"text": "Had to buy matching clothes.", "currency_penalty": 250},
+            {"text": "It's twins day at the prison! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "Your makeup skills improved! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found money in the visitor's locker!", "currency_bonus": 400},
+            {"text": "New biometric scanners installed! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "You forgot your visitor's backstory! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to buy premium disguise materials.", "currency_penalty": 350}
         ]
     },
     {
@@ -1267,14 +1024,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🚁 {user} signals their accomplice in a helicopter...",
         "success_text": "🚁 Action movie style! {user} grabbed the rope ladder and soared away while the guards stood in awe. Someone's been watching too many movies!",
         "fail_text": "🚁 Plot twist: It was actually a police helicopter. {user} just got featured on 'World's Most Embarrassing Prison Breaks'.",
-        "base_chance": 0.25,
+        "base_chance": 0.35,
         "events": [
             {"text": "Your pilot is an ex-stunt double! (+25% success chance)", "chance_bonus": 0.25},
             {"text": "Perfect weather conditions! (+15% success chance)", "chance_bonus": 0.15},
             {"text": "You grabbed the prison's petty cash box!", "currency_bonus": 400},
             {"text": "Anti-aircraft spotlight activated! (-25% success chance)", "chance_penalty": 0.25},
             {"text": "High winds today! (-20% success chance)", "chance_penalty": 0.20},
-            {"text": "Had to pay the pilot's fuel costs.", "currency_penalty": 200}
+            {"text": "Had to pay the pilot's fuel costs.", "currency_penalty": 200},
+            {"text": "The guards are watching an air show! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "Your pilot has gaming experience! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found the warden's emergency fund!", "currency_bonus": 600},
+            {"text": "The prison installed anti-air defenses! (-30% success chance)", "chance_penalty": 0.30},
+            {"text": "Motion sickness kicks in! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to pay for helicopter maintenance.", "currency_penalty": 450}
         ]
     },
     {
@@ -1289,7 +1052,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "You found money in the prop cash box!", "currency_bonus": 250},
             {"text": "The guard is a theatre critic! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "Stage fright kicks in! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Had to bribe the stage manager.", "currency_penalty": 200}
+            {"text": "Had to bribe the stage manager.", "currency_penalty": 200},
+            {"text": "Broadway scout in the audience! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "The spotlight malfunctioned! (+15% success chance)", "chance_bonus": 0.15},
+            {"text": "Won the drama competition prize!", "currency_bonus": 450},
+            {"text": "Method actor guard on duty! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "You're in the wrong costume! (-10% success chance)", "chance_penalty": 0.10},
+            {"text": "Had to pay for premium props.", "currency_penalty": 300}
         ]
     },
     {
@@ -1297,14 +1066,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "📦 {user} tries to mail themselves to freedom...",
         "success_text": "📦 Special delivery! {user} was successfully shipped to freedom with Prime shipping. The 1-star review for 'uncomfortable packaging' was worth it!",
         "fail_text": "📦 Return to sender! {user} forgot to put enough stamps on themselves. The postal service has strict policies about shipping prisoners.",
-        "base_chance": 0.30,
+        "base_chance": 0.35,
         "events": [
             {"text": "It's holiday rush season! (+20% success chance)", "chance_bonus": 0.20},
             {"text": "You found a perfect-sized box! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "You discovered undelivered {currency} money orders!", "currency_bonus": 275},
             {"text": "Package inspection in progress! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "The box is too heavy! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Had to pay for express shipping.", "currency_penalty": 225}
+            {"text": "Had to pay for express shipping.", "currency_penalty": 225},
+            {"text": "New temp worker doesn't check labels! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "Found bubble wrap to hide in! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Discovered a misplaced Amazon package!", "currency_bonus": 350},
+            {"text": "X-ray machine just got upgraded! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "You're not Prime eligible! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to pay for overnight shipping.", "currency_penalty": 400}
         ]
     },
     {
@@ -1319,7 +1094,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "You found valuables in the trash!", "currency_bonus": 225},
             {"text": "Guard dog inspection day! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "The dumpster has holes in it! (-10% success chance)", "chance_penalty": 0.10},
-            {"text": "Had to buy air fresheners.", "currency_penalty": 175}
+            {"text": "Had to buy air fresheners.", "currency_penalty": 175},
+            {"text": "It's recycling awareness day! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "Found a hazmat suit in the trash! (+15% success chance)", "chance_bonus": 0.15},
+            {"text": "Discovered the janitor's secret savings!", "currency_bonus": 375},
+            {"text": "New waste management protocols! (-20% success chance)", "chance_penalty": 0.20},
+            {"text": "The compactor is malfunctioning! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "Had to bribe the garbage collector.", "currency_penalty": 325}
         ]
     },
     {
@@ -1327,14 +1108,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🎸 {user} hides inside the prison band's bass drum...",
         "success_text": "🎸 {user} rode the rhythm all the way to freedom! The band's encore performance was suspiciously lighter.",
         "fail_text": "🎸 {user} ruined the big finale by sneezing during the drum solo. The critics were not impressed.",
-        "base_chance": 0.40,
+        "base_chance": 0.35,
         "events": [
             {"text": "The band is playing extra loud! (+15% success chance)", "chance_bonus": 0.15},
             {"text": "You're in the back row! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "You found {currency} from the performance!", "currency_bonus": 200},
             {"text": "The drum has a hole! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "Guard requests a song! (-10% success chance)", "chance_penalty": 0.10},
-            {"text": "Had to bribe the drummer.", "currency_penalty": 175}
+            {"text": "Had to bribe the drummer.", "currency_penalty": 175},
+            {"text": "Famous musician visiting today! (+20% success chance)", "chance_bonus": 0.20},
+            {"text": "The acoustics are perfect! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found the band's tip jar!", "currency_bonus": 325},
+            {"text": "The warden is a music critic! (-20% success chance)", "chance_penalty": 0.20},
+            {"text": "You're rhythmically challenged! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to pay for instrument repairs.", "currency_penalty": 275}
         ]
     },
     {
@@ -1349,7 +1136,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "You won the {currency} prize!", "currency_bonus": 350},
             {"text": "Professional referee watching! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "You pulled a muscle! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Entry fee and equipment costs.", "currency_penalty": 275}
+            {"text": "Entry fee and equipment costs.", "currency_penalty": 275},
+            {"text": "Olympic scout in attendance! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "Performance enhancing snacks! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Found the betting pool money!", "currency_bonus": 500},
+            {"text": "Drug testing in progress! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "Forgot to stretch! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to buy premium running shoes.", "currency_penalty": 350}
         ]
     },
     {
@@ -1357,14 +1150,20 @@ PRISON_BREAK_SCENARIOS = [
         "attempt_text": "🎨 {user} plans to escape during the prison art exhibition...",
         "success_text": "🎨 {user} posed as a modern art installation and was shipped to a museum! Critics called it 'A moving piece about freedom.'",
         "fail_text": "🎨 {user}'s 'Statue of Liberty' pose wasn't convincing enough. The art critics gave it zero stars.",
-        "base_chance": 0.40,
+        "base_chance": 0.35,
         "events": [
             {"text": "Your art got first place! (+15% success chance)", "chance_bonus": 0.15},
             {"text": "The gallery is packed! (+10% success chance)", "chance_bonus": 0.10},
             {"text": "Someone bought your artwork!", "currency_bonus": 275},
             {"text": "The curator is suspicious! (-15% success chance)", "chance_penalty": 0.15},
             {"text": "Paint is still wet! (-10% success chance)", "chance_penalty": 0.10},
-            {"text": "Had to buy art supplies.", "currency_penalty": 225}
+            {"text": "Had to buy art supplies.", "currency_penalty": 225},
+            {"text": "Famous art collector visiting! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "Abstract art exhibition - perfect cover! (+15% success chance)", "chance_bonus": 0.15},
+            {"text": "Won the People's Choice Award!", "currency_bonus": 450},
+            {"text": "Art authenticator on site! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "Your masterpiece is smudged! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to buy premium art materials.", "currency_penalty": 375}
         ]
     },
     {
@@ -1379,7 +1178,13 @@ PRISON_BREAK_SCENARIOS = [
             {"text": "Won the {currency} prize!", "currency_bonus": 300},
             {"text": "Food critic is watching! (-20% success chance)", "chance_penalty": 0.20},
             {"text": "Kitchen fire alert! (-15% success chance)", "chance_penalty": 0.15},
-            {"text": "Had to buy premium ingredients.", "currency_penalty": 250}
+            {"text": "Had to buy premium ingredients.", "currency_penalty": 250},
+            {"text": "Celebrity chef guest judge! (+25% success chance)", "chance_bonus": 0.25},
+            {"text": "Found the secret recipe book! (+10% success chance)", "chance_bonus": 0.10},
+            {"text": "Catering contract opportunity!", "currency_bonus": 550},
+            {"text": "Health inspector surprise visit! (-25% success chance)", "chance_penalty": 0.25},
+            {"text": "Your sauce is too bland! (-15% success chance)", "chance_penalty": 0.15},
+            {"text": "Had to buy truffle ingredients.", "currency_penalty": 400}
         ]
     }
 ]
