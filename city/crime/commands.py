@@ -545,9 +545,16 @@ class CrimeCommands:
                     description=_(scenario['fail_text']).format(user=ctx.author.mention),
                     color=discord.Color.red()
                 )
+                
+                # Format the time for penalty calculation
+                minutes = remaining_time // 60
+                seconds = remaining_time % 60
+                new_minutes = (remaining_time * 2) // 60
+                new_seconds = (remaining_time * 2) % 60
+                
                 embed.add_field(
                     name="⚖️ Penalty",
-                    value=f"Your sentence has been doubled! (+{format_cooldown_time(added_time)})",
+                    value=f"Your sentence has been doubled!\n ({minutes}m {seconds}s * 2 = ⏰ {new_minutes}m {new_seconds}s)",
                     inline=True
                 )
                 embed.add_field(
