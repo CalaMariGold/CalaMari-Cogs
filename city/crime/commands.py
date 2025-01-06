@@ -439,12 +439,7 @@ class CrimeCommands:
     async def crime_jailbreak(self, ctx: commands.Context):
         """Attempt to break out of jail
         
-        Success chance is based on remaining jail time:
-        - 1-5 minutes: 60% chance
-        - 6-15 minutes: 40% chance
-        - 16+ minutes: 20% chance
-        
-        Failed attempts add more jail time!
+        Failed attempt doubles jail time!
         """
         try:
             # Check if user is in jail
@@ -477,32 +472,35 @@ class CrimeCommands:
             # Add suspense delay
             await asyncio.sleep(3)
 
-            # Random event (now 100% chance)
-            event = random.choice(scenario['events'])
-            event_text = event['text']
-            # Format event text with currency name
-            currency_name = await bank.get_currency_name(ctx.guild)
-            event_text = event_text.format(currency=currency_name)
+            # Get 2-4 random events
+            num_events = random.randint(2, 4)
+            selected_events = random.sample(scenario['events'], num_events)
             
-            # Apply chance modifiers and log them
-            original_chance = success_chance
-            if "chance_bonus" in event:
-                success_chance = min(1.0, success_chance + event["chance_bonus"])  # Cap at 100%
-                event_text = f"⭐ {event_text}"
-            elif "chance_penalty" in event:
-                success_chance = max(0.05, success_chance - event["chance_penalty"])  # Minimum 5% chance
-                event_text = f"⚠️ {event_text}"
-            
-            # Apply currency modifiers
-            if "currency_bonus" in event:
-                await bank.deposit_credits(ctx.author, event["currency_bonus"])
-                event_text += f" (+{event['currency_bonus']} {currency_name})"
-            elif "currency_penalty" in event:
-                await bank.withdraw_credits(ctx.author, event["currency_penalty"])
-                event_text += f" (-{event['currency_penalty']} {currency_name})"
-            
-            await ctx.send(event_text)
-            await asyncio.sleep(3)
+            # Apply events in sequence
+            for event in selected_events:
+                event_text = event['text']
+                # Format event text with currency name
+                currency_name = await bank.get_currency_name(ctx.guild)
+                event_text = event_text.format(currency=currency_name)
+                
+                # Apply chance modifiers and log them
+                if "chance_bonus" in event:
+                    success_chance = min(1.0, success_chance + event["chance_bonus"])  # Cap at 100%
+                    event_text = f"⭐ {event_text}"
+                elif "chance_penalty" in event:
+                    success_chance = max(0.05, success_chance - event["chance_penalty"])  # Minimum 5% chance
+                    event_text = f"⚠️ {event_text}"
+                
+                # Apply currency modifiers
+                if "currency_bonus" in event:
+                    await bank.deposit_credits(ctx.author, event["currency_bonus"])
+                    event_text += f"⭐ (+{event['currency_bonus']} {currency_name})"
+                elif "currency_penalty" in event:
+                    await bank.withdraw_credits(ctx.author, event["currency_penalty"])
+                    event_text += f"⚠️ (-{event['currency_penalty']} {currency_name})"
+                
+                await ctx.send(event_text)
+                await asyncio.sleep(3.5)
 
             roll = random.random()
 
