@@ -389,7 +389,7 @@ class CrimeCommands:
                 return
                 
             # Calculate bail cost based on remaining time
-            bail_cost = int(settings.get("bail_cost_multiplier", 1.5) * jail_time)
+            bail_cost = int(settings.get("bail_cost_multiplier", 1.5) * (jail_time / 60))  # Convert seconds to minutes
             
             # Check if user can afford bail
             if not await bank.can_spend(ctx.author, bail_cost):

@@ -71,7 +71,7 @@ DEFAULT_GUILD = {
     "crime_options": CRIME_TYPES,
     "global_settings": {
         "allow_bail": True,
-        "bail_cost_multiplier": 1.5,
+        "bail_cost_multiplier": 1.6,
         "min_steal_balance": 100,
         "max_steal_amount": 1000,
         "default_jail_time": 1800,  # 30 minutes
