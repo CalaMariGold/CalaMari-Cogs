@@ -11,8 +11,8 @@ import asyncio
 from .scenarios import get_random_scenario, get_crime_event, format_text, get_all_scenarios
 from .blackmarket import BLACKMARKET_ITEMS, BlackmarketView, BlackmarketSelect, InventoryView, InventorySelect
 
-_ = Translator("Crime", __file__)
 
+_ = Translator("Crime", __file__)
 class CrimeButton(discord.ui.Button):
     """A button for committing crimes"""
     def __init__(self, style: discord.ButtonStyle, label: str, emoji: str, custom_id: str, disabled: bool = False):
@@ -836,7 +836,7 @@ class CrimeView(discord.ui.View):
                     self.all_messages.append(msg)
                     return
                 
-                # Send failure message
+                # Send failure message with jail options
                 msg = await interaction.channel.send(
                     embed=await self.format_crime_message(
                         False,
@@ -848,6 +848,14 @@ class CrimeView(discord.ui.View):
                     )
                 )
                 self.all_messages.append(msg)
+                
+                # Add jail options view
+                jail_view = JailOptionsView(self.cog, interaction, jail_time)
+                jail_msg = await interaction.channel.send(view=jail_view)
+                jail_view.message = jail_msg
+                self.all_messages.append(jail_msg)
+                
+                # Disable attempt view buttons
                 for item in attempt_view.children:
                     item.disabled = True
                 await attempt_view.message.edit(view=attempt_view)
@@ -1795,3 +1803,84 @@ class AddScenarioModal(discord.ui.Modal):
         embed.add_field(name="Reward Range", value=f"{min_reward:,} - {max_reward:,}", inline=True)
         
         await interaction.response.send_message(embed=embed)
+
+class JailOptionsView(discord.ui.View):
+    """View for jail options after a failed crime."""
+    def __init__(self, cog, interaction: discord.Interaction, jail_time: int):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.interaction = interaction
+        self.jail_time = jail_time
+        self.message = None
+        
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Only allow the original user to use the view."""
+        return interaction.user.id == self.interaction.user.id
+        
+    async def on_timeout(self) -> None:
+        """Handle view timeout"""
+        try:
+            for item in self.children:
+                item.disabled = True
+            await self.message.edit(view=self)
+        except (discord.NotFound, discord.HTTPException):
+            pass
+            
+    @discord.ui.button(label="Jail Break", style=discord.ButtonStyle.danger, emoji="🔓")
+    async def jailbreak(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Attempt a jailbreak"""
+        if interaction.user.bot:
+            return
+            
+        try:
+            await interaction.response.defer()
+            
+            # Disable the jailbreak button immediately after deferring
+            button.disabled = True
+            await self.message.edit(view=self)
+            
+            # Create context from interaction
+            ctx = await self.cog.bot.get_context(interaction.message)
+            ctx.author = interaction.user
+            
+            # Use existing jailbreak command
+            await self.cog.crime_jailbreak(ctx)
+            
+        except Exception as e:
+            await interaction.followup.send(
+                _("An error occurred while attempting jailbreak. Error: {error}").format(
+                    error=str(e)
+                ),
+                ephemeral=True
+            )
+            
+    @discord.ui.button(label="Pay Bail", style=discord.ButtonStyle.success, emoji="💸")
+    async def pay_bail(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Pay bail to get out of jail"""
+        if interaction.user.bot:
+            return
+            
+        try:
+            await interaction.response.defer()
+            
+            # Create context from interaction
+            ctx = await self.cog.bot.get_context(interaction.message)
+            ctx.author = interaction.user
+            
+            # Use existing bail command
+            await self.cog.crime_bail(ctx)
+            
+            # Disable buttons after use
+            for item in self.children:
+                item.disabled = True
+            await self.message.edit(view=self)
+            self.stop()
+            
+        except Exception as e:
+            await interaction.followup.send(
+                _("An error occurred while paying bail. Error: {error}").format(
+                    error=str(e)
+                ),
+                ephemeral=True
+            )
+
