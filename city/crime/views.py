@@ -610,7 +610,7 @@ class CrimeView(discord.ui.View):
                     # Format the message with all arguments at once
                     msg = await interaction.channel.send(await format_text(event_text, interaction, **format_args))
                     self.all_messages.append(msg)
-                    await asyncio.sleep(3.5)  # Increased delay between events (was 2s)
+                    await asyncio.sleep(4.0)  # Increased delay between events
 
                     # Apply event modifiers
                     if "chance_bonus" in event:

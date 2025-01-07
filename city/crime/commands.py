@@ -472,8 +472,8 @@ class CrimeCommands:
             # Add suspense delay
             await asyncio.sleep(3)
 
-            # Get 2-4 random events
-            num_events = random.randint(2, 4)
+            # Get 1-3 random events
+            num_events = random.randint(1, 3)
             selected_events = random.sample(scenario['events'], num_events)
             
             # Apply events in sequence

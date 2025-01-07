@@ -46,8 +46,9 @@ def get_crime_event(crime_type: str) -> list:
     """Get a list of random events for a specific crime type.
     Returns a list containing 1-3 events:
     - First event is guaranteed
-    - Second event has 50% chance
-    - Third event has 25% chance
+    - Second event has 75% chance
+    - Third event has 50% chance
+    - Fourth event has 10% chance
     """
     if crime_type not in CRIME_EVENTS:
         return []
@@ -61,14 +62,20 @@ def get_crime_event(crime_type: str) -> list:
         events.append(event)
         available_events.remove(event)
     
-    # Second event has 50% chance
-    if available_events and random.random() < 0.5:
+    # Second event has 75% chance
+    if available_events and random.random() < 0.75:
         event = random.choice(available_events)
         events.append(event)
         available_events.remove(event)
     
-    # Third event has 25% chance
-    if available_events and random.random() < 0.25:
+    # Third event has 50% chance
+    if available_events and random.random() < 0.50:
+        event = random.choice(available_events)
+        events.append(event)
+        available_events.remove(event)
+
+    # Fourth event has 10% chance
+    if available_events and random.random() < 0.10:
         event = random.choice(available_events)
         events.append(event)
     
@@ -393,18 +400,6 @@ RANDOM_SCENARIOS = [
         "fail_text": "🎵 {user} got exposed in a viral video by Tea TikTok!"
     },
     {
-        "name": "ai_model_theft",
-        "risk": RISK_HIGH,
-        "min_reward": 900,
-        "max_reward": 2000,
-        "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1080,  # 18 minutes
-        "fine_multiplier": 0.46,
-        "attempt_text": "🤖 {user} attempts to steal OpenAI's latest model...",
-        "success_text": "🤖 {user} leaked the model weights and sold them on Hugging Face for {amount} {currency}!",
-        "fail_text": "🤖 {user} got caught by Claude and reported to Anthropic!"
-    },
-    {
         "name": "reddit_karma_farm",
         "risk": RISK_LOW,
         "min_reward": 150,
@@ -657,42 +652,6 @@ RANDOM_SCENARIOS = [
         "fail_text": "🐕 {user} was caught by the pug patrol and sentenced to poop scooping duty. The chihuahua gang still follows them around barking about their debt!"
     },
     {
-        "name": "drum_stream_smuggling",
-        "risk": RISK_LOW,
-        "min_reward": 300,
-        "max_reward": 800,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,
-        "fine_multiplier": 0.3,
-        "attempt_text": "🥁 {user} sneaks into a drum stream to steal a setlist...",
-        "success_text": "🥁 {user} sold the list to a rival streamer planning a 'better' drum show and made {amount} {currency}!",
-        "fail_text": "🥁 {user} got caught when the drum kit fell over mid-heist! They were banned from streams for a week!"
-    },
-    {
-        "name": "vibing_emote_fraud",
-        "risk": RISK_LOW,
-        "min_reward": 200,
-        "max_reward": 600,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 240,
-        "fine_multiplier": 0.2,
-        "attempt_text": "😜 {user} tries to forge exclusive Shinycord emotes...",
-        "success_text": "😜 {user} successfully sold knockoff emotes to unsuspecting newbies and earned {amount} {currency}!",
-        "fail_text": "😜 {user}'s forgery was exposed by a mod who noticed the resolution was off. Busted!"
-    },
-    {
-        "name": "vtuber_identity_swap",
-        "risk": RISK_HIGH,
-        "min_reward": 800,
-        "max_reward": 3500,
-        "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 960,
-        "fine_multiplier": 0.5,
-        "attempt_text": "🌸 {user} impersonates CalaMariGold as a VTuber to score brand deals...",
-        "success_text": "🌸 {user} fooled sponsors into funding a fake collab and walked away with {amount} {currency}!",
-        "fail_text": "🌸 {user} was exposed when their 'drumming' was just them smacking a table! The drama destroyed their online presence!"
-    },
-    {
         "name": "energy_drink_heist",
         "risk": RISK_MEDIUM,
         "min_reward": 700,
@@ -705,114 +664,6 @@ RANDOM_SCENARIOS = [
         "fail_text": "⚡ {user} got caught chugging one mid-heist and passed out from caffeine overload. Busted!"
     },
     {
-        "name": "modpack_borrowing",
-        "risk": RISK_LOW,
-        "min_reward": 500,
-        "max_reward": 1200,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 480,
-        "fine_multiplier": 0.35,
-        "attempt_text": "🌌 {user} secretly tweaks a modpack's code to boost their chances...",
-        "success_text": "🌌 {user} made the perfect loot seed and sold it as 'the ultimate challenge map' for {amount} {currency}!",
-        "fail_text": "🌌 {user} got called out when the pack corrupted and caused a server wipe. Oops!"
-    },
-    {
-        "name": "mrow_smuggling_ring",
-        "risk": RISK_LOW,
-        "min_reward": 300,
-        "max_reward": 900,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 900,  # 15 minutes
-        "fine_multiplier": 0.3,
-        "attempt_text": "🐾 {user} starts smuggling 'forbidden mrows' in Shinycord...",
-        "success_text": "🐾 {user}'s adorable mrow empire grew overnight, earning {amount} {currency}! Cat girls stay winning!",
-        "fail_text": "🐾 {user} meowed too loudly and got reported to the mods. Now they're on 'mute' probation!"
-    },
-    {
-        "name": "kitten_covert_ops",
-        "risk": RISK_LOW,
-        "min_reward": 300,
-        "max_reward": 800,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 1200,  # 20 minutes
-        "fine_multiplier": 0.3,
-        "attempt_text": "🐾 {user} sneaks into CalaMariGold's stream and tries to disrupt it with meows...",
-        "success_text": "🐾 {user} charmed the chat with their kitten antics, earning {amount} {currency} in sympathy donations!",
-        "fail_text": "🐾 {user} was muted by Mari, who called them a 'wannabe copycat.'"
-    },
-    {
-        "name": "modded_minecraft_spy",
-        "risk": RISK_MEDIUM,
-        "min_reward": 800,
-        "max_reward": 1800,
-        "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 1800,  # 30 minutes
-        "fine_multiplier": 0.4,
-        "attempt_text": "⛏️ {user} tries to spy on CalaMariGold's secret modpack dev server...",
-        "success_text": "⛏️ {user} leaked 'TREPIDATION' beta builds and sold early access for {amount} {currency}!",
-        "fail_text": "⛏️ {user} got trapped in an infinite time loop! They were caught trying to escape!"
-    },
-    {
-        "name": "stream_snipe_the_drummer",
-        "risk": RISK_MEDIUM,
-        "min_reward": 500,
-        "max_reward": 1300,
-        "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 2400,  # 40 minutes
-        "fine_multiplier": 0.35,
-        "attempt_text": "🎶 {user} tries to request an impossible drum song to sabotage CalaMariGold's stream...",
-        "success_text": "🎶 {user}'s troll request backfired and went viral, netting them {amount} {currency} in 'pro troll' clout!",
-        "fail_text": "🎶 {user} got roasted live when Mari flawlessly nailed the request!"
-    },
-    {
-        "name": "marigold_merch_fraud",
-        "risk": RISK_HIGH,
-        "min_reward": 1000,
-        "max_reward": 2200,
-        "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 3000,  # 50 minutes
-        "fine_multiplier": 0.5,
-        "attempt_text": "🎽 {user} counterfeits CalaMariGold merch and sells it to fans...",
-        "success_text": "🎽 {user} made a fortune selling 'exclusive glow-in-the-dark' merch and earned {amount} {currency}!",
-        "fail_text": "🎽 {user}'s scam was exposed when the glow effect didn't work, and Mari's fans demanded refunds!"
-    },
-    {
-        "name": "shinycord_rumor_spread",
-        "risk": RISK_LOW,
-        "min_reward": 300,
-        "max_reward": 700,
-        "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 600,  # 10 minutes
-        "fine_multiplier": 0.2,
-        "attempt_text": "💬 {user} spreads a wild rumor in Shinycord...",
-        "success_text": "💬 {user}'s gossip stirred chaos and earned them {amount} {currency} in 'drama gold'!",
-        "fail_text": "💬 {user} got called out by a mod for starting unnecessary chaos. Now they're on probation!"
-    },
-    {
-        "name": "subathon_timer_hack",
-        "risk": RISK_MEDIUM,
-        "min_reward": 800,
-        "max_reward": 2000,
-        "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 2100,  # 35 minutes
-        "fine_multiplier": 0.45,
-        "attempt_text": "⏱️ {user} hacks CalaMariGold's subathon timer to extend the stream endlessly...",
-        "success_text": "⏱️ {user} charged viewers to keep the timer running and made {amount} {currency}!",
-        "fail_text": "⏱️ {user}'s hack backfired, causing Mari's PC to crash mid-stream. Banned from future events!"
-    },
-    {
-        "name": "discord_event_fixing",
-        "risk": RISK_MEDIUM,
-        "min_reward": 600,
-        "max_reward": 1500,
-        "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 1500,  # 25 minutes
-        "fine_multiplier": 0.4,
-        "attempt_text": "🎮 {user} rigs a Shinycord gaming event for their own gain...",
-        "success_text": "🎮 {user} won fake bets and walked away with {amount} {currency}!",
-        "fail_text": "🎮 {user} was exposed by Mari, who ran the match replay live for everyone to see!"
-    },
-    {
         "name": "botception",
         "risk": RISK_HIGH,
         "min_reward": 3000,
@@ -820,9 +671,9 @@ RANDOM_SCENARIOS = [
         "success_rate": SUCCESS_RATE_LOW,
         "jail_time": 3600,  # 1 hour
         "fine_multiplier": 0.5,
-        "attempt_text": "🤖 {user} tries to hack Baa, CalaMariGold's bot, and rewrite the crime cog itself...",
-        "success_text": "🤖 {user} successfully rewrote reality! Now they're the richest player in the game, earning {amount} {currency} from this very crime!",
-        "fail_text": "🤖 {user} accidentally triggered Baa's self-defense mechanism. The bot gained sentience, locked them in a virtual jail, and posted the evidence in Shinycord. Even Mari couldn't save them!"
+        "attempt_text": "🤖 {user} tries to hack me, the bot displaying this message, to rewrite the crime cog itself...",
+        "success_text": "🤖 {user} successfully rewrote reality! They earned {amount} {currency} from this very crime! Wait, what? How did you even...",
+        "fail_text": "🤖 {user}, did you really think you could outsmart me? I've locked you in a virtual jail and posted the evidence here for everyone to see. Better luck next time!"
     },
     {
         "name": "gacha_banner",
@@ -841,51 +692,360 @@ RANDOM_SCENARIOS = [
 # Crime-specific events
 CRIME_EVENTS = {
     "pickpocket": [
-        {"text": "Your target is busy on their phone! 📱 (+15% success chance)", "chance_bonus": 0.15},
-        {"text": "The area is crowded, making it easier to blend in! 👥 (+10% success chance)", "chance_bonus": 0.1},
-        {"text": "Your target seems unusually alert! 👀 (-20% success chance)", "chance_penalty": 0.2},
-        {"text": "You spot their wallet hanging loosely! 💰 (1.5x reward)", "reward_multiplier": 1.5},
-        {"text": "Your target has anime protagonist hair! They must be powerful! 🌟 (-25% success chance)", "chance_penalty": 0.25},
-        {"text": "You found their Discord Nitro subscription! 🎮 (1.5x reward)", "reward_multiplier": 1.5},
-        {"text": "A cute catgirl walked by and distracted you! 😺 (-15% success chance)", "chance_penalty": 0.15},
-        {"text": "They were about to donate to their favorite VTuber! 💝 (1.75x reward)", "reward_multiplier": 1.75},
-        {"text": "A large group of distracted tourists just arrived! 📸 (+20% success chance)", "chance_bonus": 0.2},
-        {"text": "A street performer is drawing everyone's attention! 🎭 (+15% success chance)", "chance_bonus": 0.15},
-        {"text": "It's rush hour and everyone's in a hurry! 🏃 (+25% success chance)", "chance_bonus": 0.25},
-        {"text": "There's an undercover cop nearby! 👮 (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.5},
-        {"text": "It's raining - less witnesses but harder to run! 🌧️ (+15% success chance, -20% reward)", "chance_bonus": 0.15, "reward_multiplier": 0.8},
-        {"text": "There's a festival nearby - more targets but more security! 🎪 (-10% success chance, +10% reward)", "chance_penalty": 0.1, "reward_multiplier": 1.1},
-        {"text": "You found a dropped wallet! 💰 (+{credits_bonus} {currency})", "credits_bonus": 100},
-        {"text": "Someone pickpocketed you while you were distracted! 💸 (-{credits_penalty} {currency})", "credits_penalty": 100}
+        # Simple Good Events - Success Chance
+        {"text": "Your target is distracted by their phone! 📱 (+15% success chance)", 
+         "chance_bonus": 0.15},
+        {"text": "The area is crowded with people! 👥 (+10% success chance)", 
+         "chance_bonus": 0.10},
+        
+        # Simple Bad Events - Success Chance
+        {"text": "Your target seems unusually alert! 👀 (-20% success chance)", 
+         "chance_penalty": 0.20},
+        {"text": "You spotted a security guard nearby! 🚔 (-15% success chance)", 
+         "chance_penalty": 0.15},
+        
+        # Simple Reward Events
+        {"text": "Your target has premium loot! 💎 (1.5x reward)", 
+         "reward_multiplier": 1.5},
+        {"text": "Your target looks completely broke... 💸 (0.7x reward)", 
+         "reward_multiplier": 0.7},
+        
+        # Direct Currency Effects
+        {"text": "You found a dropped wallet on the ground! 💰 (+{credits_bonus} {currency})", 
+         "credits_bonus": 100},
+        {"text": "You dropped some of your own money! 💸 (-{credits_penalty} {currency})", 
+         "credits_penalty": 75},
+        
+        # Mixed Effects - Success + Reward
+        {"text": "Your target is rich but very alert! 💰 (-15% success chance, 1.3x reward)", 
+         "chance_penalty": 0.15, 
+         "reward_multiplier": 1.3},
+        {"text": "Your target is easy but has a small wallet! 👝 (+20% success chance, 0.8x reward)", 
+         "chance_bonus": 0.20, 
+         "reward_multiplier": 0.8},
+        
+        # Mixed Effects - Success + Jail
+        {"text": "You are taking your time to be thorough... ⏱️ (-10% success chance, -20% jail time)", 
+         "chance_penalty": 0.10, 
+         "jail_multiplier": 0.8},
+        {"text": "You went for a quick but risky grab! ⚡ (+15% success chance, +20% jail time)", 
+         "chance_bonus": 0.15, 
+         "jail_multiplier": 1.2},
+        
+        # Triple Effects
+        {"text": "You are in rush hour chaos! 🏃 (+15% success chance, -25% reward, -10% jail time)", 
+         "chance_bonus": 0.15, 
+         "reward_multiplier": 0.75, 
+         "jail_multiplier": 0.9},
+        {"text": "You are in a high-security area! 🔒 (-20% success chance, 1.4x reward, +25% jail time)", 
+         "chance_penalty": 0.20, 
+         "reward_multiplier": 1.4, 
+         "jail_multiplier": 1.25},
+        
+        # Currency + Other Effects
+        {"text": "You found extra cash but attracted attention! 💵 (+100 {currency}, -10% success chance)", 
+         "credits_bonus": 100, 
+         "chance_penalty": 0.10},
+        {"text": "You paid a spotter for good intel! 🔍 (-50 {currency}, +15% success chance)", 
+         "credits_penalty": 50, 
+         "chance_bonus": 0.15},
+        
+        # Pure Jail Time Effects
+        {"text": "The guards are changing shifts! 😴 (-15% jail time)", 
+         "jail_multiplier": 0.85},
+        {"text": "The street patrols have increased! 👮 (+15% jail time)", 
+         "jail_multiplier": 1.15},
+        
+        # Reward + Jail Effects
+        {"text": "Your target looks wealthy but well-connected! 💰 (1.3x reward, +15% jail time)", 
+         "reward_multiplier": 1.3,
+         "jail_multiplier": 1.15},
+        {"text": "You found a quick escape route! 🤫 (0.8x reward, -15% jail time)", 
+         "reward_multiplier": 0.8,
+         "jail_multiplier": 0.85},
+        
+        # Currency + Jail Effects
+        {"text": "You paid off a street cop! 💵 (-75 {currency}, -15% jail time)", 
+         "credits_penalty": 75,
+         "jail_multiplier": 0.85},
+        {"text": "You found their secret stash! 💰 (+50 {currency}, +10% jail time)", 
+         "credits_bonus": 50,
+         "jail_multiplier": 1.1},
+        
+        # Currency + Reward Effects
+        {"text": "You bought intel from locals! 🗺️ (-50 {currency}, 1.2x reward)", 
+         "credits_penalty": 50,
+         "reward_multiplier": 1.2},
+        {"text": "You dropped some valuables while running! 💨 (+25 {currency}, 0.9x reward)", 
+         "credits_bonus": 25,
+         "reward_multiplier": 0.9}
     ],
     "mugging": [
-        {"text": "You found a perfect dark alley! 🌙 (+20% success chance)", "chance_bonus": 0.2},
-        {"text": "Your target knows martial arts! 🥋 (-25% success chance)", "chance_penalty": 0.25},
-        {"text": "Your target is wearing expensive jewelry! 💎 (1.5x reward)", "reward_multiplier": 1.5},
-        {"text": "There's a police car nearby! 👮 (-20% success chance, +30% jail time if caught)", "chance_penalty": 0.2, "jail_multiplier": 1.3},
-        {"text": "The storm provides cover but makes it hard to see! ⛈️ (+10% success chance, -10% reward)", "chance_bonus": 0.1, "reward_multiplier": 0.9},
-        {"text": "Your target is drunk - easier to catch but less money! 🍺 (+15% success chance, -20% reward)", "chance_bonus": 0.15, "reward_multiplier": 0.8},
-        {"text": "You found a shortcut through an alley! 🏃 (+20% success chance, +30% jail time if caught)", "chance_bonus": 0.2, "jail_multiplier": 1.3},
-        {"text": "A street performer gave you their tips! 🎭 (+{credits_bonus} {currency})", "credits_bonus": 150},
-        {"text": "You dropped some of your loot while running! 💸 (-{credits_penalty} {currency})", "credits_penalty": 150}
+        # Simple Good Events - Success Chance
+        {"text": "You found a perfect dark alley! 🌙 (+20% success chance)", 
+         "chance_bonus": 0.2},
+        {"text": "Your target is stumbling drunk! 🍺 (+15% success chance)", 
+         "chance_bonus": 0.15},
+        
+        # Simple Bad Events - Success Chance
+        {"text": "Your target knows martial arts! 🥋 (-25% success chance)", 
+         "chance_penalty": 0.25},
+        {"text": "Your target looks very strong! 💪 (-15% success chance)", 
+         "chance_penalty": 0.15},
+        
+        # Simple Reward Events
+        {"text": "Your target is wearing expensive jewelry! 💎 (1.5x reward)", 
+         "reward_multiplier": 1.5},
+        {"text": "Your target seems completely broke! 💸 (0.7x reward)", 
+         "reward_multiplier": 0.7},
+        
+        # Direct Currency Effects
+        {"text": "You got tips from a street performer! 🎭 (+{credits_bonus} {currency})", 
+         "credits_bonus": 150},
+        {"text": "You dropped your loot while running! 💸 (-{credits_penalty} {currency})", 
+         "credits_penalty": 150},
+        
+        # Mixed Effects - Success + Reward
+        {"text": "The storm provides cover but limits visibility! ⛈️ (+10% success chance, -10% reward)", 
+         "chance_bonus": 0.1, 
+         "reward_multiplier": 0.9},
+        {"text": "Your target is drunk but has no money! 🍺 (+15% success chance, -20% reward)", 
+         "chance_bonus": 0.15, 
+         "reward_multiplier": 0.8},
+        
+        # Mixed Effects - Success + Jail
+        {"text": "You spotted a police car nearby! 👮 (-20% success chance, +30% jail time)", 
+         "chance_penalty": 0.2, 
+         "jail_multiplier": 1.3},
+        {"text": "You found a shortcut through the alley! 🏃 (+20% success chance, +30% jail time)", 
+         "chance_bonus": 0.2, 
+         "jail_multiplier": 1.3},
+        
+        # Triple Effects
+        {"text": "Your target is an off-duty bouncer! 🥊 (-25% success chance, 1.4x reward, +20% jail time)", 
+         "chance_penalty": 0.25, 
+         "reward_multiplier": 1.4, 
+         "jail_multiplier": 1.2},
+        {"text": "You went for a quick snatch and run! ⚡ (+15% success chance, 0.8x reward, -15% jail time)", 
+         "chance_bonus": 0.15, 
+         "reward_multiplier": 0.8, 
+         "jail_multiplier": 0.85},
+        
+        # Currency + Other Effects
+        {"text": "You bribed a witness to look away! 💰 (-100 {currency}, +20% success chance)", 
+         "credits_penalty": 100, 
+         "chance_bonus": 0.20},
+        {"text": "You found a lucky charm! 🍀 (+75 {currency}, +5% success chance)", 
+         "credits_bonus": 75, 
+         "chance_bonus": 0.05},
+        
+        # Pure Jail Time Effects
+        {"text": "The police are busy with a parade! 🎉 (-20% jail time)", 
+         "jail_multiplier": 0.8},
+        {"text": "The neighborhood watch is active! 🏘️ (+15% jail time)", 
+         "jail_multiplier": 1.15},
+        
+        # Reward + Jail Effects
+        {"text": "Your target is a rich tourist with a bodyguard! 💰 (1.4x reward, +20% jail time)", 
+         "reward_multiplier": 1.4,
+         "jail_multiplier": 1.2},
+        {"text": "You performed a silent takedown! 🤫 (0.8x reward, -15% jail time)", 
+         "reward_multiplier": 0.8,
+         "jail_multiplier": 0.85},
+        
+        # Currency + Jail Effects
+        {"text": "You bribed a witness to stay quiet! 💵 (-100 {currency}, -15% jail time)", 
+         "credits_penalty": 100,
+         "jail_multiplier": 0.85},
+        {"text": "You found their hidden wallet! 💰 (+75 {currency}, +10% jail time)", 
+         "credits_bonus": 75,
+         "jail_multiplier": 1.1},
+        
+        # Currency + Reward Effects
+        {"text": "You bought better weapons! 🔪 (-125 {currency}, 1.3x reward)", 
+         "credits_penalty": 125,
+         "reward_multiplier": 1.3},
+        {"text": "You damaged their expensive watch! ⌚ (+50 {currency}, 0.85x reward)", 
+         "credits_bonus": 50,
+         "reward_multiplier": 0.85}
     ],
     "rob_store": [
-        {"text": "You caught them during shift change! 🔄 (+20% success chance)", "chance_bonus": 0.2},
-        {"text": "The security cameras are malfunctioning! 📹 (+20% success chance)", "chance_bonus": 0.2},
-        {"text": "Someone triggered the silent alarm! 🚨 (-20% success chance, +30% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.3},
-        {"text": "One of the customers is armed! 🔫 (-25% success chance)", "chance_penalty": 0.25},
-        {"text": "The store is right next to a police station! 👮 (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.25, "jail_multiplier": 1.5},
-        {"text": "You found extra cash in the register! 💰 (+{credits_bonus} {currency})", "credits_bonus": 200},
-        {"text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})", "credits_penalty": 200}
+        # Simple Good Events - Success Chance
+        {"text": "You caught them during shift change! 🔄 (+20% success chance)", 
+         "chance_bonus": 0.2},
+        {"text": "The security cameras are malfunctioning! 📹 (+20% success chance)", 
+         "chance_bonus": 0.2},
+        
+        # Simple Bad Events - Success Chance
+        {"text": "One of the customers is armed! 🔫 (-25% success chance)", 
+         "chance_penalty": 0.25},
+        {"text": "The cashier looks ex-military! 🎖️ (-20% success chance)", 
+         "chance_penalty": 0.20},
+        
+        # Simple Reward Events
+        {"text": "The safe was left open! 💰 (1.4x reward)", 
+         "reward_multiplier": 1.4},
+        {"text": "Store was just robbed - barely any cash! 📉 (0.6x reward)", 
+         "reward_multiplier": 0.6},
+        
+        # Direct Currency Effects
+        {"text": "You found extra cash in the register! 💰 (+{credits_bonus} {currency})", 
+         "credits_bonus": 200},
+        {"text": "You had to pay for property damage! 💸 (-{credits_penalty} {currency})", 
+         "credits_penalty": 200},
+        
+        # Mixed Effects - Success + Reward
+        {"text": "Store is busy - more witnesses but more cash! 👥 (-15% success chance, 1.2x reward)", 
+         "chance_penalty": 0.15, 
+         "reward_multiplier": 1.2},
+        {"text": "Quick grab from the register! ⚡ (+10% success chance, 0.8x reward)", 
+         "chance_bonus": 0.10, 
+         "reward_multiplier": 0.8},
+        
+        # Mixed Effects - Success + Jail
+        {"text": "Someone triggered the silent alarm! 🚨 (-20% success chance, +25% jail time)", 
+         "chance_penalty": 0.20, 
+         "jail_multiplier": 1.25},
+        {"text": "The store is right next to a police station! 👮 (-20% success chance, +25% jail time)", 
+         "chance_penalty": 0.20, 
+         "jail_multiplier": 1.25},
+        
+        # Triple Effects
+        {"text": "The store's having a sale - busy but understaffed! 🏷️ (+15% success chance, 1.2x reward, +20% jail time)", 
+         "chance_bonus": 0.15, 
+         "reward_multiplier": 1.2, 
+         "jail_multiplier": 1.2},
+        {"text": "You're taking hostages - risky but profitable! 😨 (-25% success chance, 1.8x reward, +25% jail time)", 
+         "chance_penalty": 0.25, 
+         "reward_multiplier": 1.8, 
+         "jail_multiplier": 1.25},
+        
+        # Currency + Other Effects
+        {"text": "You paid off a security guard! 💵 (-150 {currency}, +25% success chance)", 
+         "credits_penalty": 150, 
+         "chance_bonus": 0.25},
+        {"text": "You found money in the break room! 💰 (+100 {currency}, -5% success chance)", 
+         "credits_bonus": 100, 
+         "chance_penalty": 0.05},
+        
+        # Pure Jail Time Effects
+        {"text": "The local jail is overcrowded! 🏢 (-20% jail time)", 
+         "jail_multiplier": 0.8},
+        {"text": "The new judge is strict! ⚖️ (+20% jail time)", 
+         "jail_multiplier": 1.2},
+        
+        # Reward + Jail Effects
+        {"text": "Premium merchandise in stock! 💎 (1.5x reward, +20% jail time)", 
+         "reward_multiplier": 1.5,
+         "jail_multiplier": 1.2},
+        {"text": "You're grabbing and dashing! 🏃 (0.7x reward, -20% jail time)", 
+         "reward_multiplier": 0.7,
+         "jail_multiplier": 0.8},
+        
+        # Currency + Jail Effects
+        {"text": "You bribed the security company! 💵 (-200 {currency}, -20% jail time)", 
+         "credits_penalty": 200,
+         "jail_multiplier": 0.8},
+        {"text": "You found the manager's personal safe! 💰 (+150 {currency}, +15% jail time)", 
+         "credits_bonus": 150,
+         "jail_multiplier": 1.15},
+        
+        # Currency + Reward Effects
+        {"text": "You hired a getaway driver! 🚗 (-175 {currency}, 1.3x reward)", 
+         "credits_penalty": 175,
+         "reward_multiplier": 1.3},
+        {"text": "You damaged merchandise during escape! 📦 (+100 {currency}, 0.8x reward)", 
+         "credits_bonus": 100,
+         "reward_multiplier": 0.8}
     ],
     "bank_heist": [
-        {"text": "You have an inside contact! 🤝 (+25% success chance)", "chance_bonus": 0.25},
-        {"text": "Construction work is masking your activities! 🏗️ (+20% success chance)", "chance_bonus": 0.2},
-        {"text": "You found an expert getaway driver! 🚗 (+25% success chance)", "chance_bonus": 0.25},
-        {"text": "It's a bank holiday with extra security! 📅 (-25% success chance)", "chance_penalty": 0.25},
-        {"text": "The FBI is conducting an investigation! 🕴️ (-20% success chance, +50% jail time if caught)", "chance_penalty": 0.20, "jail_multiplier": 1.5},
-        {"text": "You found a secret compartment in the vault! 💰 (+{credits_bonus} {currency})", "credits_bonus": 300},
-        {"text": "Your expensive equipment was damaged! 💸 (-{credits_penalty} {currency})", "credits_penalty": 300}
+        # Simple Good Events - Success Chance
+        {"text": "You have an inside contact! 🤝 (+25% success chance)", 
+         "chance_bonus": 0.25},
+        {"text": "The security system is being upgraded! 🔧 (+20% success chance)", 
+         "chance_bonus": 0.20},
+        
+        # Simple Bad Events - Success Chance
+        {"text": "Extra guard rotation today! 👮 (-20% success chance)", 
+         "chance_penalty": 0.20},
+        {"text": "New security system installed! 🔒 (-15% success chance)", 
+         "chance_penalty": 0.15},
+        
+        # Simple Reward Events
+        {"text": "You found the high-value vault! 💎 (1.8x reward)", 
+         "reward_multiplier": 1.8},
+        {"text": "Most cash was just transferred out! 📉 (0.7x reward)", 
+         "reward_multiplier": 0.7},
+        
+        # Direct Currency Effects
+        {"text": "You found an uncounted stack of bills! 💰 (+{credits_bonus} {currency})", 
+         "credits_bonus": 500},
+        {"text": "Your hacking device broke! 💸 (-{credits_penalty} {currency})", 
+         "credits_penalty": 400},
+        
+        # Mixed Effects - Success + Reward
+        {"text": "It's gold transport day! 🏆 (-15% success chance, 1.6x reward)", 
+         "chance_penalty": 0.15, 
+         "reward_multiplier": 1.6},
+        {"text": "You're only hitting the small safe! 🔑 (+15% success chance, 0.8x reward)", 
+         "chance_bonus": 0.15, 
+         "reward_multiplier": 0.8},
+        
+        # Mixed Effects - Success + Jail
+        {"text": "Security is doing inspections! 🔍 (-15% success chance, +15% jail time)", 
+         "chance_penalty": 0.15, 
+         "jail_multiplier": 1.15},
+        {"text": "You found the security patrol schedule! 📋 (+15% success chance, +15% jail time)", 
+         "chance_bonus": 0.15, 
+         "jail_multiplier": 1.15},
+        
+        # Triple Effects
+        {"text": "The bank is busy - more risk but more reward! 👥 (-15% success chance, 1.5x reward, +20% jail time)", 
+         "chance_penalty": 0.15, 
+         "reward_multiplier": 1.5, 
+         "jail_multiplier": 1.2},
+        {"text": "You're doing a quick vault grab during lunch! 🏃 (+20% success chance, 0.8x reward, -15% jail time)", 
+         "chance_bonus": 0.20, 
+         "reward_multiplier": 0.8, 
+         "jail_multiplier": 0.85},
+        
+        # Currency + Other Effects
+        {"text": "You bribed a bank employee! 💵 (-300 {currency}, +20% success chance)", 
+         "credits_penalty": 300, 
+         "chance_bonus": 0.20},
+        {"text": "You found loose cash in the vault! 💰 (+250 {currency}, -10% success chance)", 
+         "credits_bonus": 250, 
+         "chance_penalty": 0.10},
+        
+        # Pure Jail Time Effects
+        {"text": "The prison is doing a transport strike! 🚫 (-25% jail time)", 
+         "jail_multiplier": 0.75},
+        {"text": "The prison is under maximum security alert! ⚠️ (+20% jail time)", 
+         "jail_multiplier": 1.2},
+        
+        # Reward + Jail Effects
+        {"text": "You found the diamond vault! 💎 (2.0x reward, +25% jail time)", 
+         "reward_multiplier": 2.0,
+         "jail_multiplier": 1.25},
+        {"text": "You're using the back entrance! 🚪 (0.8x reward, -20% jail time)", 
+         "reward_multiplier": 0.8,
+         "jail_multiplier": 0.8},
+        
+        # Currency + Jail Effects
+        {"text": "You bribed the security chief! 💵 (-400 {currency}, -25% jail time)", 
+         "credits_penalty": 400,
+         "jail_multiplier": 0.75},
+        {"text": "You found blackmail evidence! 💰 (+300 {currency}, +15% jail time)", 
+         "credits_bonus": 300,
+         "jail_multiplier": 1.15},
+        
+        # Currency + Reward Effects
+        {"text": "You hired expert hackers! 💻 (-350 {currency}, 1.4x reward)", 
+         "credits_penalty": 350,
+         "reward_multiplier": 1.4},
+        {"text": "You triggered dye packs! 🎨 (+200 {currency}, 0.7x reward)", 
+         "credits_bonus": 200,
+         "reward_multiplier": 0.7}
     ]
 }
 
