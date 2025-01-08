@@ -1308,8 +1308,6 @@ class TargetModal(discord.ui.Modal):
             )
             # Add target details field for clarity
             target_details = f"Username: @{target.name}"
-            if target.nick:
-                target_details += f"\nNickname: {target.nick}"
             target_details += f"\nBank Balance: {target_balance:,} {await bank.get_currency_name(interaction.guild)}"
             
             embed.add_field(
