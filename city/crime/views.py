@@ -1338,7 +1338,7 @@ class TargetModal(discord.ui.Modal):
 class TargetSelectionView(discord.ui.View):
     """View for selecting a target"""
     def __init__(self, cog, interaction: discord.Interaction, crime_type: str, crime_data: dict):
-        super().__init__(timeout=30)
+        super().__init__(timeout=60)
         self.cog = cog
         self.interaction = interaction
         self.crime_type = crime_type
