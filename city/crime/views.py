@@ -1192,34 +1192,64 @@ class TargetModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         """Handle target selection submission"""
         try:
+            await interaction.response.defer()
+            
             # Try to find the target member
-            target = None
+            exact_matches = []
+            partial_matches = []
             input_value = self.target_input.value.lower()
             
-            # First try exact matches
+            # First collect all exact and partial matches
             for member in interaction.guild.members:
                 # Check exact matches first
                 if (input_value == member.name.lower() or 
                     input_value == member.display_name.lower() or 
                     input_value == str(member.id)):
-                    target = member
-                    break
+                    exact_matches.append(member)
+                elif (input_value in member.name.lower() or 
+                    input_value in member.display_name.lower()):
+                    partial_matches.append(member)
             
-            # If no exact match found, try partial matches
-            if not target:
-                for member in interaction.guild.members:
-                    if (input_value in member.name.lower() or 
-                        input_value in member.display_name.lower()):
-                        # If we find a partial match, inform the user to be more specific
-                        msg = await interaction.channel.send(
-                            _("Multiple possible matches found. Please be more specific or use the exact username/nickname.\n"
-                              "Tip: You can also use their Discord ID number to target them precisely.")
-                        )
-                        self.view.all_messages.append(msg)
-                        return
-            
-            if not target:
-                msg = await interaction.channel.send(
+            # Handle multiple exact matches
+            if len(exact_matches) > 1:
+                # Format the list of exact matches with their details
+                match_list = []
+                for i, member in enumerate(exact_matches, 1):
+                    if member.nick:
+                        match_list.append(f"{i}. @{member.name} (Nickname: {member.nick})")
+                    else:
+                        match_list.append(f"{i}. @{member.name}")
+                
+                msg = await interaction.followup.send(
+                    _("Multiple users found with that exact name/nickname:\n```\n{}\n```\n"
+                      "Please use their Discord ID or full @username to target a specific user.").format(
+                        '\n'.join(match_list)
+                    )
+                )
+                self.view.all_messages.append(msg)
+                return
+            elif len(exact_matches) == 1:
+                target = exact_matches[0]
+            # Handle partial matches only if no exact matches
+            elif partial_matches:
+                # Format the list of partial matches with their details
+                match_list = []
+                for i, member in enumerate(partial_matches, 1):
+                    if member.nick:
+                        match_list.append(f"{i}. @{member.name} (Nickname: {member.nick})")
+                    else:
+                        match_list.append(f"{i}. @{member.name}")
+                
+                msg = await interaction.followup.send(
+                    _("Multiple possible matches found:\n```\n{}\n```\n"
+                      "Please be more specific or use their Discord ID or full @username.").format(
+                        '\n'.join(match_list[:10])  # Limit to first 10 matches
+                    )
+                )
+                self.view.all_messages.append(msg)
+                return
+            else:
+                msg = await interaction.followup.send(
                     _("Could not find a member named '{name}'. Please check the spelling and try again.").format(
                         name=self.target_input.value
                     )
@@ -1232,7 +1262,7 @@ class TargetModal(discord.ui.Modal):
             can_target, reason = await can_target_for_crime(self.view.cog, interaction, target, self.view.crime_data, settings)
             
             if not can_target:
-                msg = await interaction.channel.send(reason)
+                msg = await interaction.followup.send(reason)
                 self.view.all_messages.append(msg)
                 return
                 
@@ -1242,7 +1272,7 @@ class TargetModal(discord.ui.Modal):
                 min_required = max(settings.get("min_steal_balance", 100), self.view.crime_data["min_reward"])
                 
                 if target_balance < min_required:
-                    msg = await interaction.channel.send(
+                    msg = await interaction.followup.send(
                         _("This target doesn't have enough {currency} to steal from! (Minimum: {min:,})").format(
                             currency=await bank.get_currency_name(interaction.guild),
                             min=min_required
@@ -1251,12 +1281,11 @@ class TargetModal(discord.ui.Modal):
                     self.view.all_messages.append(msg)
                     return
             except Exception as e:
-                await interaction.channel.send(
+                await interaction.followup.send(
                     _("An error occurred while checking your target's balance. Please try again. Error: {error}").format(
                         error=str(e)
                     )
                 )
-                self.view.all_messages.append(msg)
                 return
                 
             # Create crime view with selected target
@@ -1277,8 +1306,19 @@ class TargetModal(discord.ui.Modal):
                 value=f"{int(self.view.crime_data['max_reward'] * self.view.crime_data['fine_multiplier']):,} {await bank.get_currency_name(interaction.guild)}",
                 inline=True
             )
+            # Add target details field for clarity
+            target_details = f"Username: @{target.name}"
+            if target.nick:
+                target_details += f"\nNickname: {target.nick}"
+            target_details += f"\nBank Balance: {target_balance:,} {await bank.get_currency_name(interaction.guild)}"
             
-            message = await interaction.channel.send(
+            embed.add_field(
+                name="🎯 Target Details",
+                value=target_details,
+                inline=False
+            )
+            
+            message = await interaction.followup.send(
                 embed=embed,
                 view=crime_view
             )
@@ -1289,12 +1329,11 @@ class TargetModal(discord.ui.Modal):
             self.view.stop()
             
         except Exception as e:
-            await interaction.channel.send(
+            await interaction.followup.send(
                 _("An error occurred while selecting the target. Please try again. Error: {error}").format(
                     error=str(e)
                 )
             )
-            self.view.all_messages.append(msg)
 
 class TargetSelectionView(discord.ui.View):
     """View for selecting a target"""
