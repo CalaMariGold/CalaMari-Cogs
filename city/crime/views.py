@@ -1196,14 +1196,28 @@ class TargetModal(discord.ui.Modal):
             target = None
             input_value = self.target_input.value.lower()
             
-            # Search through guild members
+            # First try exact matches
             for member in interaction.guild.members:
-                if (input_value in member.name.lower() or 
-                    input_value in member.display_name.lower() or 
+                # Check exact matches first
+                if (input_value == member.name.lower() or 
+                    input_value == member.display_name.lower() or 
                     input_value == str(member.id)):
                     target = member
                     break
-                    
+            
+            # If no exact match found, try partial matches
+            if not target:
+                for member in interaction.guild.members:
+                    if (input_value in member.name.lower() or 
+                        input_value in member.display_name.lower()):
+                        # If we find a partial match, inform the user to be more specific
+                        msg = await interaction.channel.send(
+                            _("Multiple possible matches found. Please be more specific or use the exact username/nickname.\n"
+                              "Tip: You can also use their Discord ID number to target them precisely.")
+                        )
+                        self.view.all_messages.append(msg)
+                        return
+            
             if not target:
                 msg = await interaction.channel.send(
                     _("Could not find a member named '{name}'. Please check the spelling and try again.").format(
