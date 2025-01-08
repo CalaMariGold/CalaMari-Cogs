@@ -1,543 +1,224 @@
-"""Blackmarket items and views for the crime system."""
+"""Blackmarket system for the City cog.
 
+This module provides a shop interface for purchasing special items and perks
+that can be used to gain advantages in the crime system.
+
+The blackmarket offers both permanent perks and consumable items that can
+affect various aspects of the crime system, such as jail time and notifications.
+"""
+
+from typing import Dict, Any, Optional
 import discord
 from redbot.core import bank, commands
-from typing import Dict, List, Optional
-from datetime import datetime, timedelta
-import time
 
-# Blackmarket Items Configuration
-BLACKMARKET_ITEMS = {
+# Registry of available blackmarket items
+BLACKMARKET_ITEMS: Dict[str, Dict[str, Any]] = {
     "notify_ping": {
         "name": "Jail Release Notification",
-        "emoji": "🔔",
+        "description": "Get notified when your jail sentence is over",
         "cost": 10000,
-        "description": "Get notified when you're released from jail. Select in inventory to toggle on/off",
         "type": "perk",
-        "effect": "notify_on_release"
+        "emoji": "🔔",
+        "can_sell": True,
+        "toggleable": True
     },
     "jail_reducer": {
         "name": "Reduced Sentence",
-        "emoji": "⚖️",
-        "cost": 20000,
         "description": "Permanently reduce jail time by 20%",
+        "cost": 20000,
         "type": "perk",
-        "effect": "reduce_jail_time",
-        "magnitude": 0.2
+        "emoji": "⚖️",
+        "can_sell": True,
+        "toggleable": False
+    },
+    "jail_pass": {
+        "name": "Get Out of Jail Free",
+        "description": "Instantly escape from jail",
+        "cost": 1000,
+        "type": "consumable",
+        "emoji": "🔑",
+        "can_sell": True,
+        "uses": 1
     }
 }
 
 class BlackmarketView(discord.ui.View):
-    """View for the blackmarket shop."""
+    """A view for displaying and purchasing items from the blackmarket.
     
-    def __init__(self, cog: commands.Cog, ctx: commands.Context):
-        super().__init__(timeout=60)
-        self.cog = cog
+    This view provides a shop interface where users can view and purchase
+    various items and perks that affect the crime system.
+    
+    Attributes:
+        ctx (commands.Context): The command context
+        cog (commands.Cog): The cog instance that created this view
+        message (Optional[discord.Message]): The message containing this view
+    """
+    
+    def __init__(self, ctx: commands.Context, cog: commands.Cog) -> None:
+        super().__init__(timeout=180)
         self.ctx = ctx
+        self.cog = cog
         self.message: Optional[discord.Message] = None
-        
-        # Add select menu for items
-        self.add_item(BlackmarketSelect(cog, ctx))
-
-class BlackmarketSelect(discord.ui.Select):
-    """Dropdown select menu for blackmarket items."""
+        self._update_options()
     
-    def __init__(self, cog: commands.Cog, ctx: commands.Context):
-        self.cog = cog
-        self.ctx = ctx
+    def _update_options(self) -> None:
+        """Update the select menu options based on available items."""
+        # Clear existing options
+        for child in self.children[:]:
+            self.remove_item(child)
         
-        # Create options from items
-        options = []
-        for item_id, item in BLACKMARKET_ITEMS.items():
-            options.append(
+        # Create select menu
+        select = discord.ui.Select(
+            placeholder="Select an item to purchase",
+            options=[
                 discord.SelectOption(
                     label=item["name"],
                     value=item_id,
-                    description=f"{item['cost']:,} credits - {item['description']}",
+                    description=f"{item['description']} - {item['cost']:,} credits",
                     emoji=item["emoji"]
                 )
-            )
-            
-        super().__init__(
-            placeholder="Select an item to purchase...",
-            min_values=1,
-            max_values=1,
-            options=options
-        )
-        
-    async def callback(self, interaction: discord.Interaction):
-        """Handle item selection."""
-        if interaction.user.id != self.ctx.author.id:
-            await interaction.response.send_message("This menu is not for you!", ephemeral=True)
-            return
-            
-        item_id = self.values[0]
-        item = BLACKMARKET_ITEMS[item_id]
-        currency_name = await bank.get_currency_name(self.ctx.guild)
-        
-        # Update option descriptions with currency name
-        new_options = []
-        for option in self.options:
-            item = BLACKMARKET_ITEMS[option.value]
-            option.description = f"{item['cost']:,} {currency_name} - {item['description']}"
-            new_options.append(option)
-        self.options = new_options
-        
-        try:
-            # Check if user can afford
-            balance = await bank.get_balance(self.ctx.author)
-            if balance < item["cost"]:
-                await interaction.response.send_message(
-                    f"❌ You cannot afford the {item['name']}! (Cost: {item['cost']:,} {currency_name})",
-                    ephemeral=True
-                )
-                return
-                
-            # Handle purchase based on item type
-            async with self.cog.config.member(self.ctx.author).all() as member_data:
-                if item["type"] == "perk":
-                    if item_id in member_data.get("purchased_perks", []):
-                        await interaction.response.send_message(
-                            f"❌ You already own the {item['name']} perk!",
-                            ephemeral=True
-                        )
-                        return
-                        
-                    # Add perk to user's perks
-                    if "purchased_perks" not in member_data:
-                        member_data["purchased_perks"] = []
-                    member_data["purchased_perks"].append(item_id)
-                    
-                    # Special handling for notify_ping
-                    if item_id == "notify_ping":
-                        member_data["notify_unlocked"] = True  # Unlock the feature
-                        member_data["notify_on_release"] = True  # Enable notifications by default
-                        
-                else:  # Consumable
-                    if "active_items" not in member_data:
-                        member_data["active_items"] = {}
-                        
-                    # Add item to inventory
-                    current_time = int(time.time())
-                    if item_id in member_data["active_items"]:
-                        # Stack duration for time-based items
-                        if "duration" in item:
-                            existing_end = member_data["active_items"][item_id].get("end_time", current_time)
-                            new_end = max(existing_end, current_time) + item["duration"]
-                            member_data["active_items"][item_id] = {
-                                "end_time": new_end
-                            }
-                        else:
-                            # Stack uses for use-based items
-                            uses = member_data["active_items"][item_id].get("uses", 0) + item["uses"]
-                            member_data["active_items"][item_id] = {
-                                "uses": uses
-                            }
-                    else:
-                        if "duration" in item:
-                            member_data["active_items"][item_id] = {
-                                "end_time": current_time + item["duration"]
-                            }
-                        else:
-                            member_data["active_items"][item_id] = {
-                                "uses": item["uses"]
-                            }
-                            
-            # Deduct cost
-            await bank.withdraw_credits(self.ctx.author, item["cost"])
-            
-            # Send success message
-            if item_id == "notify_ping":
-                await interaction.response.send_message(
-                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} {currency_name}!\n"
-                    f"Notifications are now enabled by default. Select the perk in your inventory to toggle them on/off.",
-                    ephemeral=True
-                )
-            else:
-                await interaction.response.send_message(
-                    f"✅ Successfully purchased {item['emoji']} **{item['name']}** for {item['cost']:,} {currency_name}!",
-                    ephemeral=True
-                )
-            
-        except Exception as e:
-            await interaction.response.send_message(
-                f"❌ An error occurred while processing your purchase: {str(e)}",
-                ephemeral=True
-            )
-
-class InventoryView(discord.ui.View):
-    """View for the inventory."""
-    
-    def __init__(self, cog: commands.Cog, ctx: commands.Context):
-        super().__init__(timeout=60)
-        self.cog = cog
-        self.ctx = ctx
-        self.message: Optional[discord.Message] = None
-        
-        # Create both select menus
-        self.activate_select = InventorySelect(cog, ctx)
-        self.sell_select = InventorySellSelect(cog, ctx)
-        
-        # Add them to the view
-        self.add_item(self.activate_select)
-        self.add_item(self.sell_select)
-    
-    async def initialize_dropdowns(self) -> None:
-        """Initialize both dropdowns when the view is first shown."""
-        member_data = await self.cog.config.member(self.ctx.author).all()
-        
-        # Update both dropdowns
-        await self.activate_select.update_options()
-        await self.sell_select.update_options()
-        
-        # Update the message with the new view state
-        if self.message:
-            await self.message.edit(view=self)
-
-class InventorySelect(discord.ui.Select):
-    """Dropdown select menu for activating inventory items."""
-    
-    def __init__(self, cog: commands.Cog, ctx: commands.Context):
-        self.cog = cog
-        self.ctx = ctx
-        
-        # Initialize with a default "empty" option
-        options = [
-            discord.SelectOption(
-                label="No items available",
-                value="none",
-                description="Purchase items from the black market",
-                emoji="❌"
-            )
-        ]
-        
-        super().__init__(
-            placeholder="Select an item to activate...",
-            min_values=1,
-            max_values=1,
-            options=options,
-            disabled=True  # Start disabled until we update options
-        )
-        
-    async def update_options(self) -> None:
-        """Update the select menu options based on user's inventory.
-        
-        Refreshes the dropdown with current items, their uses/duration, and proper formatting.
-        Disables the dropdown if no items are available. Handles both consumable items
-        and permanent perks, showing appropriate status information for each:
-        - Consumables: Shows remaining uses or duration
-        - Perks: Shows permanent status and description
-        - Time-based items: Shows remaining time in hours/minutes
-        """
-        member_data = await self.cog.config.member(self.ctx.author).all()
-        current_time = int(time.time())
-        
-        options = []
-        
-        # Add active consumables
-        active_items = member_data.get("active_items", {})
-        for item_id, status in active_items.items():
-            item = BLACKMARKET_ITEMS[item_id]
-            
-            if "duration" in item:
-                end_time = status.get("end_time", 0)
-                if end_time > current_time:
-                    remaining = end_time - current_time
-                    hours = remaining // 3600
-                    minutes = (remaining % 3600) // 60
-                    time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
-                    
-                    options.append(
-                        discord.SelectOption(
-                            label=f"{item['name']} (Active)",
-                            value=f"active_{item_id}",
-                            description=f"Time remaining: {time_str}",
-                            emoji=item["emoji"]
-                        )
-                    )
-            else:
-                uses = status.get("uses", 0)
-                if uses > 0:
-                    options.append(
-                        discord.SelectOption(
-                            label=f"{item['name']} ({uses} uses)",
-                            value=item_id,
-                            description=item["description"],
-                            emoji=item["emoji"]
-                        )
-                    )
-                    
-        # Add owned perks that can be activated (excluding jail_reducer)
-        for perk_id in member_data.get("purchased_perks", []):
-            # Skip jail reducer perk since it's passive
-            if perk_id == "jail_reducer":
-                continue
-                
-            perk = BLACKMARKET_ITEMS[perk_id]
-            options.append(
-                discord.SelectOption(
-                    label=f"{perk['name']} (Permanent)",
-                    value=f"perk_{perk_id}",
-                    description=perk["description"],
-                    emoji=perk["emoji"]
-                )
-            )
-            
-        if options:
-            self.options = options
-            self.disabled = False
-        else:
-            # If no items, show default "empty" option
-            self.options = [
-                discord.SelectOption(
-                    label="No items available",
-                    value="none",
-                    description="Purchase items from the black market",
-                    emoji="❌"
-                )
+                for item_id, item in BLACKMARKET_ITEMS.items()
             ]
-            self.disabled = True
+        )
+        select.callback = self._handle_purchase
+        self.add_item(select)
+    
+    async def _handle_purchase(self, interaction: discord.Interaction) -> None:
+        """Handle item purchase.
         
-    async def callback(self, interaction: discord.Interaction):
-        """Handle item activation."""
+        Args:
+            interaction (discord.Interaction): The interaction that triggered this callback
+        """
         if interaction.user.id != self.ctx.author.id:
             await interaction.response.send_message("This menu is not for you!", ephemeral=True)
             return
-            
-        item_id = self.values[0]
         
-        # Handle different item types
-        if item_id.startswith("active_"):
+        try:
+            item_id = interaction.data["values"][0]
+            item = BLACKMARKET_ITEMS[item_id]
+        except (KeyError, AttributeError):
             await interaction.response.send_message(
-                "This item is already active!",
+                "❌ This item is no longer available!",
                 ephemeral=True
             )
             return
-            
-        # Handle notification toggle
-        if item_id == "perk_notify_ping":
-            try:
-                async with self.cog.config.member(self.ctx.author).all() as member_data:
-                    member_data["notify_on_release"] = not member_data.get("notify_on_release", False)
-                    is_enabled = member_data["notify_on_release"]
-                
-                embed = discord.Embed(
-                    title="🔔 Jail Release Notifications",
-                    description=f"Notifications have been {'enabled' if is_enabled else 'disabled'}.\n\n"
-                              f"You will{' ' if is_enabled else ' not '}be pinged when your jail sentence is over.",
-                    color=discord.Color.green() if is_enabled else discord.Color.red()
-                )
-                await interaction.response.send_message(embed=embed)
-                return
-            except Exception as e:
-                await interaction.response.send_message(
-                    f"❌ An error occurred while toggling notifications: {str(e)}",
-                    ephemeral=True
-                )
-                return
-            
-        # Handle consumable activation
-        try:
-            item = BLACKMARKET_ITEMS[item_id]
-            
-            async with self.cog.config.member(self.ctx.author).all() as member_data:
-                if item_id not in member_data.get("active_items", {}):
+        
+        # Check if user can afford
+        balance = await bank.get_balance(self.ctx.author)
+        if balance < item["cost"]:
+            currency_name = await bank.get_currency_name(self.ctx.guild)
+            await interaction.response.send_message(
+                f"❌ You need {item['cost']:,} {currency_name} to buy this!",
+                ephemeral=True
+            )
+            return
+        
+        # Handle purchase
+        async with self.cog.config.member(self.ctx.author).all() as member_data:
+            if item["type"] == "perk":
+                if item_id in member_data.get("purchased_perks", []):
                     await interaction.response.send_message(
-                        "❌ You don't have this item!",
+                        "❌ You already own this perk!",
                         ephemeral=True
                     )
                     return
-                    
-                # Special handling for different items
-                if item_id == "jail_card":
-                    # Check if in jail
-                    if not await self.cog.is_jailed(self.ctx.author):
+                
+                if "purchased_perks" not in member_data:
+                    member_data["purchased_perks"] = []
+                member_data["purchased_perks"].append(item_id)
+                
+                # Special handling for notify_ping
+                if item_id == "notify_ping":
+                    member_data["notify_unlocked"] = True
+                    member_data["notify_on_release"] = True
+            else:  # consumable
+                if "active_items" not in member_data:
+                    member_data["active_items"] = {}
+                
+                if item_id in member_data["active_items"]:
+                    current_uses = member_data["active_items"][item_id].get("uses", 0)
+                    if current_uses > 0:
                         await interaction.response.send_message(
-                            "❌ You're not in jail!",
+                            "❌ You already have this item with uses remaining!",
                             ephemeral=True
                         )
                         return
-                        
-                    # Free from jail
-                    await self.cog.config.member(self.ctx.author).jail_until.set(0)
-                    
-                    # Remove one use
-                    member_data["active_items"][item_id]["uses"] -= 1
-                    if member_data["active_items"][item_id]["uses"] <= 0:
-                        del member_data["active_items"][item_id]
-                        
-                    await interaction.response.send_message(
-                        "🔓 You used your Get Out of Jail Free card and were released!",
-                        ephemeral=False
-                    )
-                    
-            # Update options after use
-            await self.update_options()
-            
-        except Exception as e:
-            await interaction.response.send_message(
-                f"❌ An error occurred while activating your item: {str(e)}",
-                ephemeral=True
-            )
-
-class InventorySellSelect(discord.ui.Select):
-    """Dropdown select menu for selling inventory items."""
-    
-    def __init__(self, cog: commands.Cog, ctx: commands.Context):
-        self.cog = cog
-        self.ctx = ctx
+                
+                member_data["active_items"][item_id] = {"uses": item["uses"]}
         
-        # Initialize with a default "empty" option
-        options = [
-            discord.SelectOption(
-                label="No items available",
-                value="none",
-                description="Purchase items from the black market",
-                emoji="❌"
-            )
-        ]
+        # Complete purchase
+        await bank.withdraw_credits(self.ctx.author, item["cost"])
+        currency_name = await bank.get_currency_name(self.ctx.guild)
         
-        super().__init__(
-            placeholder="Select an item to sell...",
-            min_values=1,
-            max_values=1,
-            options=options,
-            disabled=True  # Start disabled until we update options
+        await interaction.response.send_message(
+            f"✅ Purchased {item['emoji']} **{item['name']}** for {item['cost']:,} {currency_name}",
+            ephemeral=True
         )
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Check if the interaction is valid.
         
-    async def update_options(self) -> None:
-        """Update the select menu options based on user's inventory."""
-        member_data = await self.cog.config.member(self.ctx.author).all()
-        currency_name = await bank.get_currency_name(self.ctx.guild)
-        options = []
-        
-        # Add owned perks first
-        perks = member_data.get("purchased_perks", [])
-        for perk_id in perks:
-            if perk_id in BLACKMARKET_ITEMS:  # Make sure the perk exists
-                perk = BLACKMARKET_ITEMS[perk_id]
-                sell_price = int(perk["cost"] * 0.25)  # 25% refund for perks
-                options.append(
-                    discord.SelectOption(
-                        label=f"{perk['name']} (Permanent)",
-                        value=f"perk_{perk_id}",
-                        description=f"Sell for {sell_price:,} {currency_name}",
-                        emoji=perk["emoji"]
-                    )
-                )
-        
-        # Add sellable items (consumables)
-        active_items = member_data.get("active_items", {})
-        for item_id, status in active_items.items():
-            if item_id in BLACKMARKET_ITEMS:  # Make sure the item exists
-                item = BLACKMARKET_ITEMS[item_id]
-                uses = status.get("uses", 0)
-                if uses > 0:
-                    sell_price = int(item["cost"] * 0.5)  # 50% refund
-                    options.append(
-                        discord.SelectOption(
-                            label=f"{item['name']} ({uses} uses)",
-                            value=item_id,
-                            description=f"Sell for {sell_price:,} {currency_name}",
-                            emoji=item["emoji"]
-                        )
-                    )
+        Args:
+            interaction (discord.Interaction): The interaction to check
             
-        if options:
-            self.options = options
-            self.disabled = False
-        else:
-            # If no items, show default "empty" option
-            self.options = [
-                discord.SelectOption(
-                    label="No items available",
-                    value="none",
-                    description="Purchase items from the black market",
-                    emoji="❌"
-                )
-            ]
-            self.disabled = True
-        
-    async def callback(self, interaction: discord.Interaction):
-        """Handle item selling."""
-        if interaction.user.id != self.ctx.author.id:
-            await interaction.response.send_message("This menu is not for you!", ephemeral=True)
-            return
-            
-        item_id = self.values[0]
-        currency_name = await bank.get_currency_name(self.ctx.guild)
-        
-        # Handle different item types
+        Returns:
+            bool: True if the interaction is valid, False otherwise
+        """
+        return interaction.user.id == self.ctx.author.id
+    
+    async def on_timeout(self) -> None:
+        """Handle view timeout by disabling all components."""
         try:
-            async with self.cog.config.member(self.ctx.author).all() as member_data:
-                if item_id.startswith("perk_"):
-                    # Handle perk selling
-                    perk_id = item_id[5:]  # Remove "perk_" prefix
-                    if perk_id not in member_data.get("purchased_perks", []):
-                        await interaction.response.send_message(
-                            "❌ You don't own this perk!",
-                            ephemeral=True
-                        )
-                        return
-                        
-                    perk = BLACKMARKET_ITEMS[perk_id]
-                    sell_price = int(perk["cost"] * 0.25)  # 25% refund
-                    
-                    # Remove perk
-                    member_data["purchased_perks"].remove(perk_id)
-                    
-                    # If it's the notification perk, disable notifications
-                    if perk_id == "notify_ping":
-                        member_data["notify_on_release"] = False
-                        member_data["notify_unlocked"] = False
-                    
-                    # Give credits
-                    await bank.deposit_credits(self.ctx.author, sell_price)
-                    
-                    embed = discord.Embed(
-                        title="💰 Item Sold",
-                        description=f"You sold your {perk['emoji']} {perk['name']} for {sell_price:,} {currency_name}.",
-                        color=discord.Color.green()
-                    )
-                    await interaction.response.send_message(embed=embed)
-                    
-                else:
-                    # Handle consumable selling
-                    if item_id not in member_data.get("active_items", {}):
-                        await interaction.response.send_message(
-                            "❌ You don't have this item!",
-                            ephemeral=True
-                        )
-                        return
-                        
-                    item = BLACKMARKET_ITEMS[item_id]
-                    uses = member_data["active_items"][item_id].get("uses", 0)
-                    sell_price = int(item["cost"] * 0.5 * uses)  # 50% refund per use
-                    
-                    # Remove item
-                    del member_data["active_items"][item_id]
-                    
-                    # Give credits
-                    await bank.deposit_credits(self.ctx.author, sell_price)
-                    
-                    embed = discord.Embed(
-                        title="💰 Item Sold",
-                        description=f"You sold your {item['emoji']} {item['name']} ({uses} uses) for {sell_price:,} {currency_name}.",
-                        color=discord.Color.green()
-                    )
-                    await interaction.response.send_message(embed=embed)
-                    
-            # Update both dropdowns after selling
-            await self.update_options()
-            for child in self.view.children:
-                if isinstance(child, InventorySelect):
-                    await child.update_options()
-                    
-            # Update the message with new dropdowns
-            await self.view.message.edit(view=self.view)
-            
-        except Exception as e:
-            await interaction.response.send_message(
-                f"❌ An error occurred while selling the item: {str(e)}",
-                ephemeral=True
-            ) 
+            for child in self.children:
+                child.disabled = True
+            await self.message.edit(view=self)
+        except (discord.NotFound, discord.HTTPException):
+            pass
+
+async def display_blackmarket(cog: commands.Cog, ctx: commands.Context) -> None:
+    """Display the blackmarket shop interface.
+    
+    Args:
+        cog (commands.Cog): The cog instance
+        ctx (commands.Context): The command context
+    """
+    currency_name = await bank.get_currency_name(ctx.guild)
+    
+    # Create embed
+    embed = discord.Embed(
+        title="🏴‍☠️ Black Market",
+        description="Welcome to the black market! Here you can purchase special items and perks.",
+        color=discord.Color.dark_red()
+    )
+    
+    # Add perks section
+    perks = []
+    for item_id, item in BLACKMARKET_ITEMS.items():
+        if item["type"] == "perk":
+            perks.append(f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
+                        f"↳ {item['description']}")
+    
+    if perks:
+        embed.add_field(
+            name="__🔒 Permanent Perks__",
+            value="\n".join(perks),
+            inline=False
+        )
+    
+    # Add consumable items section
+    items = []
+    for item_id, item in BLACKMARKET_ITEMS.items():
+        if item["type"] == "consumable":
+            items.append(f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
+                        f"↳ {item['description']}")
+    
+    if items:
+        embed.add_field(
+            name="__📦 Consumable Items__",
+            value="\n".join(items),
+            inline=False
+        )
+    
+    # Create and send view
+    view = BlackmarketView(ctx, cog)
+    view.message = await ctx.send(embed=embed, view=view) 

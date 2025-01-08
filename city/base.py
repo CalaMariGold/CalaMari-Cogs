@@ -6,6 +6,7 @@ import discord
 from datetime import datetime, timezone
 import time
 from .crime.data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
+from typing import Dict, Any
 
 CONFIG_SCHEMA = {
     "GUILD": {
@@ -60,6 +61,12 @@ class CityBase:
         
         # Track active tasks
         self.tasks = []
+
+    @commands.group(name="city", invoke_without_command=True)
+    async def city(self, ctx: commands.Context):
+        """Access the city system."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
         
     async def red_delete_data_for_user(self, *, requester, user_id: int):
         """Delete user data when requested."""
@@ -353,6 +360,7 @@ class CityBase:
         - Crime records and cooldowns
         - Jail status and history
         - All statistics (successful crimes, failed crimes, etc.)
+        - All perks and items
         - References in other users' data
         
         This action cannot be undone.
@@ -370,6 +378,7 @@ class CityBase:
             "• Crime records and cooldowns\n"
             "• Jail status and history\n"
             "• All statistics (successful crimes, failed crimes, etc.)\n"
+            "• All perks and items\n"
             "• References in other users' data",
             view=view
         )
@@ -402,9 +411,6 @@ class CityBase:
                     if member_data.get("last_target") == user.id:
                         await self.config.member_from_ids(guild_id, member_id).last_target.set(None)
                         modified = True
-                    
-                    # If we add any other cross-user references in the future,
-                    # they should be cleaned up here
             
             await ctx.send(f"✅ Successfully wiped all city data for {user.display_name} across all guilds.")
             
@@ -420,7 +426,8 @@ class CityBase:
         - Delete ALL user stats
         - Remove ALL crime records and cooldowns
         - Clear ALL jail status and history
-        - Wipe ALL cross-user references
+        - Wipe ALL perks and items
+        - Remove ALL cross-user references
         - Remove ALL data across ALL guilds
         
         This action absolutely cannot be undone.
@@ -434,6 +441,7 @@ class CityBase:
             "• All user statistics\n"
             "• All crime records and cooldowns\n"
             "• All jail records and history\n"
+            "• All perks and items\n"
             "• All cross-user references\n"
             "• All other city-related data\n\n"
             "This action CANNOT be undone and will affect ALL users.\n"
@@ -473,3 +481,32 @@ class CityBase:
             
         except Exception as e:
             await ctx.send(f"❌ An error occurred while wiping data: {str(e)}")
+
+    @city.command(name="inventory")
+    @commands.guild_only()
+    async def city_inventory(self, ctx: commands.Context) -> None:
+        """View your inventory of items and perks from all city systems.
+        
+        This command displays a combined view of all items and perks you own
+        from different city systems like crime, business, etc.
+        """
+        # Gather items from different systems
+        all_items: Dict[str, Dict[str, Any]] = {}
+        
+        # Add crime items if crime system is loaded
+        try:
+            from .crime.blackmarket import BLACKMARKET_ITEMS
+            all_items.update(BLACKMARKET_ITEMS)
+        except ImportError:
+            pass
+        
+        # Add business items if business system is loaded
+        try:
+            from .business.shop import BUSINESS_ITEMS
+            all_items.update(BUSINESS_ITEMS)
+        except ImportError:
+            pass
+        
+        # Display combined inventory
+        from .inventory import display_inventory
+        await display_inventory(self, ctx, all_items)

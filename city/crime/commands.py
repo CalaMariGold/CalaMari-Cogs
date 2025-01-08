@@ -8,9 +8,8 @@ import random
 import time
 import asyncio
 from .scenarios import get_random_scenario, get_random_jailbreak_scenario
-from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView, BlackmarketView, InventoryView, AddScenarioModal
+from .views import CrimeListView, BailView, CrimeView, TargetSelectionView, CrimeButton, MainMenuView, AddScenarioModal
 from .data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
-from .blackmarket import BLACKMARKET_ITEMS
 from datetime import datetime
 from ..utils import (
     format_cooldown_time, 
@@ -923,7 +922,6 @@ class CrimeCommands:
         async with self.config.member(member).all() as member_data:
             # Check for reduced sentence perk
             if "jail_reducer" in member_data.get("purchased_perks", []):
-                # Apply 20% reduction
                 jail_time = int(jail_time * 0.8)  # 20% shorter sentence
             
             member_data["jail_until"] = int(time.time()) + jail_time
@@ -1023,148 +1021,13 @@ class CrimeCommands:
 
     @crime.command(name="blackmarket")
     async def crime_blackmarket(self, ctx: commands.Context):
-        """Browse the black market for special items and perks.
+        """View the black market shop.
         
-        Available items:
-        • 🔔 Jail Release Notification - Get notified when released
-        • ⚖️ Reduced Sentence - 20% shorter jail time
-        • 🔓 Get Out of Jail Free - Instant release from jail
-        • 🍀 Lucky Charm - Temporary crime success boost
-        
-        Use the dropdown menu to purchase items.
-        Some items are permanent perks, others are consumable.
+        The black market offers special items and perks that can help with your criminal activities.
+        Items purchased here will appear in your inventory (!city inventory).
         """
-        try:
-            # Create embed
-            embed = discord.Embed(
-                title="🏴‍☠️ Black Market",
-                description=(
-                    "Welcome to the shadier side of the city...\n"
-                    "Here you can find various items and perks to aid your criminal career.\n"
-                    "Use the dropdown menu below to make a purchase."
-                ),
-                color=discord.Color.dark_purple()
-            )
-            
-            # Add current balance
-            balance = await bank.get_balance(ctx.author)
-            currency_name = await bank.get_currency_name(ctx.guild)
-            embed.add_field(
-                name="💰 Your Balance",
-                value=f"{balance:,} {currency_name}",
-                inline=False
-            )
-            
-            # Group items by type
-            perks = []
-            consumables = []
-            
-            for item_id, item in BLACKMARKET_ITEMS.items():
-                if item["type"] == "perk":
-                    perks.append(
-                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
-                        f"↳ {item['description']}"
-                    )
-                else:
-                    consumables.append(
-                        f"{item['emoji']} **{item['name']}** - {item['cost']:,} {currency_name}\n"
-                        f"↳ {item['description']}"
-                    )
-            
-            # Add perks section
-            if perks:
-                embed.add_field(
-                    name="🔒 Permanent Perks",
-                    value="\n\n".join(perks),
-                    inline=False
-                )
-            
-            # Add consumables section
-            if consumables:
-                embed.add_field(
-                    name="📦 Consumable Items",
-                    value="\n\n".join(consumables),
-                    inline=False
-                )
-            
-            # Create and send view
-            view = BlackmarketView(self, ctx)
-            view.message = await ctx.send(embed=embed, view=view)
-            
-        except Exception as e:
-            await ctx.send(f"An error occurred while opening the black market: {str(e)}")
-
-    @crime.command(name="inventory")
-    async def view_inventory(self, ctx: commands.Context):
-        """View your inventory of items and perks."""
-        try:
-            # Get member data
-            member_data = await self.config.member(ctx.author).all()
-            current_time = int(time.time())
-            
-            # Create embed
-            embed = discord.Embed(
-                title="🎒 Your Inventory",
-                description="Use the dropdowns below to activate or sell your items.",
-                color=discord.Color.blue()
-            )
-            
-            # Add perks section
-            perks = member_data.get("purchased_perks", [])
-            if perks:
-                perk_list = []
-                for perk_id in perks:
-                    perk = BLACKMARKET_ITEMS[perk_id]
-                    perk_list.append(f"{perk['emoji']} **{perk['name']}**\n↳ {perk['description']}")
-                embed.add_field(
-                    name="🔒 Permanent Perks",
-                    value="\n".join(perk_list),
-                    inline=False
-                )
-            
-            # Add active items section
-            active_items = member_data.get("active_items", {})
-            if active_items:
-                active_list = []
-                for item_id, status in active_items.items():
-                    item = BLACKMARKET_ITEMS[item_id]
-                    
-                    if "duration" in item:
-                        end_time = status.get("end_time", 0)
-                        if end_time > current_time:
-                            remaining = end_time - current_time
-                            hours = remaining // 3600
-                            minutes = (remaining % 3600) // 60
-                            time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
-                            active_list.append(
-                                f"{item['emoji']} **{item['name']}**\n↳ Time remaining: {time_str}"
-                            )
-                    else:
-                        uses = status.get("uses", 0)
-                        if uses > 0:
-                            active_list.append(
-                                f"{item['emoji']} **{item['name']}**\n↳ {uses} uses remaining"
-                            )
-                            
-                if active_list:
-                    embed.add_field(
-                        name="📦 Items",
-                        value="\n".join(active_list),
-                        inline=False
-                    )
-            
-            if not perks and not active_items:
-                embed.description += "\n\n❌ Your inventory is empty! Visit the black market to purchase items."
-            
-            # Create and send view
-            view = InventoryView(self, ctx)
-            view.message = await ctx.send(embed=embed, view=view)
-            
-            # Initialize dropdowns
-            await view.initialize_dropdowns()
-            
-        except Exception as e:
-            await ctx.send(_("An error occurred while viewing your inventory: {}").format(str(e)))
+        from .blackmarket import display_blackmarket
+        await display_blackmarket(self, ctx)
 
     @crime_set.group(name="scenarios")
     @commands.guild_only()

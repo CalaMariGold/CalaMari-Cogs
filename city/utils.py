@@ -26,8 +26,10 @@ def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
     
     if hours > 0:
         time_str = f"{hours}h {minutes}m"
-    else:
+    elif minutes > 0:
         time_str = f"{minutes}m {seconds}s"
+    else:
+        time_str = f"{seconds}s"
         
     return f"⏳ {time_str}" if include_emoji else time_str
 

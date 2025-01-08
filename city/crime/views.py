@@ -6,10 +6,9 @@ from redbot.core import commands, bank
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import humanize_number
 from typing import Optional, Tuple
-from ..utils import calculate_stolen_amount, can_target_user
+from ..utils import calculate_stolen_amount, can_target_user, format_cooldown_time
 import asyncio
 from .scenarios import get_random_scenario, get_crime_event, format_text, get_all_scenarios
-from .blackmarket import BLACKMARKET_ITEMS, BlackmarketView, BlackmarketSelect, InventoryView, InventorySelect
 
 
 _ = Translator("Crime", __file__)
@@ -371,9 +370,6 @@ class CrimeView(discord.ui.View):
             
             # Add jail time field
             if kwargs.get("jail_time", 0) > 0:
-                jail_minutes = kwargs["jail_time"] // 60
-                jail_seconds = kwargs["jail_time"] % 60
-                
                 # Check if user has reduced sentence perk
                 member_data = await self.cog.config.member(self.interaction.user).all()
                 has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
@@ -381,11 +377,9 @@ class CrimeView(discord.ui.View):
                 if has_reducer:
                     # Calculate reduced time
                     reduced_time = int(kwargs["jail_time"] * 0.8)  # 20% reduction
-                    reduced_minutes = reduced_time // 60
-                    reduced_seconds = reduced_time % 60
-                    jail_text = f"~~{jail_minutes}m {jail_seconds}s~~ → {reduced_minutes}m {reduced_seconds}s (-20%)"
+                    jail_text = f"~~{format_cooldown_time(kwargs['jail_time'], include_emoji=False)}~~ → {format_cooldown_time(reduced_time, include_emoji=False)} (-20%)"
                 else:
-                    jail_text = f"{jail_minutes}m {jail_seconds}s"
+                    jail_text = format_cooldown_time(kwargs["jail_time"], include_emoji=False)
                 
                 embed.add_field(
                     name="⛓️ Jail Time",
