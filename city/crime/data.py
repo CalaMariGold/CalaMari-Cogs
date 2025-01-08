@@ -7,8 +7,8 @@ CRIME_TYPES = {
         "min_reward": 150,
         "max_reward": 500,
         "success_rate": 0.6,
-        "cooldown": 300,  # 5 minutes
-        "jail_time": 1800,  # 30 minutes if caught
+        "cooldown": 600,  # 10 minutes
+        "jail_time": 3600,  # 1 hour if caught
         "risk": "low",
         "enabled": True,
         "fine_multiplier": 0.35,  # 35% of max reward as fine
@@ -20,8 +20,8 @@ CRIME_TYPES = {
         "min_reward": 400,
         "max_reward": 1500,
         "success_rate": 0.6,
-        "cooldown": 600,  # 10 minutes
-        "jail_time": 2700,  # 30 minutes if caught
+        "cooldown": 1800,  # 30 minutes
+        "jail_time": 5400,  # 1 hour 30 minutes if caught
         "risk": "medium",
         "enabled": True,
         "fine_multiplier": 0.4,  # 40% of max reward as fine
@@ -34,7 +34,7 @@ CRIME_TYPES = {
         "max_reward": 2000,
         "success_rate": 0.5,
         "cooldown": 21600,  # 6 hours
-        "jail_time": 2700,  # 45 minutes if caught
+        "jail_time": 10800,  # 3 hours if caught
         "risk": "medium",
         "enabled": True,
         "fine_multiplier": 0.4,  # 45% of max reward as fine
@@ -46,7 +46,7 @@ CRIME_TYPES = {
         "max_reward": 5000,
         "success_rate": 0.4,
         "cooldown": 86400,  # 1 day
-        "jail_time": 7200,  # 2 hours if caught
+        "jail_time": 14400,  # 4 hours if caught
         "risk": "high",
         "enabled": True,
         "fine_multiplier": 0.4,  # 40% of max reward as fine

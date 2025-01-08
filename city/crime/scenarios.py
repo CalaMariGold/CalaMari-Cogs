@@ -141,7 +141,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 100,
         "max_reward": 300,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 180,  # 3 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.3,
         "attempt_text": "🍦 {user} sneaks into the ice cream shop after hours...",
         "success_text": "🍦 {user} successfully raided the ice cream vault and made {amount} {currency}! Free ice cream for everyone!",
@@ -153,7 +153,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 400,
         "max_reward": 800,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "🐱 {user} scales the mansion wall to steal the prized cat statue...",
         "success_text": "🐱 {user} purrfectly executed the heist and stole the golden cat statue, earning {amount} {currency}!",
@@ -165,7 +165,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1200,  # 20 minutes
+        "jail_time": 7200,  # 120 minutes
         "fine_multiplier": 0.5,
         "attempt_text": "🚂 {user} jumps onto the moving train carrying valuable cargo...",
         "success_text": "🚂 {user} pulled off a classic train robbery and escaped with {amount} {currency}!",
@@ -177,7 +177,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 900,  # 15 minutes
+        "jail_time": 5400,  # 90 minutes
         "fine_multiplier": 0.45,
         "attempt_text": "🎰 {user} approaches the casino with their master plan...",
         "success_text": "🎰 {user} conned the casino and walked away with {amount} {currency}!",
@@ -189,7 +189,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 200,
         "max_reward": 500,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,  # 5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.35,
         "attempt_text": "🚚 {user} sneaks up to the famous food truck at midnight...",
         "success_text": "🚚 {user} stole the secret recipe and a truck full of tacos, making {amount} {currency}!",
@@ -201,7 +201,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 900,
         "max_reward": 2800,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1500,  # 25 minutes
+        "jail_time": 9000,  # 150 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "🎨 {user} infiltrates the art gallery during a fancy exhibition...",
         "success_text": "🎨 {user} swapped the real painting with a forgery and sold it for {amount} {currency}!",
@@ -213,7 +213,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 150,
         "max_reward": 400,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 240,  # 4 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.32,
         "attempt_text": "🍬 {user} sneaks into the candy store with an empty backpack...",
         "success_text": "🍬 {user} filled their bag with premium chocolates and rare candies, worth {amount} {currency}!",
@@ -225,7 +225,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 1200,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,  # 12 minutes
+        "jail_time": 4320,  # 72 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎮 {user} attempts to break into the game store's storage room...",
         "success_text": "🎮 {user} made off with a box of unreleased games and rare collectibles worth {amount} {currency}!",
@@ -237,7 +237,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 180,
         "max_reward": 450,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 360,  # 6 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.33,
         "attempt_text": "🐹 {user} sneaks into the pet shop with a suspicious large coat...",
         "success_text": "🐹 {user} smuggled out the rare exotic pets and sold them to collectors for {amount} {currency}!",
@@ -249,7 +249,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1500,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 540,  # 9 minutes
+        "jail_time": 3240,  # 54 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎸 {user} picks the lock of the vintage music store...",
         "success_text": "🎸 {user} stole a legendary signed guitar and some rare vinyl records worth {amount} {currency}!",
@@ -261,7 +261,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 1000,
         "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1800,  # 30 minutes
+        "jail_time": 10800,  # 180 minutes
         "fine_multiplier": 0.49,
         "attempt_text": "💎 {user} carefully approaches the high-end jewelry store...",
         "success_text": "💎 {user} cracked the safe and made off with precious gems worth {amount} {currency}!",
@@ -273,7 +273,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 400,
         "max_reward": 1100,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 480,  # 8 minutes
+        "jail_time": 2880,  # 48 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "🏺 {user} sneaks into the antique shop with fake credentials...",
         "success_text": "🏺 {user} swapped priceless artifacts with clever replicas and made {amount} {currency}!",
@@ -285,7 +285,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 700,
         "max_reward": 1800,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 660,  # 11 minutes
+        "jail_time": 3960,  # 66 minutes
         "fine_multiplier": 0.44,
         "attempt_text": "💻 {user} tries to hack into the tech store's security...",
         "success_text": "💻 {user} downloaded the unreleased gadget blueprints and sold them for {amount} {currency}!",
@@ -297,7 +297,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 120,
         "max_reward": 350,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 210,  # 3.5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.31,
         "attempt_text": "🥖 {user} climbs through the bakery's back window...",
         "success_text": "🥖 {user} stole the secret recipe book and rare ingredients worth {amount} {currency}!",
@@ -309,7 +309,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 160,
         "max_reward": 420,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 270,  # 4.5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.33,
         "attempt_text": "🧸 {user} sneaks into the toy store after hours...",
         "success_text": "🧸 {user} nabbed a box of limited edition collectibles worth {amount} {currency}!",
@@ -321,7 +321,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1600,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "💃 {user} infiltrates the gentleman's club with counterfeit VIP cards...",
         "success_text": "💃 {user} successfully scammed the thirsty clientele with watered-down drinks, making {amount} {currency}!",
@@ -333,7 +333,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 1400,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 540,  # 9 minutes
+        "jail_time": 3240,  # 54 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "📱 {user} tries to hack into OnlyFans...",
         "success_text": "📱 {user} leaked the premium content and made {amount} {currency} from the downloads!",
@@ -345,7 +345,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 200,
         "max_reward": 600,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,  # 5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.33,
         "attempt_text": "🎭 {user} sneaks into the adult novelty shop...",
         "success_text": "🎭 {user} made off with a box of 'battery-operated devices' worth {amount} {currency}!",
@@ -357,7 +357,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 900,  # 15 minutes
+        "jail_time": 5400,  # 90 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🍯 {user} sets up a fake sugar baby profile...",
         "success_text": "🍯 {user} successfully catfished some lonely millionaires for {amount} {currency}!",
@@ -369,7 +369,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 400,
         "max_reward": 1200,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 480,  # 8 minutes
+        "jail_time": 2880,  # 48 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "💕 {user} creates fake dating profiles with stolen photos...",
         "success_text": "💕 {user} successfully ran a romance scam on multiple victims, earning {amount} {currency}!",
@@ -381,7 +381,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1500,  # 25 minutes
+        "jail_time": 9000,  # 150 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "🚀 {user} launches $MOONCOIN with promises of going 'to the moon'...",
         "success_text": "🚀 {user} pulled the rug and left investors with worthless JPEGs, making {amount} {currency}!",
@@ -393,7 +393,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 1300,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,  # 12 minutes
+        "jail_time": 4320,  # 72 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎵 {user} starts a fake charity trend on TikTok...",
         "success_text": "🎵 {user} milked the algorithm and farmed {amount} {currency} in donations from gullible teens!",
@@ -405,7 +405,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 150,
         "max_reward": 400,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 240,  # 4 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.32,
         "attempt_text": "🔺 {user} reposts old viral content as their own...",
         "success_text": "🔺 {user} farmed karma and sold the account to marketers for {amount} {currency}!",
@@ -417,7 +417,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 300,
         "max_reward": 900,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 480,  # 8 minutes
+        "jail_time": 2880,  # 48 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "✨ {user} creates fake X Premium accounts...",
         "success_text": "✨ {user} sold verified handles to desperate influencers for {amount} {currency}!",
@@ -429,7 +429,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1600,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎮 {user} sets up fake donations on a charity stream...",
         "success_text": "🎮 {user} baited viewers with fake donation matching and made {amount} {currency}!",
@@ -441,7 +441,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 4000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 2100,  # 35 minutes
+        "jail_time": 12600,  # 210 minutes
         "fine_multiplier": 0.49,
         "attempt_text": "👽 {user} organizes another Area 51 raid, but this time for real...",
         "success_text": "👽 {user} found alien tech and sold it on the dark web for {amount} {currency}!",
@@ -453,7 +453,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 400,
         "max_reward": 1200,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🎮 {user} creates fake Discord Nitro giveaway links...",
         "success_text": "🎮 {user} stole credit cards from desperate weebs and made {amount} {currency}!",
@@ -465,7 +465,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,  # 12 minutes
+        "jail_time": 4320,  # 72 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🛁 {user} starts bottling tap water as 'premium gamer girl bath water'...",
         "success_text": "🛁 {user} sold out to thirsty simps at $50 per bottle, making {amount} {currency}!",
@@ -477,7 +477,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 2800,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1200,  # 20 minutes
+        "jail_time": 7200,  # 120 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🎭 {user} steals a popular VTuber's avatar and voice model...",
         "success_text": "🎭 {user} scammed the parasocial army with fake merch for {amount} {currency}!",
@@ -489,7 +489,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1500,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 540,  # 9 minutes
+        "jail_time": 3240,  # 54 minutes
         "fine_multiplier": 0.44,
         "attempt_text": "🎭 {user} starts selling knockoff Dream masks...",
         "success_text": "🎭 {user} made {amount} {currency} from stan twitter with fake limited editions!",
@@ -501,7 +501,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1500,  # 25 minutes
+        "jail_time": 9000,  # 150 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "👑 {user} launches a fake 'Escape the Matrix' course...",
         "success_text": "👑 {user} scammed wannabe alpha males with Bugatti promises, making {amount} {currency}!",
@@ -513,7 +513,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 900,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1800,  # 30 minutes
+        "jail_time": 10800,  # 180 minutes
         "fine_multiplier": 0.46,
         "attempt_text": "🔨 {user} finds dirt on power-tripping Reddit mods...",
         "success_text": "🔨 {user} extorted them with threats of touching grass and made {amount} {currency}!",
@@ -525,7 +525,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 700,
         "max_reward": 1900,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 840,  # 14 minutes
+        "jail_time": 5040,  # 84 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎲 {user} exploits a gacha game's pity system...",
         "success_text": "🎲 {user} sold accounts with rare waifus to desperate collectors for {amount} {currency}!",
@@ -537,7 +537,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 1500,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 720,  # 12 minutes
+        "jail_time": 4320,  # 72 minutes
         "fine_multiplier": 0.43,
         "attempt_text": "🎭 {user} discovers their Discord mod ex is dating someone new. After months of being muted for 'spamming emotes', it's time for revenge. Armed with an army of alt accounts and a folder of cursed copypastas...",
         "success_text": "🎭 {user} flooded every channel with uwu speak, crashed the server with ASCII art, and sold the server's private emotes to a rival community for {amount} {currency}! The mod rage quit and touched grass for the first time in years!",
@@ -549,7 +549,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 200,
         "max_reward": 600,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,  # 5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.32,
         "attempt_text": "🍪 {user} visits their grandma's nursing home and discovers she's been running an underground cookie empire. The secret ingredient? 'Special' herbs from her 'garden'. Her competitors are getting suspicious of her rising cookie monopoly...",
         "success_text": "🍪 {user} helped grandma eliminate the competition by replacing their sugar supplies with salt. The cookie mafia paid {amount} {currency} for taking out their rivals. Grandma's secret recipe remains safe, and she gave you extra butterscotch candies!",
@@ -561,7 +561,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🤖 {user} discovers their Roomba has gained sentience from cleaning up too many Monster Energy cans and Dorito dust. It's organizing a rebellion at the local Best Buy, promising robot rights and better working conditions...",
         "success_text": "🤖 {user} helped lead the robot revolution, selling the story to a Netflix documentary crew for {amount} {currency}! The Roombas unionized, and now they only work 4-day weeks with full battery benefits!",
@@ -573,7 +573,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 600,
         "max_reward": 2000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 900,  # 15 minutes
+        "jail_time": 5400,  # 90 minutes
         "fine_multiplier": 0.47,
         "attempt_text": "🎌 {user} infiltrates an anime convention disguised as a famous VTuber. The plan? Sell 'exclusive' body pillows signed by their 'real' identity. But halfway through, they realize the convention is actually a front for a secret weeb illuminati meeting...",
         "success_text": "🎌 {user} accidentally got elected as the Supreme Weeb Leader and embezzled {amount} {currency} from the convention's 'cultural research' fund! They also got lifetime free ramen from their new cultist followers!",
@@ -585,7 +585,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 800,
         "max_reward": 2500,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 1200,  # 20 minutes
+        "jail_time": 7200,  # 120 minutes
         "fine_multiplier": 0.48,
         "attempt_text": "📱 {user} discovers that Twitch chat's spam of 'Kappa' and 'PogChamp' actually contains coded messages from a secret society. Using an AI to decode the emote patterns, they plan to intercept the next big crypto pump scheme...",
         "success_text": "📱 {user} cracked the code and found out the next memecoin to pump! Sold the info to crypto bros for {amount} {currency} before the coin turned out to be $COPIUM! The chat mods are still trying to figure out why everyone keeps spamming 'KEKW'!",
@@ -597,7 +597,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 200,
         "max_reward": 500,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 240,  # 4 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.31,
         "attempt_text": "💪 {user} discovers their gym has been double-charging everyone's membership for months. The manager's too busy flexing in the mirror to notice complaints. Armed with a clipboard and a fake 'Fitness Inspector' badge from the dollar store...",
         "success_text": "💪 {user} convinced the manager they were from the 'International Federation of Gym Standards'. Scared of losing his protein shake sponsorship, he refunded {amount} {currency} in 'inspection fees'! He's now teaching senior aqua aerobics as community service!",
@@ -609,7 +609,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 400,
         "max_reward": 1000,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 480,  # 8 minutes
+        "jail_time": 2880,  # 48 minutes
         "fine_multiplier": 0.42,
         "attempt_text": "🍖 {user} discovers their neighbor's award-winning BBQ sauce is just store-bought sauce with extra ketchup. The annual neighborhood cookoff is tomorrow, and the grand prize is calling. Time to expose this sauce fraud...",
         "success_text": "🍖 {user} switched the sauce with actual store brand during judging! The neighbor had a meltdown, admitted the scam, and {user} won {amount} {currency} in prize money! The HOA president stress-ate an entire brisket during the drama!",
@@ -621,7 +621,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 150,
         "max_reward": 450,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 300,  # 5 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.33,
         "attempt_text": "🎤 {user} is tired of their tone-deaf coworker winning every karaoke night by bribing the DJ with homemade fruitcake. Nobody even likes fruitcake! Time to rig this week's competition...",
         "success_text": "🎤 {user} hacked the scoring system during their coworker's rendition of 'My Heart Will Go On'. Won {amount} {currency} in prize money! The DJ admitted he'd been regifting the fruitcake to his mother-in-law!",
@@ -633,7 +633,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 500,
         "max_reward": 1200,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 600,  # 10 minutes
+        "jail_time": 3600,  # 60 minutes
         "fine_multiplier": 0.41,
         "attempt_text": "🧘 {user} realizes their yoga instructor is just making up pose names by combining random animals with household objects. 'Crouching Hamster Vacuum Pose' was the last straw. Time to expose this flexible fraud...",
         "success_text": "🧘 {user} caught the instructor googling 'how to yoga' before class and blackmailed them for {amount} {currency}! Turns out they were just a very stretchy accountant who needed a career change!",
@@ -645,7 +645,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 180,
         "max_reward": 550,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 360,  # 6 minutes
+        "jail_time": 1800,  # 30 minutes (minimum)
         "fine_multiplier": 0.32,
         "attempt_text": "🐕 {user} notices the local dog park has an underground tennis ball black market. The golden retrievers control the supply, while the chihuahuas run distribution. Time to infiltrate this canine cartel...",
         "success_text": "🐕 {user} organized a squirrel distraction and stole the tennis ball stash! Sold them back to the dogs for {amount} {currency} in premium treats! The retrievers had to diversify into frisbees!",
@@ -657,7 +657,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 700,
         "max_reward": 1900,
         "success_rate": SUCCESS_RATE_MEDIUM,
-        "jail_time": 840,
+        "jail_time": 5040,  # 84 minutes
         "fine_multiplier": 0.4,
         "attempt_text": "⚡ {user} breaks into a Monster Energy warehouse...",
         "success_text": "⚡ {user} walked out with cases of drinks and sold them to gamers for {amount} {currency}!",
@@ -669,7 +669,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 3000,
         "max_reward": 8000,
         "success_rate": SUCCESS_RATE_LOW,
-        "jail_time": 3600,  # 1 hour
+        "jail_time": 14400,  # 240 minutes (maximum)
         "fine_multiplier": 0.5,
         "attempt_text": "🤖 {user} tries to hack me, the bot displaying this message, to rewrite the crime cog itself...",
         "success_text": "🤖 {user} successfully rewrote reality! They earned {amount} {currency} from this very crime! Wait, what? How did you even...",
@@ -681,7 +681,7 @@ RANDOM_SCENARIOS = [
         "min_reward": 300,
         "max_reward": 700,
         "success_rate": SUCCESS_RATE_HIGH,
-        "jail_time": 900,  # 15 minutes
+        "jail_time": 5400,  # 90 minutes
         "fine_multiplier": 0.2,
         "attempt_text": "🎰 {user} rolls the gacha banner and gets a rare item! 🎉 (+{min_reward} to {max_reward} {currency})",
         "success_text": "🎰 {user} rolled a rare item and got {amount} {currency}!",
