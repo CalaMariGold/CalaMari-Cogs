@@ -1046,12 +1046,11 @@ class BailView(discord.ui.View):
         
     async def on_error(self, interaction: discord.Interaction, error: Exception, item: discord.ui.Item):
         """Handle any errors that occur during button interactions"""
-        error_embed = self.format_bail_embed(
-            "⚠️ Error",
-            f"An error occurred. Please try again: {str(error)}",
-            discord.Color.red()
+        msg = await interaction.channel.send(
+            _("An error occurred. Please try again. Error: {error}").format(
+                error=str(error)
+            )
         )
-        msg = await interaction.channel.send(embed=error_embed)
         self.all_messages.append(msg)
         await self.cleanup_messages()
         self.stop()
@@ -1312,46 +1311,125 @@ class TargetSelectionView(discord.ui.View):
     async def get_random_target(self) -> Optional[discord.Member]:
         """Get a random valid target from the guild."""
         try:
-            # Get settings
-            settings = await self.cog.config.guild(self.interaction.guild).global_settings()
-            min_required = max(settings.get("min_steal_balance", 100), self.crime_data["min_reward"])
-            
-            # Get list of valid targets
-            valid_targets = []
-            for member in self.interaction.guild.members:
-                # Skip if can't target
-                can_target, _ = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
-                if not can_target:
-                    continue
-                    
-                try:
-                    # Check if member has enough credits
-                    balance = await bank.get_balance(member)
-                    if balance >= min_required:
-                        valid_targets.append(member)
-                except Exception as e:
-                    await self.message.channel.send(
-                        _("An error occurred while checking balance for {member}. Error: {error}").format(
-                            member=member,
-                            error=str(e)
-                        )
-                    )
-                    continue
-            
-            if not valid_targets:
-                await self.interaction.channel.send(
-                    _("No valid targets found! Everyone is either broke, a bot, or immune to crime.")
-                )
+            # Get settings first - we need this for all checks
+            try:
+                settings = await self.cog.config.guild(self.interaction.guild).global_settings()
+                min_required = max(settings.get("min_steal_balance", 100), self.crime_data["min_reward"])
+            except AttributeError as e:
+                await self.interaction.channel.send(_("Error: Could not access guild settings. Please try again."))
                 return None
-                
-            # Return random target from valid list
-            return random.choice(valid_targets)
+            except Exception as e:
+                await self.interaction.channel.send(_("Error: Could not load settings. Error: {error}").format(error=str(e)))
+                return None
+
+            # Get last target ID once - cheap memory lookup
+            try:
+                last_target_id = await self.cog.config.member(self.interaction.user).last_target()
+            except Exception as e:
+                # Non-critical error, can proceed without last target check
+                last_target_id = None
             
+            # Initial filtering with optimized memory usage
+            all_members = []
+            try:
+                for member in self.interaction.guild.members:
+                    # Combined early filtering with clear conditions
+                    if (member.bot or 
+                        member.id == self.interaction.user.id or
+                        (last_target_id is not None and member.id == last_target_id) or
+                        member.guild_permissions.administrator):  # Skip admins early
+                        continue
+                    all_members.append(member)
+            except AttributeError:
+                await self.interaction.channel.send(_("Error: Could not access guild members. Please try again."))
+                return None
+            
+            if not all_members:
+                await self.interaction.channel.send(_("No valid targets found! Everyone is either a bot or immune to crime."))
+                return None
+            
+            random.shuffle(all_members)
+            
+            # Get list of jailed members once instead of checking individually
+            jailed_members = set()
+            jail_check_errors = 0
+            for member in all_members:
+                try:
+                    if await self.cog.is_jailed(member):
+                        jailed_members.add(member.id)
+                except Exception as e:
+                    jail_check_errors += 1
+                    if jail_check_errors > len(all_members) * 0.5:  # If over 50% of jail checks fail
+                        await self.interaction.channel.send(_("Error: Too many jail status check failures. Please try again."))
+                        return None
+                    continue
+            
+            # Process members in chunks
+            chunk_size = 25
+            total_checked = 0
+            balance_check_errors = 0
+            targeting_check_errors = 0
+            
+            while total_checked < len(all_members):
+                chunk_end = min(total_checked + chunk_size, len(all_members))
+                current_chunk = all_members[total_checked:chunk_end]
+                
+                for member in current_chunk:
+                    # Skip jailed members - using set for O(1) lookup
+                    if member.id in jailed_members:
+                        continue
+                        
+                    # Check balance - most expensive operation, do last
+                    try:
+                        balance = await bank.get_balance(member)
+                    except discord.NotFound:
+                        continue  # Member left server
+                    except Exception as e:
+                        balance_check_errors += 1
+                        if balance_check_errors > 5:  # If multiple balance checks fail
+                            await self.interaction.channel.send(
+                                _("Error: Multiple balance check failures. Please try again later.")
+                            )
+                            return None
+                        continue
+                    
+                    if balance >= min_required:
+                        # Final targeting check using can_target_for_crime
+                        try:
+                            can_target, reason = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
+                            if can_target:
+                                return member
+                        except discord.NotFound:
+                            continue  # Member left server
+                        except Exception as e:
+                            targeting_check_errors += 1
+                            if targeting_check_errors > 5:  # If multiple targeting checks fail
+                                await self.interaction.channel.send(
+                                    _("Error: Multiple targeting check failures. Please try again later.")
+                                )
+                                return None
+                            continue
+                        
+                total_checked += chunk_size
+                
+                # Stop if we've checked half the server with no success
+                if total_checked >= len(all_members) * 0.5:
+                    break
+                
+            await self.interaction.channel.send(_("No valid targets found! Everyone is either broke, a bot, or immune to crime."))
+            return None
+            
+        except discord.NotFound:
+            await self.interaction.channel.send(_("Error: The server or channel could not be found. Please try again."))
+            return None
+        except discord.Forbidden:
+            await self.interaction.channel.send(_("Error: I don't have permission to perform this action."))
+            return None
         except Exception as e:
-            await self.message.channel.send(
-                _("An error occurred while finding a random target. Error: {error}").format(
-                    error=str(e)
-                )
+            # Use interaction.channel instead of message.channel for reliability
+            await self.interaction.channel.send(
+                _("An unexpected error occurred while finding a random target. Please try again later. Error: {error}")
+                .format(error=str(e))
             )
             return None
 
@@ -1361,7 +1439,7 @@ class TargetSelectionView(discord.ui.View):
         
     async def on_error(self, interaction: discord.Interaction, error: Exception, item: discord.ui.Item):
         """Handle any errors that occur during button interactions"""
-        await interaction.channel.send(
+        msg = await interaction.channel.send(
             _("An error occurred. Please try again. Error: {error}").format(
                 error=str(error)
             )
