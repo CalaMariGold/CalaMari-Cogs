@@ -1315,7 +1315,7 @@ class TargetSelectionView(discord.ui.View):
             try:
                 settings = await self.cog.config.guild(self.interaction.guild).global_settings()
                 min_required = max(settings.get("min_steal_balance", 100), self.crime_data["min_reward"])
-            except AttributeError as e:
+            except AttributeError:
                 await self.interaction.channel.send(_("Error: Could not access guild settings. Please try again."))
                 return None
             except Exception as e:
@@ -1325,8 +1325,7 @@ class TargetSelectionView(discord.ui.View):
             # Get last target ID once - cheap memory lookup
             try:
                 last_target_id = await self.cog.config.member(self.interaction.user).last_target()
-            except Exception as e:
-                # Non-critical error, can proceed without last target check
+            except Exception:
                 last_target_id = None
             
             # Initial filtering with optimized memory usage
@@ -1357,62 +1356,73 @@ class TargetSelectionView(discord.ui.View):
                 try:
                     if await self.cog.is_jailed(member):
                         jailed_members.add(member.id)
-                except Exception as e:
+                except Exception:
                     jail_check_errors += 1
-                    if jail_check_errors > len(all_members) * 0.5:  # If over 50% of jail checks fail
+                    if jail_check_errors > min(5, len(all_members) * 0.1):  # 10% or 5 errors, whichever is smaller
                         await self.interaction.channel.send(_("Error: Too many jail status check failures. Please try again."))
                         return None
                     continue
             
             # Process members in chunks
-            chunk_size = 25
+            chunk_size = min(25, max(10, len(all_members) // 20))  # Dynamic chunk size
             total_checked = 0
             balance_check_errors = 0
             targeting_check_errors = 0
+            
+            # Pre-cache bank data for first chunk to avoid initial lag
+            try:
+                first_chunk = all_members[:chunk_size]
+                balance_tasks = [bank.get_balance(member) for member in first_chunk if member.id not in jailed_members]
+                if balance_tasks:
+                    await asyncio.gather(*balance_tasks, return_exceptions=True)
+            except Exception:
+                pass  # Ignore pre-cache errors
             
             while total_checked < len(all_members):
                 chunk_end = min(total_checked + chunk_size, len(all_members))
                 current_chunk = all_members[total_checked:chunk_end]
                 
+                # Check balances in parallel for the chunk
+                balance_tasks = []
+                chunk_members = []
                 for member in current_chunk:
-                    # Skip jailed members - using set for O(1) lookup
-                    if member.id in jailed_members:
-                        continue
+                    if member.id not in jailed_members:
+                        balance_tasks.append(bank.get_balance(member))
+                        chunk_members.append(member)
                         
-                    # Check balance - most expensive operation, do last
+                if balance_tasks:
                     try:
-                        balance = await bank.get_balance(member)
-                    except discord.NotFound:
-                        continue  # Member left server
-                    except Exception as e:
-                        balance_check_errors += 1
-                        if balance_check_errors > 5:  # If multiple balance checks fail
-                            await self.interaction.channel.send(
-                                _("Error: Multiple balance check failures. Please try again later.")
-                            )
-                            return None
-                        continue
-                    
-                    if balance >= min_required:
-                        # Final targeting check using can_target_for_crime
-                        try:
-                            can_target, reason = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
-                            if can_target:
-                                return member
-                        except discord.NotFound:
-                            continue  # Member left server
-                        except Exception as e:
-                            targeting_check_errors += 1
-                            if targeting_check_errors > 5:  # If multiple targeting checks fail
-                                await self.interaction.channel.send(
-                                    _("Error: Multiple targeting check failures. Please try again later.")
-                                )
-                                return None
-                            continue
+                        balance_results = await asyncio.gather(*balance_tasks, return_exceptions=True)
+                        for member, balance_result in zip(chunk_members, balance_results):
+                            if isinstance(balance_result, Exception):
+                                if not isinstance(balance_result, discord.NotFound):
+                                    balance_check_errors += 1
+                                continue
+                                
+                            if balance_result >= min_required:
+                                try:
+                                    can_target, _ = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
+                                    if can_target:
+                                        return member
+                                except discord.NotFound:
+                                    continue
+                                except Exception:
+                                    targeting_check_errors += 1
+                                    
+                    except Exception:
+                        balance_check_errors += len(balance_tasks)
+                        
+                    # Check error thresholds
+                    if balance_check_errors > min(5, len(all_members) * 0.1):
+                        await self.interaction.channel.send(_("Error: Multiple balance check failures. Please try again later."))
+                        return None
+                    if targeting_check_errors > min(5, len(all_members) * 0.1):
+                        await self.interaction.channel.send(_("Error: Multiple targeting check failures. Please try again later."))
+                        return None
                         
                 total_checked += chunk_size
                 
-                # Stop if we've checked half the server with no success
+                # Stop if we've checked enough members
                 if total_checked >= len(all_members) * 0.5:
                     break
                 
@@ -1426,7 +1436,6 @@ class TargetSelectionView(discord.ui.View):
             await self.interaction.channel.send(_("Error: I don't have permission to perform this action."))
             return None
         except Exception as e:
-            # Use interaction.channel instead of message.channel for reliability
             await self.interaction.channel.send(
                 _("An unexpected error occurred while finding a random target. Please try again later. Error: {error}")
                 .format(error=str(e))
