@@ -885,7 +885,14 @@ class CrimeView(discord.ui.View):
             return
             
         try:
-            # Delete only the confirmation message
+            # Delete all messages including target selection
+            for msg in self.all_messages:
+                try:
+                    await msg.delete()
+                except (discord.NotFound, discord.HTTPException):
+                    pass
+                    
+            # Delete confirmation message
             try:
                 await self.message.delete()
             except (discord.NotFound, discord.HTTPException):
