@@ -33,7 +33,7 @@ Example:
 - You put 10,000 credits in your vault
 - Each hour you earn: 10,000 × (2% ÷ 24) = 8.33 credits
 - After one day: ~200 credits profit
-- Profits add to your vault automatically unless collected
+- Profits add to your vault automatically every hour
 
 ### ⬆️ Business Progression and Shop
 - Multiple upgrade levels with increased vault capacity
@@ -47,7 +47,7 @@ Example:
 Choose your industry when starting (expensive to change later):
 
 ### 💹 Trading
-- Daily profit rate fluctuates between -15% to +15% of base rate
+- Daily profit rate fluctuates between -10% to +10% of base rate, +5% both ways for each level
 - Rate changes at midnight server time
 - 24h lockup period after deposits (no withdrawals)
 - Each day with increased profit adds +1% to base rate (max +10% bonus)
@@ -56,7 +56,7 @@ Choose your industry when starting (expensive to change later):
 - Example: At level 1 (2% base), rate varies from 1.7% to 2.3% daily
 
 ### 🏭 Manufacturing
-- Base profit rate -10%
+- Base profit rate: -1% from the base rate (1% profit rate at lv 1)
 - Vault capacity +25% (Level 1: 37.5k instead of 30k)
 - Robbery steal % reduced by 15% (steal 8.5-21.25% instead of 10-25%)
 - Consecutive days without withdrawal adds +0.5% profit (max +10%)
@@ -142,21 +142,21 @@ Choose your industry when starting (expensive to change later):
 - Must balance growth vs. risk
 
 ### Business Robbery
-- Criminals can target business vaults
-- Base steal range: 10-25% of vault balance
+- Criminals can target a business vault once every 24 hours
+- Base steal range: 5-15% of vault balance
+- Vaults need a minimum of 2500 credits to be robbed
 - Success chance calculation:
   - Start with 50% base chance
   - Add/subtract industry modifiers
   - Subtract target's security items
   - Add criminal's success rate items
 - Steal percentage calculation:
-  - Start with random 10-25% base steal
+  - Start with random 5-15% base steal
   - Subtract security item effects (Risk Management: -5%)
   - Subtract industry effects (Manufacturing: -15%)
   - Apply to vault balance
 - Example:
   - Manufacturing business with Risk Management
-  - Base steal 10-25% → 5-20% (Risk Management) → 4.25-17% (Manufacturing)
 
 ### Progression
 - Upgrade business level for better benefits
