@@ -5,7 +5,7 @@ from redbot.core import bank, commands
 from datetime import datetime, timezone
 import time
 import random
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List, Dict
 
 def format_cooldown_time(seconds: int, include_emoji: bool = True) -> str:
     """Format cooldown time into a human readable string.
@@ -220,3 +220,74 @@ def format_crime_description(crime_type: str, data: dict, cooldown_status: str) 
         ]
             
     return "\n".join(description)
+
+def calculate_streak_bonus(streak: int) -> float:
+    """Calculate reward multiplier based on current streak.
+    
+    The bonus increases with streak but has diminishing returns:
+    Streak 1: +5% (1.05x)
+    Streak 2: +10% (1.10x)
+    Streak 3: +15% (1.15x)
+    Streak 4: +20% (1.20x)
+    Streak 5+: +25% (1.25x) max
+    """
+    if streak <= 0:
+        return 1.0
+    
+    # Calculate bonus with diminishing returns
+    bonus = min(0.25, streak * 0.05)  # Cap at 25% bonus
+    return 1.0 + bonus
+
+async def update_streak(config, member: discord.Member, success: bool) -> tuple[int, float]:
+    """Update a member's crime streak and return new streak and multiplier.
+    
+    Args:
+        config: The config instance to use for data storage
+        member (discord.Member): The member to update
+        success (bool): Whether the crime was successful
+        
+    Returns:
+        tuple[int, float]: The new streak count and reward multiplier
+    """
+    async with config.member(member).all() as member_data:
+        current_time = int(time.time())
+        last_crime = member_data.get("last_crime_time", 0)
+        
+        # Reset streak if it's been more than 24 hours since last crime
+        if current_time - last_crime > 86400:  # 24 hours in seconds
+            member_data["current_streak"] = 0
+        
+        if success:
+            # Increment streak on success
+            member_data["current_streak"] += 1
+            # Update highest streak if current is higher
+            if member_data["current_streak"] > member_data.get("highest_streak", 0):
+                member_data["highest_streak"] = member_data["current_streak"]
+        else:
+            # Reset streak on failure
+            member_data["current_streak"] = 0
+        
+        # Update last crime time
+        member_data["last_crime_time"] = current_time
+        
+        # Calculate new multiplier
+        new_multiplier = calculate_streak_bonus(member_data["current_streak"])
+        member_data["streak_multiplier"] = new_multiplier
+        
+        return member_data["current_streak"], new_multiplier
+
+def format_streak_text(streak: int, multiplier: float) -> str:
+    """Format streak information for display in embeds.
+    
+    Args:
+        streak (int): Current streak count
+        multiplier (float): Current reward multiplier
+        
+    Returns:
+        str: Formatted streak text
+    """
+    if streak <= 0:
+        return "No active streak"
+        
+    bonus_percent = (multiplier - 1.0) * 100
+    return f"🔥 {streak} streak (+{bonus_percent:.0f}%)"

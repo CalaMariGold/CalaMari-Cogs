@@ -6,7 +6,13 @@ from redbot.core import commands, bank
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import humanize_number
 from typing import Optional, Tuple
-from ..utils import calculate_stolen_amount, can_target_user, format_cooldown_time
+from ..utils import (
+    calculate_stolen_amount, 
+    can_target_user, 
+    format_cooldown_time,
+    update_streak,
+    format_streak_text
+)
 import asyncio
 from .scenarios import get_random_scenario, get_crime_event, format_text, get_all_scenarios
 
@@ -280,57 +286,53 @@ class CrimeView(discord.ui.View):
             if self.reward_calculations:
                 breakdown = []
                 base_entry = self.reward_calculations[0]  # First entry is always base amount
-                
+
                 # Only add base amount if there are modifiers
                 if len(self.reward_calculations) > 1:
                     breakdown.append(f"Base: {base_entry[1]:,} {currency}")
-                    
-                    # Add subsequent calculations
-                    for calc in self.reward_calculations[1:]:
-                        if len(calc) == 3:  # Event with multiplier
-                            text, amount, modifier = calc
-                            if isinstance(modifier, float):
-                                # For multipliers, just show the multiplier and new amount
-                                breakdown.append(f"➜ ({modifier:.1f}x): {amount:,} {currency}")
-                            else:
-                                # For flat bonuses, just show the bonus amount
-                                breakdown.append(f"➜ +{modifier:,} {currency}")
                 else:
                     # If no modifiers, just show the final amount
-                    breakdown.append(f"Final: {base_entry[1]:,} {currency}")
+                    breakdown.append(f"** {base_entry[1]:,} {currency}**")
+
+                # Add subsequent calculations
+                for calc in self.reward_calculations[1:]:
+                    text, amount, modifier = calc
+                    if "streak" in text.lower():  # Explicitly check for streak bonus
+                        breakdown.append(f"➜ {text}: {amount:,} {currency}")
+                    elif isinstance(modifier, float):
+                        # For other multipliers
+                        breakdown.append(f"➜ ({modifier:.1f}x): {amount:,} {currency}")
+                    else:
+                        # For flat bonuses/penalties
+                        if modifier > 0:
+                            breakdown.append(f"➜ +{modifier:,} {currency}")
+                        else:
+                            breakdown.append(f"➜ {modifier:,} {currency}")
+                    
+                # Add direct credit changes before final amount
+                if kwargs.get('credit_changes', 0) != 0:
+                    credit_change = kwargs['credit_changes']
+                    current_amount = kwargs.get('reward', 0)
+                    final_amount = current_amount + credit_change
+                    if credit_change > 0:
+                        breakdown.append(f"➜ (+{credit_change:,}): {final_amount:,} {currency}")
+                    else:
+                        breakdown.append(f"➜ ({credit_change:,}): {final_amount:,} {currency}")
                     
                 if len(self.reward_calculations) > 1:
-                    breakdown.append(f"Final: {kwargs.get('reward', 0):,} {currency}")
+                    final_amount = kwargs.get('reward', 0) + kwargs.get('credit_changes', 0)
+                    breakdown.append(f"**Final: {final_amount:,} {currency}**")
                 
                 embed.add_field(
                     name="💰 Reward Calculation",
                     value="\n".join(breakdown),
-                    inline=False
-                )
-            
-            # Add success rate if not random
-            if self.crime_type != "random":
+                    inline=False)
+                  
                 embed.add_field(
                     name="📊 Success Rate",
                     value=f"{kwargs.get('rate', int(self.crime_data['success_rate'] * 100))}%",
-                    inline=True
-                )
-            
-            # Add credit changes field if any occurred
-            if kwargs.get('credit_changes', 0) != 0:
-                if kwargs['credit_changes'] > 0:
-                    embed.add_field(
-                        name="💰 Bonus Credits",
-                        value=f"+{kwargs['credit_changes']:,} {currency}",
-                        inline=True
-                    )
-                else:
-                    embed.add_field(
-                        name="💸 Credit Losses",
-                        value=f"{kwargs['credit_changes']:,} {currency}",
-                        inline=True
-                    )
-            
+                    inline=True)
+                  
             return embed
         else:
             embed = discord.Embed(
@@ -387,28 +389,10 @@ class CrimeView(discord.ui.View):
                     inline=True
                 )
             
-            # Add success rate if not random
-            if self.crime_type != "random":
                 embed.add_field(
                     name="📊 Success Rate",
                     value=f"{kwargs.get('rate', int(self.crime_data['success_rate'] * 100))}%",
-                    inline=True
-                )
-            
-            # Add credit changes field if any occurred
-            if kwargs.get('credit_changes', 0) != 0:
-                if kwargs['credit_changes'] > 0:
-                    embed.add_field(
-                        name="💰 Bonus Credits",
-                        value=f"+{kwargs['credit_changes']:,} {currency}",
-                        inline=True
-                    )
-                else:
-                    embed.add_field(
-                        name="💸 Credit Losses",
-                        value=f"{kwargs['credit_changes']:,} {currency}",
-                        inline=True
-                    )
+                    inline=True)
             
             return embed
         
@@ -618,7 +602,7 @@ class CrimeView(discord.ui.View):
                     if "jail_multiplier" in event:
                         jail_time = int(jail_time * event["jail_multiplier"])
                         
-                    # Handle direct credit changes
+                    # Handle direct credit changes (just track the totals here)
                     if "credits_bonus" in event:
                         bonus = event["credits_bonus"]
                         await bank.deposit_credits(interaction.user, bonus)
@@ -634,7 +618,7 @@ class CrimeView(discord.ui.View):
                             if current_balance > 0:
                                 await bank.withdraw_credits(interaction.user, current_balance)
                                 total_credit_changes -= current_balance
-                            
+
             # Add suspense delay based on risk level
             if self.crime_data["risk"] == "high":
                 await asyncio.sleep(6)  # More suspense for high-risk crimes (was 6s)
@@ -664,11 +648,16 @@ class CrimeView(discord.ui.View):
                         self.reward_calculations = [("Base Amount", base_amount)]
                         current_amount = base_amount
                         
+                        # Apply streak bonus if any
+                        streak, streak_multiplier = await update_streak(self.cog.config, interaction.user, True)
+                        if streak > 0:
+                            current_amount = round(current_amount * streak_multiplier)  # Round after streak multiplier
+                            self.reward_calculations.append((format_streak_text(streak, streak_multiplier), current_amount, streak_multiplier))
+                        
                         # Process reward modifiers from events
                         for event in events:
                             if "reward_multiplier" in event:
-                                old_amount = current_amount
-                                current_amount = int(current_amount * event["reward_multiplier"])
+                                current_amount = round(current_amount * event["reward_multiplier"])  # Round after each multiplier
                                 self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
                             elif "credits_bonus" in event:
                                 current_amount += event["credits_bonus"]
@@ -748,15 +737,23 @@ class CrimeView(discord.ui.View):
                         self.reward_calculations = [("Base Amount", base_amount)]
                         current_amount = base_amount
                         
+                        # Apply streak bonus if any
+                        streak, streak_multiplier = await update_streak(self.cog.config, interaction.user, True)
+                        if streak > 0:
+                            current_amount = round(current_amount * streak_multiplier)  # Round after streak multiplier
+                            self.reward_calculations.append((format_streak_text(streak, streak_multiplier), current_amount, streak_multiplier))
+
                         # Process reward modifiers from events
                         for event in events:
                             if "reward_multiplier" in event:
-                                old_amount = current_amount
-                                current_amount = int(current_amount * event["reward_multiplier"])
+                                current_amount = round(current_amount * event["reward_multiplier"])  # Round after each multiplier
                                 self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
                             elif "credits_bonus" in event:
                                 current_amount += event["credits_bonus"]
-                                self.reward_calculations.append((event["text"], current_amount, event["credits_bonus"]))
+                                self.reward_calculations.append((f"Bonus Credits", current_amount, event["credits_bonus"]))
+                            elif "credits_penalty" in event:
+                                current_amount -= event["credits_penalty"]
+                                self.reward_calculations.append((f"Bonus Credits", current_amount, -event["credits_penalty"]))
                         
                         await bank.deposit_credits(interaction.user, current_amount)
                         
@@ -793,6 +790,10 @@ class CrimeView(discord.ui.View):
                         return
             else:
                 # Crime failed, processing penalties
+                
+                # Reset streak on failure
+                await update_streak(self.cog.config, interaction.user, False)
+                
                 fine_amount = int(self.crime_data["max_reward"] * self.crime_data["fine_multiplier"])
                 actual_fine = 0  # Track how much was actually paid
                 
@@ -1090,6 +1091,9 @@ class BailView(discord.ui.View):
             async with self.cog.config.member(interaction.user).all() as user_data:
                 user_data["jail_until"] = 0
                 user_data["total_bail_paid"] = user_data.get("total_bail_paid", 0) + self.bail_amount
+            
+            # Cancel any pending release notification
+            await self.cog._cancel_notification(interaction.user)
             
             # Clean up the bail prompt first
             await self.cleanup_messages()

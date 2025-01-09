@@ -99,4 +99,7 @@ DEFAULT_MEMBER = {
     "total_stolen_by": 0,   # Amount stolen by others
     "total_bail_paid": 0,   # Amount spent on bail
     "notify_on_release": False,  # Whether to ping user when jail sentence is over
+    "current_streak": 0,    # Current successful crime streak
+    "highest_streak": 0,    # Highest streak achieved
+    "streak_multiplier": 1.0,  # Current reward multiplier from streak
 }

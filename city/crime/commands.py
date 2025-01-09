@@ -14,13 +14,18 @@ from datetime import datetime
 from ..utils import (
     format_cooldown_time, 
     get_crime_emoji, 
-    format_crime_description
+    format_crime_description,
+    format_streak_text
 )
 
 _ = Translator("Crime", __file__)
 
 class CrimeCommands:
     """Crime commands mixin."""
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.notification_tasks = {}  # Store notification tasks by member ID
 
     @commands.group(name="crime", invoke_without_command=True)
     async def crime(self, ctx: commands.Context):
@@ -35,6 +40,11 @@ class CrimeCommands:
             # Get jail status
             jail_remaining = await self.get_jail_time_remaining(ctx.author)
             status = "⛓️ In jail" if jail_remaining > 0 else "✅ Free"
+            
+            # Get streak info
+            streak = member_data.get("current_streak", 0)
+            streak_multiplier = member_data.get("streak_multiplier", 1.0)
+            streak_text = format_streak_text(streak, streak_multiplier)
             
             # Create embed
             embed = discord.Embed(
@@ -54,7 +64,8 @@ class CrimeCommands:
                     f"💰 Lifetime Earnings: {humanize_number(member_data['total_credits_earned'])} {await bank.get_currency_name(ctx.guild)}\n"
                     f"✅ Successful Crimes: {member_data['total_successful_crimes']}\n"
                     f"❌ Failed Attempts: {member_data['total_failed_crimes']}\n"
-                    f"🏆 Largest Heist: {humanize_number(member_data['largest_heist'])} {await bank.get_currency_name(ctx.guild)}"
+                    f"🏆 Largest Heist: {humanize_number(member_data['largest_heist'])} {await bank.get_currency_name(ctx.guild)}\n"
+                    f"📈 Current Streak: {streak_text}"
                 ),
                 inline=False
             )
@@ -336,7 +347,8 @@ class CrimeCommands:
                 f"**{currency_name} Earned:** {humanize_number(member_data['total_credits_earned'])}",
                 f"**Crimes:** ✅ {member_data['total_successful_crimes']} | ❌ {member_data['total_failed_crimes']}",
                 f"**{currency_name} Stolen:** {humanize_number(member_data['total_stolen_from'])}",
-                f"**Largest Heist:** {humanize_number(member_data['largest_heist'])}"
+                f"**Largest Heist:** {humanize_number(member_data['largest_heist'])}",
+                f"**Highest Streak:** 🔥 {member_data.get('highest_streak', 0)}"
             ]
             
             # Calculate success rate
@@ -509,6 +521,9 @@ class CrimeCommands:
                 await self.config.member(ctx.author).jail_until.set(0)
                 await self.config.member(ctx.author).attempted_jailbreak.set(False)  # Reset jailbreak attempt when successful
                 
+                # Cancel any pending release notification
+                await self._cancel_notification(ctx.author)
+                
                 # Double check jail time is cleared
                 remaining = await self.get_jail_time_remaining(ctx.author)
                 if remaining > 0:
@@ -548,8 +563,8 @@ class CrimeCommands:
                 # Format the time for penalty calculation
                 minutes = remaining_time // 60
                 seconds = remaining_time % 60
-                new_minutes = (remaining_time * 1.3) // 60
-                new_seconds = (remaining_time * 1.3) % 60
+                new_minutes = int((remaining_time * 1.3) // 60)
+                new_seconds = int((remaining_time * 1.3) % 60)
                 
                 embed.add_field(
                     name="⚖️ Penalty",
@@ -599,6 +614,11 @@ class CrimeCommands:
                 "title": f"💸 __Most Fines/Bail Paid__",
                 "fields": ["total_fines_paid", "total_bail_paid"],
                 "format": "credits"
+            },
+            "streaks": {
+                "title": "🔥 __Highest Crime Streak__",
+                "field": "highest_streak",
+                "format": "number"
             }
         }
         
@@ -933,8 +953,19 @@ class CrimeCommands:
             
             # If notifications are enabled, schedule a notification
             if member_data.get("notify_on_release", False):
-                asyncio.create_task(self._schedule_release_notification(member, jail_time))
-    
+                # Cancel any existing notification task
+                if member.id in self.notification_tasks:
+                    self.notification_tasks[member.id].cancel()
+                # Schedule new notification
+                task = asyncio.create_task(self._schedule_release_notification(member, jail_time))
+                self.notification_tasks[member.id] = task
+
+    async def _cancel_notification(self, member: discord.Member):
+        """Cancel any pending release notification for a member."""
+        if member.id in self.notification_tasks:
+            self.notification_tasks[member.id].cancel()
+            del self.notification_tasks[member.id]
+
     async def _schedule_release_notification(self, member: discord.Member, jail_time: int):
         """Schedule a notification for when a member's jail sentence is over."""
         await asyncio.sleep(jail_time)
