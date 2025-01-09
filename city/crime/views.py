@@ -1806,7 +1806,7 @@ class MainMenuSelect(discord.ui.Select):
         elif action == "stats":
             await self.ctx.invoke(self.cog.crime_stats)
         elif action == "inventory":
-            await self.ctx.invoke(self.cog.view_inventory)
+            await self.ctx.invoke(self.cog.city_inventory)
         elif action == "blackmarket":
             await self.ctx.invoke(self.cog.crime_blackmarket)
 
