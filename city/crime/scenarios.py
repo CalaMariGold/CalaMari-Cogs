@@ -683,7 +683,7 @@ RANDOM_SCENARIOS = [
         "success_rate": SUCCESS_RATE_HIGH,
         "jail_time": 5400,  # 90 minutes
         "fine_multiplier": 0.2,
-        "attempt_text": "🎰 {user} rolls the gacha banner and gets a rare item! 🎉 (+{min_reward} to {max_reward} {currency})",
+        "attempt_text": "🎰 {user} rolls the gacha banner...",
         "success_text": "🎰 {user} rolled a rare item and got {amount} {currency}!",
         "fail_text": "🎰 {user} rolled a common item. Better luck next time!"
     }
