@@ -438,7 +438,7 @@ class CrimeCommands:
     async def crime_jailbreak(self, ctx: commands.Context):
         """Attempt to break out of jail
         
-        Failed attempt doubles jail time!
+        Failed attempt increases jail time by 30%!
         """
         try:
             # Check if user is in jail
@@ -529,11 +529,11 @@ class CrimeCommands:
                 )
                 await ctx.send(embed=embed)
             else:
-                # Failed - double the remaining sentence
+                # Failed - add 30% more jail time
                 remaining_time = await self.get_jail_time_remaining(ctx.author)
-                added_time = remaining_time  # This is how much we're adding
+                added_time = int(remaining_time * 0.3)  # Add 30% more time
                 
-                # Get current jail end time and add the remaining time again
+                # Get current jail end time and add the additional time
                 current_jail_until = await self.config.member(ctx.author).jail_until()
                 new_jail_until = current_jail_until + added_time
                 await self.config.member(ctx.author).jail_until.set(new_jail_until)
@@ -548,12 +548,12 @@ class CrimeCommands:
                 # Format the time for penalty calculation
                 minutes = remaining_time // 60
                 seconds = remaining_time % 60
-                new_minutes = (remaining_time * 2) // 60
-                new_seconds = (remaining_time * 2) % 60
+                new_minutes = (remaining_time * 1.3) // 60
+                new_seconds = (remaining_time * 1.3) % 60
                 
                 embed.add_field(
                     name="⚖️ Penalty",
-                    value=f"Your sentence has been doubled!\n ({minutes}m {seconds}s * 2 = ⏰ {new_minutes}m {new_seconds}s)",
+                    value=f"Your sentence has been increased by 30%!\n ({minutes}m {seconds}s + 30% = ⏰ {new_minutes}m {new_seconds}s)",
                     inline=True
                 )
                 embed.add_field(
