@@ -1,10 +1,8 @@
 """Commands for the Business module of the City cog."""
 
-from redbot.core import commands
 import discord
 import asyncio
-from redbot.core import Config
-from redbot.core import bank
+from redbot.core import commands, Config, bank
 from .views import display_business
 
 class Business(commands.Cog):
@@ -18,6 +16,9 @@ class Business(commands.Cog):
 
     async def distribute_profits(self):
         """Calculate and distribute profits based on vault balance and business level."""
+        # As an example, this task will run every hour and distribute profits to all users with a vault balance. 
+        # The profit rate is 2% base rate, plus 0.5% per business level.
+        # This is a simple example and can be expanded upon, currently user Config will init a level 1 business for all users.
         while True:
             await asyncio.sleep(3600)  # Wait for 1 hour
             all_members = await self.config.all_members()
@@ -42,32 +43,40 @@ class Business(commands.Cog):
     @business.command(name="deposit")
     async def deposit(self, interaction: discord.Interaction, amount: int):
         """Handle deposit action."""
-        if amount <= 0:
-            await interaction.response.send_message("Amount must be positive.", ephemeral=True)
-            return
-        if not await bank.can_spend(interaction.user, amount):
-            await interaction.response.send_message("You don't have enough credits.", ephemeral=True)
-            return
-        await bank.withdraw_credits(interaction.user, amount)
-        async with self.config.member(interaction.user).vault_balance() as balance:
+        try:
+            if amount <= 0:
+                await interaction.response.send_message("Amount must be positive.", ephemeral=True)
+                return
+            if not await bank.can_spend(interaction.user, amount):
+                await interaction.response.send_message("You don't have enough credits.", ephemeral=True)
+                return
+            await bank.withdraw_credits(interaction.user, amount)
+            balance = await self.config.member(interaction.user).vault_balance()
             new_balance = balance + amount
             await self.config.member(interaction.user).vault_balance.set(new_balance)
-        await interaction.response.send_message(f"Deposited {amount} credits to your business vault.", ephemeral=True)
+            currency_name = await bank.get_currency_name(interaction.guild)
+            await interaction.response.send_message(f"Deposited {amount} {currency_name} to your business vault.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
 
     @business.command(name="withdraw")
     async def withdraw(self, interaction: discord.Interaction, amount: int):
         """Handle withdraw action."""
-        if amount <= 0:
-            await interaction.response.send_message("Amount must be positive.", ephemeral=True)
-            return
-        async with self.config.member(interaction.user).vault_balance() as balance:
+        try:
+            if amount <= 0:
+                await interaction.response.send_message("Amount must be positive.", ephemeral=True)
+                return
+            balance = await self.config.member(interaction.user).vault_balance()
             if amount > balance:
                 await interaction.response.send_message("You don't have enough credits in your vault.", ephemeral=True)
                 return
             new_balance = balance - amount
             await self.config.member(interaction.user).vault_balance.set(new_balance)
-        await bank.deposit_credits(interaction.user, amount)
-        await interaction.response.send_message(f"Withdrew {amount} credits from your business vault.", ephemeral=True)
+            await bank.deposit_credits(interaction.user, amount)
+            currency_name = await bank.get_currency_name(interaction.guild)
+            await interaction.response.send_message(f"Withdrew {amount} {currency_name} from your business vault.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
 
     @business.command(name="initvault")
     async def init_vault(self, ctx: commands.Context):
