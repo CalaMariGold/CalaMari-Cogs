@@ -24,9 +24,44 @@ class Scenario(TypedDict):
 
 SCENARIOS: List[Scenario] = [
     {
+        "start": "💾 A dusty USB drive labeled 'Top Secret Mod Notes' lies forgotten...",
+        "good": "{user} returns the drive to the mods and gets {amount} {currency} for their honesty!",
+        "bad": "The drive contained a virus! {user} pays {amount} {currency} to the server tech support role.",
+        "button_text": "Check Drive",
+        "button_emoji": "💾"
+    },
+    {
+        "start": "🤖 A wild `LootBot` appears in the channel, sparkling strangely...",
+        "good": "{user} interacts with the bot and it glitches, dropping {amount} {currency}!",
+        "bad": "The bot was a mimic! It bites {user} and steals {amount} {currency}!",
+        "button_text": "Interact",
+        "button_emoji": "🤖"
+    },
+    {
+        "start": "📥 A DM pops up from a new user: 'Click here for free {currency}!!1!'...",
+        "good": "{user} reports the scammer and the server owner rewards them with {amount} {currency}!",
+        "bad": "It was a phishing link! {user} loses {amount} {currency} fixing their account!",
+        "button_text": "Check Link",
+        "button_emoji": "🔗"
+    },
+    {
+        "start": "🌟 A Discord Nitro link appears in the channel...",
+        "good": "{user} claims the Nitro and finds a bonus {amount} {currency}!",
+        "bad": "It was a fake link! {user} feels the sting of disappointment in themselves and was hacked, losing {amount} {currency}.",
+        "button_text": "Claim Nitro",
+        "button_emoji": "✨"
+    },
+    {
+        "start": "🎤 Someone started Karaoke night in the VC, but the next singer is shy...",
+        "good": "{user} belts out a banger! The crowd showers them with {amount} {currency}!",
+        "bad": "{user}'s mic feedback breaks the bot! They pay {amount} {currency} for repairs!",
+        "button_text": "Grab Mic",
+        "button_emoji": "🎤"
+    },
+    {
         "start": "💰 A suspicious looking wallet lies on the ground...",
-        "good": "{user} returns the wallet and receives {amount} {currency} as a reward!",
-        "bad": "The wallet was a trap! {user} loses {amount} {currency} trying to grab it!",
+        "good": "{user} steals the wallet full of {amount} {currency} and runs away!",
+        "bad": "{user} was caught by the police! {amount} {currency} fine!",
         "button_text": "Pick up wallet",
         "button_emoji": "👛"
     },
@@ -45,13 +80,6 @@ SCENARIOS: List[Scenario] = [
         "button_emoji": "🎲"
     },
     {
-        "start": "🌟 A shooting star streaks across the sky...",
-        "good": "{user} catches a piece of stardust worth {amount} {currency}!",
-        "bad": "The star fragment burns {user}'s hands! Medical bills cost {amount} {currency}!",
-        "button_text": "Catch stardust",
-        "button_emoji": "✨"
-    },
-    {
         "start": "🎭 A street performer seeks a volunteer from the crowd...",
         "good": "The crowd loves {user}'s performance! They earn {amount} {currency} in tips!",
         "bad": "{user} accidentally breaks the props! They pay {amount} {currency} in damages!",
@@ -66,9 +94,9 @@ SCENARIOS: List[Scenario] = [
         "button_emoji": "📦"
     },
     {
-        "start": "🎪 An enticing carnival game stands unattended...",
+        "start": "🎪 An enticing carnival game stand appears...",
         "good": "{user} wins the jackpot! {amount} {currency} richer!",
-        "bad": "The game was rigged! {user} loses {amount} {currency}!",
+        "bad": "The game was rigged by a rival server! {user} loses {amount} {currency}!",
         "button_text": "Try your luck",
         "button_emoji": "🎯"
     },
@@ -78,13 +106,6 @@ SCENARIOS: List[Scenario] = [
         "bad": "The machine eats {user}'s {currency}! {amount} lost to the void!",
         "button_text": "Insert coin",
         "button_emoji": "🕹️"
-    },
-    {
-        "start": "🌈 A leprechaun dances at the end of a rainbow...",
-        "good": "{user} trades riddles with the leprechaun and wins {amount} {currency}!",
-        "bad": "The leprechaun tricks {user} and steals {amount} {currency}!",
-        "button_text": "Chase rainbow",
-        "button_emoji": "🍀"
     },
     {
         "start": "🎣 A golden fishing rod floats in a nearby pond...",
@@ -150,18 +171,11 @@ SCENARIOS: List[Scenario] = [
         "button_emoji": "🖌️"
     },
     {
-        "start": "🌟 A wishing well echoes with magical potential...",
-        "good": "The well multiplies {user}'s wish into {amount} {currency}!",
-        "bad": "The well spirit charges {user} {amount} {currency} for a failed wish!",
-        "button_text": "Make a wish",
-        "button_emoji": "💫"
-    },
-    {
         "start": "🎭 A magical mirror shows your reflection...",
         "good": "{user}'s reflection hands over {amount} {currency}!",
         "bad": "The mirror traps {user}'s shadow! Ransom costs {amount} {currency}!",
         "button_text": "Touch mirror",
-        "button_emoji": "🪞"
+        "button_emoji": "🎭"
     },
     {
         "start": "🎪 A cosmic vending machine descends from space...",
@@ -190,13 +204,6 @@ SCENARIOS: List[Scenario] = [
         "bad": "The shadow steals {user}'s luck! {amount} {currency} to recover!",
         "button_text": "Make deal",
         "button_emoji": "🌑"
-    },
-    {
-        "start": "🎪 A magical book writes its own story...",
-        "good": "{user} becomes the hero and earns {amount} {currency}!",
-        "bad": "{user} becomes the villain and pays {amount} {currency} in damages!",
-        "button_text": "Read story",
-        "button_emoji": "📚"
     },
     {
         "start": "🍦 An ice cream truck is playing its tune late at night...",
@@ -302,5 +309,96 @@ SCENARIOS: List[Scenario] = [
         "bad": "Security escorts {user} out! {amount} {currency} fine!",
         "button_text": "Explore beach",
         "button_emoji": "🌴"
+    },
+    {
+        "start": "🎣 Someone is hosting a fishing event...",
+        "good": "{user} catches the legendary server fish, worth {amount} {currency}!",
+        "bad": "{user} snags their line on the bot's code, costing {amount} {currency} to untangle!",
+        "button_text": "Cast Line",
+        "button_emoji": "🎣"
+    },
+    {
+        "start": "👻 A ghostly ping notification sound echoes, but there's no new message...",
+        "good": "It's a ghost notification! {user} finds the phantom {amount} {currency} left behind!",
+        "bad": "The sound haunts {user}! They pay {amount} {currency} for premium sound packs to forget it!",
+        "button_text": "Investigate Ping",
+        "button_emoji": "👻"
+    },
+    {
+        "start": "📜 A new quest pops up on the server notice board! 'Defeat 10 Spam Bots'...",
+        "good": "{user} completes the quest and earns {amount} {currency} from the Quest Master role!",
+        "bad": "The spam bots overwhelmed {user}! They pay {amount} {currency} for anti-spam protection.",
+        "button_text": "Accept Quest",
+        "button_emoji": "📜"
+    },
+    {
+        "start": "🐲 A wild Server Boss (a glitchy bot?) appears, dropping loot!",
+        "good": "{user} lands the killing blow and gets the Legendary Loot Drop worth {amount} {currency}!",
+        "bad": "The Boss's AOE attack hits {user}! Repair costs are {amount} {currency}!",
+        "button_text": "Attack Boss",
+        "button_emoji": "⚔️"
+    },
+    {
+        "start": "🗺️ An unexplored, dusty channel is discovered...",
+        "good": "{user} finds ancient server lore worth {amount} {currency} to the historians!",
+        "bad": "The channel is haunted by ghost pings! {user} pays {amount} {currency} for mental recovery.",
+        "button_text": "Explore Channel",
+        "button_emoji": "🗺️"
+    },
+    {
+        "start": "🛡️ The server is being DDoSed!",
+        "good": "{user}'s quick thinking helps repel the attack! Rewarded with {amount} {currency} for valor!",
+        "bad": "{user}'s connection drops during the fight! Reconnecting costs {amount} {currency}.",
+        "button_text": "Defend Server",
+        "button_emoji": "🛡️"
+    },
+    {
+        "start": "⚙️ A small, whirring mechanical creature scurries by, trailing sparks...",
+        "good": "{user} catches the creature and finds it carries {amount} {currency}!",
+        "bad": "The creature unleashes an electric shock! {user} pays {amount} {currency} for repairs.",
+        "button_text": "Catch It",
+        "button_emoji": "⚙️"
+    },
+    {
+        "start": "📜 A tattered scroll lies on the path, sealed with an unknown sigil...",
+        "good": "{user} breaks the seal and finds a treasure map leading to {amount} {currency}!",
+        "bad": "The scroll releases a minor curse! {user} pays {amount} {currency} to a local healer.",
+        "button_text": "Read Scroll",
+        "button_emoji": "📜"
+    },
+    {
+        "start": "☄️ A fragment of a falling star lands nearby, glowing softly...",
+        "good": "{user} carefully picks up the star fragment, finding it's worth {amount} {currency}!",
+        "bad": "The fragment burns {user}'s hand! Ointment costs {amount} {currency}.",
+        "button_text": "Touch Fragment",
+        "button_emoji": "☄️"
+    },
+    {
+        "start": "👻 A faint, chilling whisper seems to echo from the shadows...",
+        "good": "{user} follows the whisper and finds {amount} {currency} hidden by a restless spirit!",
+        "bad": "The whisper drains {user}'s energy! A potion costs {amount} {currency}.",
+        "button_text": "Follow Whisper",
+        "button_emoji": "👻"
+    },
+    {
+        "start": "📜 A bounty is posted... 'Clear out the mischievous imps plaguing the area'",
+        "good": "{user} bravely defeats the imps and collects the {amount} {currency} reward!",
+        "bad": "The imps played tricks on {user}, stealing {amount} {currency}!",
+        "button_text": "Accept Bounty",
+        "button_emoji": "📜"
+    },
+    {
+        "start": "🗿 A hulking golem, crafted from stone and metal, blocks the path!",
+        "good": "{user} finds the golem's weak spot and disables it, finding {amount} {currency} inside!",
+        "bad": "The golem smashes {user}'s backpack! Replacing gear costs {amount} {currency}.",
+        "button_text": "Fight Golem",
+        "button_emoji": "🗿"
+    },
+    {
+        "start": "⛈️ A sudden, unnatural storm gathers overhead...",
+        "good": "{user} finds shelter and discovers {amount} {currency} left by another traveler!",
+        "bad": "A lightning strike nearby scares {user}, causing them to drop {amount} {currency}!",
+        "button_text": "Seek Shelter",
+        "button_emoji": "⛈️"
     }
 ]
