@@ -507,8 +507,12 @@ class CrimeCommands:
                     await bank.deposit_credits(ctx.author, event["currency_bonus"])
                     event_text += f" (+{event['currency_bonus']} {currency_name})"
                 elif "currency_penalty" in event:
-                    await bank.withdraw_credits(ctx.author, event["currency_penalty"])
-                    event_text += f" (-{event['currency_penalty']} {currency_name})"
+                    penalty_amount = event["currency_penalty"]
+                    # Check if user can afford the penalty before withdrawing
+                    if await bank.can_spend(ctx.author, penalty_amount):
+                        await bank.withdraw_credits(ctx.author, penalty_amount)
+                        event_text += f" (-{penalty_amount} {currency_name})"
+                    # else: Optionally add a message here if they couldn't afford it, or just skip silently
                 
                 await ctx.send(event_text)
                 await asyncio.sleep(3.5)
