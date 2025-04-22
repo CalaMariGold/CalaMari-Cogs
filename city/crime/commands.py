@@ -505,10 +505,10 @@ class CrimeCommands:
                 # Apply currency modifiers
                 if "currency_bonus" in event:
                     await bank.deposit_credits(ctx.author, event["currency_bonus"])
-                    event_text += f"(+{event['currency_bonus']} {currency_name})"
+                    event_text += f" (+{event['currency_bonus']} {currency_name})"
                 elif "currency_penalty" in event:
                     await bank.withdraw_credits(ctx.author, event["currency_penalty"])
-                    event_text += f"(-{event['currency_penalty']} {currency_name})"
+                    event_text += f" (-{event['currency_penalty']} {currency_name})"
                 
                 await ctx.send(event_text)
                 await asyncio.sleep(3.5)
