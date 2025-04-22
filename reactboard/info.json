@@ -1,0 +1,16 @@
+{
+    "name": "ReactBoard",
+    "author": ["CalaMariGold"],
+    "short": "Leaderboard for message reactions.",
+    "description": "Provides a command (`reactboard`) to show messages with the most reactions in the server, with an option to filter by emoji. Tracks reactions using event listeners.",
+    "tags": ["reactions", "leaderboard", "utility", "reactboard"],
+    "requirements": [],
+    "required_cogs": {},
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 9, 0],
+    "end_user_data_statement": "This cog stores message IDs, channel IDs, and reaction counts per guild to provide the leaderboard functionality. It also stores a guild setting for including NSFW channels. Data is pruned when messages are deleted or reactions are removed. No user data is stored directly.",
+    "install_msg": "Thanks for installing ReactBoard! It will now start tracking reactions. Use `[p]reactboard` to see the leaderboard.",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+} 
