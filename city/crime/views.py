@@ -370,11 +370,40 @@ class CrimeView(discord.ui.View):
                 member_data = await self.cog.config.member(self.interaction.user).all()
                 has_reducer = "jail_reducer" in member_data.get("purchased_perks", [])
                 
-                if has_reducer:
-                    # Calculate reduced time
+                # Check if the jail time might have been doubled (fine not paid)
+                # We determine this by comparing the passed jail_time with the base jail_time for the crime
+                # We need to fetch the base jail time from config or crime_data
+                crime_options = await self.cog.config.guild(self.interaction.guild).crime_options()
+                base_jail_time = crime_options.get(self.crime_type, {}).get("jail_time", 0) # Get base jail time
+                
+                # We also need the event modifier multiplier if applicable
+                jail_multiplier = kwargs.get('jail_multiplier', 1.0)
+                
+                # Calculate the expected base jail time considering event modifiers
+                expected_base_jail_time = int(base_jail_time * jail_multiplier)
+                
+                # Check if the current jail time is double the expected base time (indicates fine penalty)
+                is_doubled = kwargs.get("jail_time", 0) == expected_base_jail_time * 2
+
+                if is_doubled:
+                    # Calculate original time (before doubling)
+                    original_time = expected_base_jail_time 
+                    doubled_time = kwargs["jail_time"]
+                    
+                    # Check for reducer perk on the *original* time before doubling
+                    if has_reducer:
+                         original_time_reduced = int(original_time * 0.8)
+                         doubled_time_final = int(original_time_reduced * 2) # Apply doubling AFTER reduction
+                         jail_text = f"~~{format_cooldown_time(original_time, include_emoji=False)}~~ → ~~{format_cooldown_time(original_time_reduced, include_emoji=False)} (-20%)~~ → {format_cooldown_time(doubled_time_final, include_emoji=False)} (+100%)"
+                    else:
+                        jail_text = f"~~{format_cooldown_time(original_time, include_emoji=False)}~~ → {format_cooldown_time(doubled_time, include_emoji=False)} (+100%)"
+
+                elif has_reducer:
+                    # If not doubled, but has reducer, apply reduction as before
                     reduced_time = int(kwargs["jail_time"] * 0.8)  # 20% reduction
                     jail_text = f"~~{format_cooldown_time(kwargs['jail_time'], include_emoji=False)}~~ → {format_cooldown_time(reduced_time, include_emoji=False)} (-20%)"
                 else:
+                    # Normal jail time, no doubling or reduction
                     jail_text = format_cooldown_time(kwargs["jail_time"], include_emoji=False)
                 
                 embed.add_field(
@@ -559,6 +588,7 @@ class CrimeView(discord.ui.View):
             success_chance = self.crime_data["success_rate"]
             jail_time = self.crime_data["jail_time"]
             reward_multiplier = 1.0
+            cumulative_jail_multiplier = 1.0 # Track jail multiplier from events
             total_credit_changes = 0  # Track direct credit changes
 
             # Get and process events if this is not a random crime
@@ -595,6 +625,7 @@ class CrimeView(discord.ui.View):
                     
                     if "jail_multiplier" in event:
                         jail_time = int(jail_time * event["jail_multiplier"])
+                        cumulative_jail_multiplier *= event["jail_multiplier"] # Update cumulative multiplier
                         
                     # Handle direct credit changes (just track the totals here)
                     if "credits_bonus" in event:
@@ -693,7 +724,8 @@ class CrimeView(discord.ui.View):
                                     reward=reward_before_direct_credits, # Pass amount before direct +/-
                                     rate=int(success_chance * 100),
                                     settings=settings,
-                                    credit_changes=total_credit_changes # Pass the net +/- amount
+                                    credit_changes=total_credit_changes, # Pass the net +/- amount
+                                    jail_multiplier=cumulative_jail_multiplier # Pass the correct multiplier
                                 )
                             )
                             self.all_messages.append(msg)
@@ -759,7 +791,8 @@ class CrimeView(discord.ui.View):
                                 reward=reward_before_direct_credits, # Pass amount before direct +/-
                                 rate=int(success_chance * 100),
                                 settings=settings,
-                                credit_changes=total_credit_changes # Pass the net +/- amount
+                                credit_changes=total_credit_changes, # Pass the net +/- amount
+                                jail_multiplier=cumulative_jail_multiplier # Pass the correct multiplier
                             )
                         )
                         self.all_messages.append(msg)
@@ -834,7 +867,8 @@ class CrimeView(discord.ui.View):
                         jail_time=jail_time,
                         rate=int(success_chance * 100),
                         settings=settings,
-                        credit_changes=total_credit_changes
+                        credit_changes=total_credit_changes,
+                        jail_multiplier=cumulative_jail_multiplier # Pass the correct multiplier
                     )
                 )
                 self.all_messages.append(msg)
