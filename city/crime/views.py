@@ -1457,7 +1457,7 @@ class TargetSelectionView(discord.ui.View):
                                 
                             if balance_result >= min_required:
                                 try:
-                                    can_target, _ = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
+                                    can_target, reason = await can_target_for_crime(self.cog, self.interaction, member, self.crime_data, settings)
                                     if can_target:
                                         return member
                                 except discord.NotFound:
