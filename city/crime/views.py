@@ -1391,8 +1391,8 @@ class TargetSelectionView(discord.ui.View):
                     # Combined early filtering with clear conditions
                     if (member.bot or 
                         member.id == self.interaction.user.id or
-                        (last_target_id is not None and member.id == last_target_id) or
-                        member.guild_permissions.administrator):  # Skip admins early
+                        (last_target_id is not None and member.id == last_target_id)):
+                        # Skip bots, self, and last target
                         continue
                     all_members.append(member)
             except AttributeError:
@@ -1400,7 +1400,7 @@ class TargetSelectionView(discord.ui.View):
                 return None
             
             if not all_members:
-                await self.interaction.channel.send(_("No valid targets found! Everyone is either a bot or immune to crime."))
+                await self.interaction.channel.send(_("No valid targets found! Everyone is either a bot or the only member found was already your last target."))
                 return None
             
             random.shuffle(all_members)
@@ -1482,7 +1482,6 @@ class TargetSelectionView(discord.ui.View):
                 if total_checked >= len(all_members) * 0.5:
                     break
                 
-            await self.interaction.channel.send(_("No valid targets found! Everyone is either broke, a bot, or immune to crime."))
             return None
             
         except discord.NotFound:
@@ -1552,7 +1551,7 @@ class TargetSelectionView(discord.ui.View):
                 self.stop()
             else:
                 settings = await self.cog.config.guild(interaction.guild).global_settings()
-                await interaction.channel.send(
+                no_target_msg = await interaction.channel.send(
                     _("No valid targets found. A valid target must:\n"
                       "• Have at least {min_balance:,} {currency}\n"
                       "• Not be your last target\n"
@@ -1562,16 +1561,14 @@ class TargetSelectionView(discord.ui.View):
                         currency=await bank.get_currency_name(interaction.guild)
                     )
                 )
-                self.all_messages.append(msg)
-                await self.cleanup_messages()
+                self.all_messages.append(no_target_msg)
         except Exception as e:
-            await interaction.channel.send(
+            error_msg = await interaction.channel.send(
                 _("An error occurred while selecting a target. Please try again. Error: {error}").format(
                     error=str(e)
                 )
             )
-            self.all_messages.append(msg)
-            await self.cleanup_messages()
+            self.all_messages.append(error_msg)
         
     @discord.ui.button(label="Select Target", style=discord.ButtonStyle.success)
     async def select_target(self, interaction: discord.Interaction, button: discord.ui.Button):
