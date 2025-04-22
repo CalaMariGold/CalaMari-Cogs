@@ -13,6 +13,7 @@ class City(CityBase, CrimeCommands, commands.Cog):
     
     def __init__(self, bot: Red) -> None:
         super().__init__(bot)
+        CrimeCommands.__init__(self, bot)
         self.bot = bot
         
         # Store crime types
