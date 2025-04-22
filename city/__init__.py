@@ -7,8 +7,9 @@ import discord
 from .base import CityBase
 from .crime import CrimeCommands
 from .crime.data import CRIME_TYPES, DEFAULT_GUILD, DEFAULT_MEMBER
+from .business import Business
 
-class City(CityBase, CrimeCommands, commands.Cog):
+class City(CityBase, CrimeCommands, Business, commands.Cog):
     """A virtual city where you can commit crimes, work jobs, and more."""
     
     def __init__(self, bot: Red) -> None:
