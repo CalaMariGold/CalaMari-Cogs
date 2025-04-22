@@ -302,12 +302,6 @@ class CrimeView(discord.ui.View):
                     elif isinstance(modifier, float):
                         # For other multipliers
                         breakdown.append(f"➜ ({modifier:.1f}x): {amount:,} {currency}")
-                    else:
-                        # For flat bonuses/penalties
-                        if modifier > 0:
-                            breakdown.append(f"➜ +{modifier:,} {currency}")
-                        else:
-                            breakdown.append(f"➜ {modifier:,} {currency}")
                     
                 # Add direct credit changes before final amount
                 if kwargs.get('credit_changes', 0) != 0:
@@ -605,19 +599,10 @@ class CrimeView(discord.ui.View):
                     # Handle direct credit changes (just track the totals here)
                     if "credits_bonus" in event:
                         bonus = event["credits_bonus"]
-                        await bank.deposit_credits(interaction.user, bonus)
                         total_credit_changes += bonus
                     elif "credits_penalty" in event:
                         penalty = event["credits_penalty"]
-                        try:
-                            await bank.withdraw_credits(interaction.user, penalty)
-                            total_credit_changes -= penalty
-                        except ValueError:
-                            # If user doesn't have enough credits, take what they have
-                            current_balance = await bank.get_balance(interaction.user)
-                            if current_balance > 0:
-                                await bank.withdraw_credits(interaction.user, current_balance)
-                                total_credit_changes -= current_balance
+                        total_credit_changes -= penalty # Just track the penalty
 
             # Add suspense delay based on risk level
             if self.crime_data["risk"] == "high":
@@ -647,27 +632,30 @@ class CrimeView(discord.ui.View):
                         base_amount = await calculate_stolen_amount(self.target, self.crime_data, settings)
                         self.reward_calculations = [("Base Amount", base_amount)]
                         current_amount = base_amount
-                        
+
                         # Apply streak bonus if any
                         streak, streak_multiplier = await update_streak(self.cog.config, interaction.user, True)
                         if streak > 0:
                             current_amount = round(current_amount * streak_multiplier)  # Round after streak multiplier
                             self.reward_calculations.append((format_streak_text(streak, streak_multiplier), current_amount, streak_multiplier))
-                        
-                        # Process reward modifiers from events
+
+                        # Process reward multipliers from events (excluding direct credits)
                         for event in events:
                             if "reward_multiplier" in event:
                                 current_amount = round(current_amount * event["reward_multiplier"])  # Round after each multiplier
                                 self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
-                            elif "credits_bonus" in event:
-                                current_amount += event["credits_bonus"]
-                                self.reward_calculations.append((event["text"], current_amount, event["credits_bonus"]))
-                        
+                            # Direct credit changes are handled by total_credit_changes
+
+                        # This is the amount BEFORE direct +/- credits from events
+                        reward_before_direct_credits = current_amount
+                        # Calculate the final amount to transfer
+                        final_transfer_amount = reward_before_direct_credits + total_credit_changes
+
                         # Check target's balance and perform transfer atomically
                         try:
                             target_balance = await bank.get_balance(self.target)
                             min_required = max(settings.get("min_steal_balance", 100), self.crime_data["min_reward"])
-                            
+
                             if target_balance < min_required:
                                 msg = await interaction.channel.send(
                                     _("Your target doesn't have enough {currency} to steal from! (Minimum: {min:,})").format(
@@ -677,32 +665,35 @@ class CrimeView(discord.ui.View):
                                 )
                                 self.all_messages.append(msg)
                                 return
-                                
+
+                            # Ensure we don't try to take more than the target has or less than zero
+                            final_transfer_amount = max(0, min(final_transfer_amount, target_balance))
+
                             # Try to perform the transfers
-                            await bank.withdraw_credits(self.target, current_amount)
-                            await bank.deposit_credits(interaction.user, current_amount)
-                            
-                            # Update stats and last target
+                            await bank.withdraw_credits(self.target, final_transfer_amount)
+                            await bank.deposit_credits(interaction.user, final_transfer_amount)
+
+                            # Update stats and last target using the actual amount transferred
                             async with self.cog.config.member(interaction.user).all() as user_data:
-                                user_data["total_stolen_from"] += current_amount
-                                user_data["total_credits_earned"] += current_amount
+                                user_data["total_stolen_from"] += final_transfer_amount
+                                user_data["total_credits_earned"] += final_transfer_amount
                                 user_data["last_target"] = self.target.id
                                 user_data["total_successful_crimes"] += 1
-                                if current_amount > user_data.get("largest_heist", 0):
-                                    user_data["largest_heist"] = current_amount
-                                    
+                                if final_transfer_amount > user_data.get("largest_heist", 0):
+                                    user_data["largest_heist"] = final_transfer_amount
+
                             async with self.cog.config.member(self.target).all() as target_data:
-                                target_data["total_stolen_by"] += current_amount
-                                
+                                target_data["total_stolen_by"] += final_transfer_amount
+
                             # Send success message
                             msg = await interaction.channel.send(
                                 embed=await self.format_crime_message(
                                     True,
                                     target=self.target,
-                                    reward=current_amount,
+                                    reward=reward_before_direct_credits, # Pass amount before direct +/-
                                     rate=int(success_chance * 100),
                                     settings=settings,
-                                    credit_changes=total_credit_changes
+                                    credit_changes=total_credit_changes # Pass the net +/- amount
                                 )
                             )
                             self.all_messages.append(msg)
@@ -710,7 +701,7 @@ class CrimeView(discord.ui.View):
                                 item.disabled = True
                             await attempt_view.message.edit(view=attempt_view)
                             self.stop()  # Stop the view after success
-                            
+
                         except discord.HTTPException as e:
                             await interaction.channel.send(
                                 _("Failed to steal from target - they may not have enough {currency}. Error: {error}").format(
@@ -720,7 +711,7 @@ class CrimeView(discord.ui.View):
                             )
                             self.all_messages.append(msg)
                             return
-                            
+
                     except Exception as e:
                         await interaction.channel.send(
                             _("An error occurred while processing the crime. Please try again. Error: {error}").format(
@@ -743,28 +734,32 @@ class CrimeView(discord.ui.View):
                             current_amount = round(current_amount * streak_multiplier)  # Round after streak multiplier
                             self.reward_calculations.append((format_streak_text(streak, streak_multiplier), current_amount, streak_multiplier))
 
-                        # Process reward modifiers from events
+                        # Process reward multipliers from events (excluding direct credits)
                         for event in events:
                             if "reward_multiplier" in event:
                                 current_amount = round(current_amount * event["reward_multiplier"])  # Round after each multiplier
                                 self.reward_calculations.append((event["text"], current_amount, event["reward_multiplier"]))
-                            elif "credits_bonus" in event:
-                                current_amount += event["credits_bonus"]
-                                self.reward_calculations.append((f"Bonus Credits", current_amount, event["credits_bonus"]))
-                            elif "credits_penalty" in event:
-                                current_amount -= event["credits_penalty"]
-                                self.reward_calculations.append((f"Bonus Credits", current_amount, -event["credits_penalty"]))
-                        
-                        await bank.deposit_credits(interaction.user, current_amount)
-                        
+                            # Direct credit changes are handled by total_credit_changes
+
+                        # This is the amount BEFORE direct +/- credits from events
+                        reward_before_direct_credits = current_amount
+                        # Calculate the final amount to deposit
+                        final_deposit_amount = reward_before_direct_credits + total_credit_changes
+
+                        # Ensure final amount isn't negative after penalties
+                        if final_deposit_amount < 0:
+                            final_deposit_amount = 0
+
+                        await bank.deposit_credits(interaction.user, final_deposit_amount)
+
                         # Send success message
                         msg = await interaction.channel.send(
                             embed=await self.format_crime_message(
                                 True,
-                                reward=current_amount,
+                                reward=reward_before_direct_credits, # Pass amount before direct +/-
                                 rate=int(success_chance * 100),
                                 settings=settings,
-                                credit_changes=total_credit_changes
+                                credit_changes=total_credit_changes # Pass the net +/- amount
                             )
                         )
                         self.all_messages.append(msg)
@@ -772,14 +767,14 @@ class CrimeView(discord.ui.View):
                             item.disabled = True
                         await attempt_view.message.edit(view=attempt_view)
                         self.stop()  # Stop the view after success
-                        
-                        # Update stats
+
+                        # Update stats using the actual amount deposited
                         async with self.cog.config.member(interaction.user).all() as user_data:
-                            user_data["total_credits_earned"] += current_amount
+                            user_data["total_credits_earned"] += final_deposit_amount
                             user_data["total_successful_crimes"] += 1
-                            if current_amount > user_data.get("largest_heist", 0):
-                                user_data["largest_heist"] = current_amount
-                                
+                            if final_deposit_amount > user_data.get("largest_heist", 0):
+                                user_data["largest_heist"] = final_deposit_amount
+
                     except Exception as e:
                         await interaction.channel.send(
                             _("An error occurred while processing your crime. Please try again. Error: {error}").format(
