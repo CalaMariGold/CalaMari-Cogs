@@ -97,6 +97,11 @@ class CityBase:
         
     async def get_remaining_cooldown(self, member: discord.Member, action_type: str) -> int:
         """Get remaining cooldown time for an action."""
+        # Check admin override first
+        member_data = await self.config.member(member).all()
+        if member_data.get("cooldowns_disabled", False):
+            return 0
+        
         current_time = int(time.time())
         last_actions = await self.config.member(member).last_actions()
         

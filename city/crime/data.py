@@ -102,4 +102,5 @@ DEFAULT_MEMBER = {
     "current_streak": 0,    # Current successful crime streak
     "highest_streak": 0,    # Highest streak achieved
     "streak_multiplier": 1.0,  # Current reward multiplier from streak
+    "cooldowns_disabled": False,  # Added: Tracks admin cooldown override
 }

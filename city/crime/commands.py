@@ -1236,3 +1236,20 @@ class CrimeCommands:
                     return
             
             await ctx.send("❌ No custom scenario found with that name.")
+
+    @crime.command(name="togglemycds")
+    @commands.admin_or_permissions(administrator=True)
+    async def toggle_my_cooldowns(self, ctx: commands.Context):
+        """Toggle your own crime cooldowns on/off (Admin only)."""
+        member_data = self.config.member(ctx.author)
+        current_status = await member_data.cooldowns_disabled()
+        
+        if current_status:
+            # Disable the override (re-enable cooldowns)
+            await member_data.cooldowns_disabled.set(False)
+            await ctx.send("Your crime cooldowns have been **re-enabled**.")
+        else:
+            # Enable the override (disable cooldowns)
+            await member_data.cooldowns_disabled.set(True)
+            # We don't strictly need to reset timestamps because get_remaining_cooldown checks the flag first.
+            await ctx.send("Your crime cooldowns have been **disabled**.")
