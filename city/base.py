@@ -34,7 +34,9 @@ CONFIG_SCHEMA = {
         "jail_channel": None,  # ID of channel where user was jailed (for notifications)
         "attempted_jailbreak": False,  # Whether user attempted jailbreak this sentence
         "purchased_perks": [],  # List of permanent perks owned from blackmarket
-        "active_items": {}  # Dict of temporary items with expiry timestamps or uses
+        "active_items": {},  # Dict of temporary items with expiry timestamps or uses
+        "vault_balance": 0,
+        "business_level": 1,
     }
 }
 
